@@ -1,0 +1,36 @@
+# Archivos y carpetas que se deben ignorar en el control de versiones
+
+# Dependencias
+node_modules/
+
+# Archivos de configuración local
+.env
+.env.local
+
+# Archivos de construcción
+/build
+/dist
+
+# Archivos de registro
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de caché
+.cache/
+.firebase/
+.firebaserc
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Directorios y archivos IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos de configuración personales
+firebase-debug.log

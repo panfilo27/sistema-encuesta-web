@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Carreras</title>
+    <link rel="stylesheet" href="/public/css/admin/opciones_admin/carreras.css">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="cuerpo-carreras">
+        <h1>Gestión de Carreras</h1>
+        <p>Administra las carreras y asigna jefes de departamento</p>
+        
+        <!-- Formulario de datos -->
+        <div class="formulario-container">
+            <h2>Datos de la Carrera</h2>
+            <form id="form-carrera">
+                <!-- Campo oculto para ID en modo edición -->
+                <input type="hidden" id="id-carrera" value="">
+                
+                <div class="form-section">
+                    <h3>Información de la Carrera</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombre-carrera">Nombre de la Carrera:</label>
+                            <input type="text" id="nombre-carrera" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="jefe-departamento">Jefe de Departamento (opcional):</label>
+                            <select id="jefe-departamento">
+                                <option value="">Sin asignar</option>
+                                <!-- Las opciones se cargarán dinámicamente desde Firestore -->
+                            </select>
+                            <small>Puede asignar un jefe de departamento ahora o después</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">Guardar</button>
+                    <button type="button" id="cancelar-carrera" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Lista de carreras -->
+        <div class="lista-container">
+            <h2>Lista de Carreras</h2>
+            <div class="search-container">
+                <input type="text" id="buscar-carrera" placeholder="Buscar por nombre de carrera">
+                <button id="btn-buscar-carrera"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+            
+            <div id="tabla-carreras" class="tabla-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre de la Carrera</th>
+                            <th>Jefe de Departamento</th>
+                            <th>Fecha de Creación</th>
+                            <th>Última Actualización</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-carreras">
+                        <tr>
+                            <td colspan="5">Cargando información de carreras...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    
+    <!-- Modelo de Carrera -->
+    <script src="../../../models/Carrera.js"></script>
+    
+    <!-- Script para la gestión de carreras -->
+    <script src="../../../js/admin/opciones_admin/carreras.js"></script>
+</body>
+</html>

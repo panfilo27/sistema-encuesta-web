@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Verificación de Correo</title>
+    <link rel="stylesheet" href="../css/login.css">
+    <style>
+        .verification-success {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            text-align: center;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .verification-success h1 {
+            color: #008c46;
+            margin-bottom: 20px;
+        }
+        
+        .verification-success p {
+            margin-bottom: 15px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .verification-success .icon {
+            font-size: 60px;
+            color: #008c46;
+            margin-bottom: 20px;
+        }
+        
+        .action-button {
+            display: inline-block;
+            background-color: #004e7f;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .action-button:hover {
+            background-color: #003a5f;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        
+        .loading {
+            margin: 20px auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-success">
+        <div id="loading" class="loading">
+            <p>Verificando correo electrónico...</p>
+            <img src="../assets/images/loading.gif" alt="Cargando" width="50">
+        </div>
+        
+        <div id="success" style="display: none;">
+            <div class="icon">✓</div>
+            <h1>¡Correo verificado correctamente!</h1>
+            <p>Tu correo electrónico ha sido verificado exitosamente.</p>
+            <p>Ahora puedes iniciar sesión en tu cuenta con tu número de control y contraseña.</p>
+            <a href="login.html" class="action-button">Ir a Iniciar Sesión</a>
+        </div>
+        
+        <div id="error" style="display: none;">
+            <div class="icon" style="color: #d9534f;">✗</div>
+            <h1 style="color: #d9534f;">Error en la verificación</h1>
+            <p>No pudimos verificar tu correo electrónico en este momento.</p>
+            <p>Es posible que el enlace haya expirado o ya hayas verificado tu correo anteriormente.</p>
+            <a href="login.html" class="action-button">Ir a Iniciar Sesión</a>
+        </div>
+        
+        <div id="not-authenticated" style="display: none;">
+            <div class="icon" style="color: #f0ad4e;">!</div>
+            <h1 style="color: #f0ad4e;">Enlace inválido</h1>
+            <p>No pudimos procesar tu solicitud. El enlace de verificación no es válido o ha expirado.</p>
+            <p>Por favor, intenta iniciar sesión para solicitar un nuevo enlace de verificación.</p>
+            <a href="login.html" class="action-button">Ir a Iniciar Sesión</a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    
+    <!-- Script de inicialización de Firebase -->
+    <script src="../js/firebase-init.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar si el usuario está autenticado mediante el enlace de verificación
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    // Usuario autenticado
+                    console.log('Usuario autenticado:', user.email);
+                    
+                    if (user.emailVerified) {
+                        // El correo está verificado en Firebase Auth
+                        console.log('Correo verificado en Firebase Auth');
+                        
+                        // Actualizar el estado en Firestore
+                        updateVerificationStatus(user);
+                    } else {
+                        // El correo no está verificado aún
+                        console.log('Correo no verificado en Firebase Auth');
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('error').style.display = 'block';
+                    }
+                } else {
+                    // No hay usuario autenticado
+                    console.log('No hay usuario autenticado');
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('not-authenticated').style.display = 'block';
+                }
+            });
+        });
+        
+        /**
+         * Actualiza el estado de verificación en Firestore
+         */
+        async function updateVerificationStatus(user) {
+            try {
+                // Buscar el usuario en Firestore por su UID
+                const querySnapshot = await firebase.firestore()
+                    .collection('usuario')
+                    .where('uid', '==', user.uid)
+                    .get();
+                
+                if (!querySnapshot.empty) {
+                    // Obtener el primer documento (debería ser único)
+                    const userDoc = querySnapshot.docs[0];
+                    
+                    // Actualizar el campo emailVerificado a true
+                    await firebase.firestore()
+                        .collection('usuario')
+                        .doc(userDoc.id)
+                        .update({
+                            emailVerificado: true,
+                            fechaActualizacion: new Date()
+                        });
+                    
+                    console.log('Estado de verificación actualizado en Firestore');
+                    
+                    // Mostrar mensaje de éxito
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('success').style.display = 'block';
+                } else {
+                    console.log('No se encontró el usuario en Firestore');
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('error').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error al actualizar estado de verificación:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

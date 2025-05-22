@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="0;url=auth/login.html">
+    <title>Sistema de Encuestas - Redireccionando</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
+    <!-- Scripts propios -->
+    <script src="js/firebase-init.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .redirect-message {
+            text-align: center;
+            padding: 20px;
+        }
+        .redirect-message p {
+            margin: 10px 0;
+        }
+        .redirect-link {
+            color: #004e7f;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-message">
+        <h1>Redireccionando...</h1>
+        <p>Serás redirigido automáticamente a la página de inicio de sesión.</p>
+        <p>Si no eres redirigido automáticamente, <a href="auth/login.html" class="redirect-link">haz clic aquí</a>.</p>
+    </div>
+    <script>
+        // Redirección con JavaScript como respaldo
+        window.location.href = "auth/login.html";
+    </script>
+</body>
+</html>

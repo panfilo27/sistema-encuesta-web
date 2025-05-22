@@ -1,0 +1,349 @@
+/* CSS para el carrusel de noticias en el Dashboard de Alumnos */
+
+.news-section {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Contenedor del carrusel */
+.carousel-container {
+    position: relative;
+    width: 100%;
+    padding: 20px 0;
+    overflow: hidden;
+}
+
+/* Track del carrusel donde se colocan las tarjetas */
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+/* Tarjeta de noticia/aviso */
+.news-card {
+    flex: 0 0 350px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer; /* Indicar que es clickeable */
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Cabecera de la tarjeta */
+.news-card-header {
+    padding: 15px;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.news-card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+/* Cuerpo de la tarjeta */
+.news-card-body {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-image-container {
+    width: 100%;
+    height: 150px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f5f5f5;
+}
+
+.news-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.news-card:hover .news-image {
+    transform: scale(1.05);
+}
+
+.news-no-image {
+    color: #999;
+    text-align: center;
+    font-style: italic;
+    width: 100%;
+}
+
+.news-description {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    line-height: 1.5;
+    margin-bottom: 15px;
+    max-height: 100px;
+    overflow: hidden;
+    position: relative;
+}
+
+.news-description::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background: linear-gradient(transparent, white);
+}
+
+/* Estilo para noticias sin imagen (descripción a pantalla completa) */
+.news-description-full {
+    font-size: 1rem;
+    line-height: 1.6;
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 15px;
+    margin: 0;
+    text-align: left;
+    display: block;
+}
+
+.news-description-full::after {
+    display: none;
+}
+
+/* Pie de la tarjeta */
+.news-card-footer {
+    padding: 10px 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.news-target {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 30px;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.news-date {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+/* Botones de navegación del carrusel */
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: white;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--primary-color);
+    z-index: 2;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.carousel-button:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.carousel-button.prev {
+    left: 10px;
+}
+
+.carousel-button.next {
+    right: 10px;
+}
+
+/* Indicador de carga */
+.carousel-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 40px 0;
+    color: var(--text-light);
+}
+
+.carousel-loading i {
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+/* Estados de aviso */
+.news-card-header.active {
+    background-color: var(--success-color);
+}
+
+.news-card-header.expired {
+    background-color: var(--text-light);
+}
+
+.news-card-header.upcoming {
+    background-color: var(--warning-color);
+}
+
+/* Mensaje de "Sin avisos" */
+.no-news-message {
+    width: 100%;
+    padding: 40px;
+    text-align: center;
+    color: var(--text-light);
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+/* Estilos para el modal de noticias */
+.news-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.news-modal.visible {
+    opacity: 1;
+}
+
+.news-modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 25px;
+    position: relative;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.news-modal.visible .news-modal-content {
+    transform: translateY(0);
+}
+
+.news-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 50%;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.news-modal-close:hover {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.news-modal-title {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin: 0 0 10px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-right: 30px; /* Espacio para el botón de cerrar */
+}
+
+.news-modal-date {
+    color: #777;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.news-modal-image {
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.news-modal-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.news-modal-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .news-card {
+        flex: 0 0 300px;
+    }
+    
+    .news-modal-content {
+        padding: 20px 15px;
+    }
+    
+    .news-modal-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .news-card {
+        flex: 0 0 calc(100% - 40px);
+    }
+    
+    .carousel-button {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .news-modal-content {
+        padding: 15px 10px;
+    }
+    
+    .news-modal-title {
+        font-size: 1.3rem;
+    }
+}

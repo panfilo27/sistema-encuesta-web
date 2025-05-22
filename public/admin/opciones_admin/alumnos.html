@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Alumnos</title>
+    <link rel="stylesheet" href="/public/css/admin/opciones_admin/alumnos.css">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="contenedor">
+        <h1>Administración de Alumnos</h1>
+        
+        <div class="buscador">
+            <input type="text" id="busqueda" placeholder="Buscar por nombre, número de control o carrera...">
+            <button id="btn-buscar"><i class="fas fa-search"></i></button>
+        </div>
+        
+        <div class="filtros">
+            <div class="filtro">
+                <label for="filtro-carrera">Filtrar por carrera:</label>
+                <select id="filtro-carrera">
+                    <option value="">Todas las carreras</option>
+                    <!-- Se llenarán dinámicamente -->
+                </select>
+            </div>
+            <div class="filtro">
+                <label for="filtro-verificado">Estado de verificación:</label>
+                <select id="filtro-verificado">
+                    <option value="">Todos</option>
+                    <option value="true">Verificados</option>
+                    <option value="false">No verificados</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="tabla-container">
+            <div id="tabla-alumnos">
+                <!-- Aquí se cargará dinámicamente la tabla de alumnos -->
+                <p class="cargando">Cargando alumnos...</p>
+            </div>
+        </div>
+        
+        <div class="paginacion">
+            <button id="btn-anterior" disabled><i class="fas fa-chevron-left"></i> Anterior</button>
+            <span id="info-pagina">Página 1</span>
+            <button id="btn-siguiente">Siguiente <i class="fas fa-chevron-right"></i></button>
+        </div>
+        
+        <!-- Contenedor para la administración de encuestas -->
+        <div class="separador-secciones"></div>
+        
+        <h2>Administración de Encuestas</h2>
+        <div id="seccion-encuestas" class="seccion-encuestas">
+            <!-- Aquí se cargará dinámicamente el contenido de encuestas -->
+            <p class="cargando">Cargando administración de encuestas...</p>
+        </div>
+    </div>
+    
+    <!-- Modal de detalle de alumno -->
+    <div id="modal-detalle" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Detalles del Alumno</h2>
+            <div id="detalle-alumno">
+                <!-- Aquí se cargarán los detalles del alumno -->
+            </div>
+            <div id="historial-encuestas-alumno" class="historial-encuestas">
+                <!-- Aquí se cargará el historial de encuestas del alumno -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+    
+    <!-- Scripts propios -->
+    <script src="/public/js/firebase-init.js"></script>
+    <script src="/public/models/Usuario.js"></script>
+    <script src="/public/js/admin/opciones_admin/alumnos.js"></script>
+</body>
+</html>

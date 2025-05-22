@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="../css/login.css">
+    <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+    <!-- Script de reCAPTCHA v2 con callback -->
+    <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoaded&render=explicit" async defer></script>
+</head>
+<body>
+    <div class="content">
+        <div class="tittle">Sistema Integral de Información</div>
+
+        <div class="fond">
+            <img src="../assets/images/fondo-venus.jpg" alt="Venus">
+        </div>
+
+        <div class="logo">
+            <img src="../assets/images/itver.png" alt="Instituto Tecnológico de Veracruz">
+        </div>
+
+        <div class="pie">
+            <img src="../assets/images/sep.png" id="sep" alt="SEP">
+        </div>
+
+        <div class="hearth">
+            <div class="backdoor"></div>
+
+            <div class="profiles">
+                <ul>
+                    <li><a href="#alumnos" id="alum" class="tab-link">Alumnos</a></li>
+                    <li><a href="#personal" id="pro" class="tab-link">Personal</a></li>
+                </ul>
+            </div>
+
+            <!-- FORMULARIO ALUMNOS -->
+            <form class="formulario" id="form-alumnos" autocomplete="on">
+                <h1>Acceso a Alumnos</h1>
+                <ul class="input-list">
+                    <li>
+                        <input type="text" id="numero_control" name="username" autocomplete="username" placeholder="Número de Control" maxlength="8" required>
+                    </li>
+                    <li class="input-password">
+                        <input type="password" id="nip" name="current-password" autocomplete="current-password" placeholder="NIP" required>
+                        <button type="button" class="toggle-eye" onclick="toggleVisibility('nip', 'eye-icon-2')">
+                            <img id="eye-icon-2" src="../assets/images/ojo-cerrado.png" alt="Mostrar/Ocultar">
+                        </button>
+                    </li>
+                    <li class="login-actions">
+                        <button type="submit" class="ingresar" id="btn-alumno">Ingresar</button>
+                        <a href="#" id="link-registro-alumno" class="registro-inline">¡Regístrate aquí!</a>
+                    </li>
+                    <li class="captcha-container">
+                        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+                    </li>
+                </ul>
+            </form>
+            
+            <!-- Modal de Registro para Alumnos -->
+            <div id="modal-registro-alumno" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Registro de Alumno</h2>
+                    <form id="form-registro">
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="reg-numero-control">Número de Control:</label>
+                                <input type="text" id="reg-numero-control" required maxlength="8">
+                            </div>
+                            <div class="form-group half">
+                                <label for="reg-nombre">Nombre(s):</label>
+                                <input type="text" id="reg-nombre" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="reg-apellido-paterno">Apellido Paterno:</label>
+                                <input type="text" id="reg-apellido-paterno" required>
+                            </div>
+                            <div class="form-group half">
+                                <label for="reg-apellido-materno">Apellido Materno:</label>
+                                <input type="text" id="reg-apellido-materno">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full">
+                            <label for="reg-carrera">Carrera:</label>
+                            <select id="reg-carrera" required>
+                                <option value="">Selecciona una carrera</option>
+                                <!-- Las opciones se cargarán dinámicamente -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group full">
+                            <label for="reg-email">Correo Electrónico:</label>
+                            <input type="email" id="reg-email" required>
+                            <small>Se enviará un correo de verificación a esta dirección</small>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="reg-password">Contraseña:</label>
+                                <input type="password" id="reg-password" required>
+                                <small>Mínimo 6 caracteres</small>
+                            </div>
+                            <div class="form-group half">
+                                <label for="reg-confirm-password">Confirmar:</label>
+                                <input type="password" id="reg-confirm-password" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full captcha-container-register">
+                            <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+                        </div>
+                        
+                        <button type="submit" class="btn-registrar">Registrarse</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Modal de Registro para Personal -->
+            <div id="modal-registro-personal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Registro de Personal</h2>
+                    <form id="form-registro-personal">
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="reg-rfc">RFC:</label>
+                                <input type="text" id="reg-rfc" required>
+                            </div>
+                            <div class="form-group half">
+                                <label for="reg-nombre-personal">Nombre(s):</label>
+                                <input type="text" id="reg-nombre-personal" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="reg-apellido-paterno-personal">Apellido Paterno:</label>
+                                <input type="text" id="reg-apellido-paterno-personal" required>
+                            </div>
+                            <div class="form-group half">
+                                <label for="reg-apellido-materno-personal">Apellido Materno:</label>
+                                <input type="text" id="reg-apellido-materno-personal">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full">
+                            <label for="reg-email-personal">Correo Electrónico:</label>
+                            <input type="email" id="reg-email-personal" required>
+                            <small>Se enviará un correo de verificación a esta dirección</small>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="reg-password-personal">Contraseña:</label>
+                                <input type="password" id="reg-password-personal" required>
+                                <small>Mínimo 6 caracteres</small>
+                            </div>
+                            <div class="form-group half">
+                                <label for="reg-confirm-password-personal">Confirmar:</label>
+                                <input type="password" id="reg-confirm-password-personal" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full captcha-container-register">
+                            <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+                        </div>
+                        
+                        <button type="submit" class="btn-registrar">Registrarse</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- FORMULARIO PERSONAL -->
+            <form class="formulario" id="form-personal" autocomplete="on">
+                <h1>Acceso a Personal</h1>
+                <ul class="input-list">
+                    <li>
+                        <input type="text" id="usuario" name="username" autocomplete="username" placeholder="Usuario" required>
+                    </li>
+                    <li class="input-password">
+                        <input type="password" id="contraseña" name="current-password" autocomplete="current-password" placeholder="Contraseña" required>
+                        <button type="button" class="toggle-eye" onclick="toggleVisibility('contraseña', 'eye-icon-1')">
+                            <img id="eye-icon-1" src="../assets/images/ojo-cerrado.png" alt="Mostrar/Ocultar">
+                        </button>
+                    </li>
+                    <li class="login-actions">
+                        <button type="submit" class="ingresar" id="btn-personal">Ingresar</button>
+                        <a href="#" id="link-registro-personal" class="registro-inline">¡Regístrate aquí!</a>
+                    </li>
+                    <li class="captcha-container">
+                        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+                    </li>
+                </ul>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
+    
+    <!-- Scripts propios -->
+    <script src="../js/firebase-init.js"></script>
+    <script src="../js/login.js" defer></script>
+    
+    <!-- Scripts de registro -->
+    <script src="../js/auth/registro-alumno.js" defer></script>
+    <script src="../js/auth/registro-personal.js" defer></script>
+    
+    <!-- Script para activar el formulario por defecto -->
+    <script>
+        // Garantizar que el formulario de personal sea visible al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Activar pestaña de personal
+            document.getElementById('pro').classList.add('active');
+            
+            // Hacer visible el formulario de personal
+            const formPersonal = document.getElementById('form-personal');
+            formPersonal.classList.add('active');
+            formPersonal.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

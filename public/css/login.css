@@ -1,0 +1,408 @@
+body {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    overflow: hidden;
+}
+.content {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.fond {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.tittle {
+    background-color: #004e7f;
+    font-size: 40px;
+    font-family: "Times New Roman", serif;
+    color: #f3ea00;
+    text-align: center;
+    font-weight: bold;
+    padding: 10px 0;
+    width: 100%;
+}
+
+img {
+    width: 100%;
+    height: 80%;
+}
+
+.logo {
+    position: absolute;
+    top: 35%;
+    left: 35%;
+}
+
+.hearth {
+    position: absolute;
+    top: 20%;
+    left: 76%;
+    width: 280px;
+    height: 300px;
+}
+
+.backdoor {
+    border-radius: 20px;
+    position: absolute;
+    background-color: #dedede;
+    opacity: 0.7;
+    width: 280px;
+    height: 300px;
+    z-index: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.profiles {
+    border-radius: 20px 20px 0 0;
+    position: absolute;
+    height: 50px;
+    width: 100%;
+    background-color: #008c46;
+    color: white;
+    z-index: 1;
+}
+
+.profiles ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+.profiles li {
+    flex: 1;
+}
+
+.profiles a {
+    display: block;
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    height: 100%;
+    line-height: 50px;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.profiles a.active {
+    background-color: #006935;
+    border-radius: 20px 20px 0 0;
+}
+
+.formulario {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+    position: absolute;
+    top: 60px;
+    padding: 0 25px;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+.formulario.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.formulario h1 {
+    text-align: center;
+    font-size: 23px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.input-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.input-list li {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.input-list input {
+    padding: 8px;
+    width: 90%;
+    border-radius: 5px;
+    border: 0 solid #999;
+}
+
+.input-password {
+    position: relative;
+    width: 90%;
+    display: flex;
+    justify-content: center;
+}
+
+.input-password button {
+    background-color: transparent;
+    width: 15%;
+}
+
+.input-password button:hover {
+    background-color: #f2f2f2;
+}
+
+.toggle-eye {
+    border-radius: 5px;
+    position: absolute;
+    left: 83%;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.toggle-eye img {
+    padding-top: 3px;
+    width: 25px;
+    height: 25px;
+}
+
+.login-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* Estilos para los contenedores de reCAPTCHA */
+.captcha-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.captcha-container-register {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.ingresar{
+    padding: 10px;
+    width: 70%;
+    border: none;
+    border-radius: 5px;
+    background-color: #136899;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.registro-inline {
+    color: #004e7f;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.registro-inline:hover {
+    text-decoration: underline;
+    color: #007bff;
+}
+
+
+.input-list button {
+    transition: background-color 0.3s ease;
+}
+
+.ingresar:hover {
+    background-color: #0d4d73;
+}
+
+.pie {
+    position: absolute;
+    height: 20%;
+    bottom: 0;
+    text-align: left;
+}
+
+#sep {
+    padding-top: 75px;
+    height: 45%;
+}
+
+/* Estilos para el enlace de registro */
+.registro-link {
+    text-align: center;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.registro-link a {
+    color: #004e7f;
+    text-decoration: none;
+    font-size: 15px;
+    display: block;
+    padding: 5px;
+    font-weight: bold;
+}
+
+.registro-link a:hover {
+    text-decoration: underline;
+    color: #007bff;
+}
+
+/* Estilos para el modal de registro */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 8% auto;
+    padding: 20px 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+}
+
+.modal h2 {
+    color: #004e7f;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 22px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -10px;
+    margin-left: -10px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    padding: 0 10px;
+}
+
+.form-group.half {
+    width: 50%;
+}
+
+.form-group.full {
+    width: 100%;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    height: 36px;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 3px;
+    color: #666;
+    font-size: 11px;
+}
+
+.btn-registrar {
+    background-color: #008c46;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.btn-registrar:hover {
+    background-color: #006935;
+}
+
+/* Estilos para el modal de verificación de correo */
+.verification-content {
+    text-align: center;
+}
+
+.verification-content h2 {
+    color: #008c46;
+}
+
+.email-highlight {
+    font-weight: bold;
+    color: #004e7f;
+    font-size: 16px;
+    padding: 8px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.btn-ok {
+    background-color: #004e7f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+.btn-ok:hover {
+    background-color: #003a5f;
+}

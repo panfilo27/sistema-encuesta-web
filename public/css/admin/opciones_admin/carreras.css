@@ -1,0 +1,255 @@
+/* Estilos para la página de gestión de carreras */
+
+.cuerpo-carreras {
+    padding: 20px;
+    width: 100%;
+}
+
+.cuerpo-carreras h1 {
+    color: #004e7f;
+    margin-bottom: 5px;
+}
+
+.cuerpo-carreras p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+/* Contenedor de formulario */
+.formulario-container {
+    margin-top: 20px;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.formulario-container h2, .lista-container h2 {
+    color: #004e7f;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 20px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Contenedor de lista */
+.lista-container {
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+/* Contenedor de búsqueda */
+.search-container {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.search-container input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+    font-size: 14px;
+}
+
+.search-container button {
+    padding: 10px 15px;
+    background-color: #004e7f;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+
+/* Formulario */
+form {
+    width: 100%;
+}
+
+/* Secciones del formulario */
+.form-section {
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+}
+
+.form-section h3 {
+    color: #333;
+    font-size: 18px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+/* Organizar campos en filas horizontales */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+    width: 100%;
+}
+
+.form-group {
+    width: 33.333%;
+    padding: 0 10px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+/* Ajuste responsivo para pantallas pequeñas */
+@media (max-width: 992px) {
+    .form-group {
+        width: 50%;
+    }
+}
+
+@media (max-width: 576px) {
+    .form-group {
+        width: 100%;
+    }
+}
+
+/* Estilos para campos y etiquetas */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+input[type="text"],
+input[type="password"],
+select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #004e7f;
+    box-shadow: 0 0 0 2px rgba(0, 78, 127, 0.1);
+}
+
+small {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 12px;
+}
+
+/* Tabla de carreras */
+.tabla-container {
+    overflow-x: auto;
+    margin-top: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 4px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+thead {
+    background-color: #f5f5f5;
+}
+
+th {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid #ddd;
+    color: #004e7f;
+    font-weight: bold;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+    background-color: #f5f9ff;
+}
+
+/* Acciones en la tabla */
+.acciones-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.btn-editar {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.btn-eliminar {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* Botones */
+.btn-primary {
+    background-color: #004e7f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary:hover {
+    background-color: #003e6f;
+}
+
+.btn-secondary {
+    background-color: #eeeeee;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-secondary:hover {
+    background-color: #dddddd;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+/* Mensajes de feedback */
+.campo-error {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.loading-message {
+    padding: 20px;
+    text-align: center;
+    color: #004e7f;
+}
+
+.empty-message {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+}
