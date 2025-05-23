@@ -184,7 +184,97 @@ async function obtenerHistorialEncuestasAlumno(alumnoId) {
     }
 }
 
- 
+/**
+ * Muestra los detalles de un módulo específico de la encuesta
+ * @param {string} modulo - Número del módulo (1-7)
+ * @param {string} encuestaId - ID de la encuesta
+ * @param {string} alumnoId - ID del alumno
+ */
+async function mostrarDetallesModulo(modulo, encuestaId, alumnoId) {
+    try {
+        console.log(`Mostrando detalles del módulo ${modulo} de la encuesta ${encuestaId} del alumno ${alumnoId}`);
+        
+        // Cargar los estilos si no están ya cargados
+        if (!document.querySelector('link[href*="/public/css/admin/alumnos/modulos/modal.css"]')) {
+            const linkEstilos = document.createElement('link');
+            linkEstilos.rel = 'stylesheet';
+            linkEstilos.href = '/public/css/admin/alumnos/modulos/modal.css';
+            document.head.appendChild(linkEstilos);
+        }
+        
+        // Verificar si ya existe el modal de módulos
+        let modalModulo = document.getElementById('modal-detalle-modulo');
+        
+        if (!modalModulo) {
+            // Crear el modal si no existe
+            const modalHTML = `
+                <div id="modal-detalle-modulo" class="modal-detalle-modulo">
+                    <div class="modal-contenido-modulo">
+                        <div class="modal-header">
+                            <h3 id="titulo-modulo">Cargando...</h3>
+                            <span class="cerrar-modal-modulo">&times;</span>
+                        </div>
+                        <div id="contenido-modulo" class="contenido-modulo">
+                            <p class="cargando">Cargando detalles del módulo...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modalDiv = document.createElement('div');
+            modalDiv.innerHTML = modalHTML;
+            document.body.appendChild(modalDiv.firstElementChild);
+            
+            modalModulo = document.getElementById('modal-detalle-modulo');
+            
+            // Agregar evento para cerrar el modal
+            document.querySelector('.cerrar-modal-modulo').addEventListener('click', function() {
+                modalModulo.style.display = 'none';
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target == modalModulo) {
+                    modalModulo.style.display = 'none';
+                }
+            });
+        }
+        
+        // Mostrar el modal
+        modalModulo.style.display = 'block';
+        document.getElementById('titulo-modulo').textContent = `Módulo ${modulo}: ${obtenerTituloModulo(modulo)}`;
+        document.getElementById('contenido-modulo').innerHTML = '<p class="cargando">Cargando datos del módulo...</p>';
+        
+        // Cargar los datos del módulo desde Firestore
+        const datosModulo = await cargarDatosModulo(modulo, encuestaId, alumnoId);
+        
+        // Cargar la vista del módulo
+        const urlVistaModulo = `/public/admin/opciones_admin/alumnos/modulos/modulo${modulo}.html`;
+        
+        // Verificar si existe el módulo, si no, cargarlo dinámicamente
+        await verificarCrearModulo(modulo);
+        
+        // Cargar vista del módulo
+        const contenidoModulo = document.getElementById('contenido-modulo');
+        contenidoModulo.innerHTML = '<iframe id="iframe-modulo" class="iframe-modulo" src="' + urlVistaModulo + '"></iframe>';
+        
+        const iframe = document.getElementById('iframe-modulo');
+        iframe.onload = function() {
+            // Inicializar el módulo y cargar datos
+            const iframeWindow = iframe.contentWindow;
+            if (iframeWindow && iframeWindow.inicializarVistaAdminModulo) {
+                iframeWindow.inicializarVistaAdminModulo(datosModulo);
+            } else {
+                console.error('No se pudo inicializar la vista del módulo');
+            }
+        };
+    } catch (error) {
+        console.error(`Error al mostrar detalles del módulo ${modulo}:`, error);
+        const contenidoModulo = document.getElementById('contenido-modulo');
+        if (contenidoModulo) {
+            contenidoModulo.innerHTML = `<p class="error">Error al cargar datos del módulo: ${error.message}</p>`;
+        }
+    }
+}
 
 /**
  * Obtiene el título del módulo según su número

@@ -43,13 +43,24 @@ Object.keys(rutas).forEach(id => {
                         // Cargar el script del filtro de encuestas
                         const scriptFiltroEncuesta = document.createElement('script');
                         scriptFiltroEncuesta.src = "../js/admin/opciones_admin/alumnos/filtro_encuesta.js";
-                        scriptFiltroEncuesta.onload = () => {
+                        document.body.appendChild(scriptFiltroEncuesta);
+                        
+                        // Cargar script de exportación
+                        const scriptExportacion = document.createElement('script');
+                        scriptExportacion.src = "../js/admin/opciones_admin/alumnos/exportar.js";
+                        scriptExportacion.onload = () => {
                             console.log('Scripts de alumnos cargados');
                             if (typeof inicializarGestorAlumnos === 'function') {
                                 inicializarGestorAlumnos();
                             }
+                            // Inicializar exportación después de cargar los demás datos
+                            setTimeout(() => {
+                                if (typeof inicializarExportacion === 'function') {
+                                    inicializarExportacion();
+                                }
+                            }, 1000);
                         };
-                        document.body.appendChild(scriptFiltroEncuesta);
+                        document.body.appendChild(scriptExportacion);
                     };
                     break;
 
