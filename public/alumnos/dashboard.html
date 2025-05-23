@@ -6,8 +6,12 @@
     <title>Dashboard Alumno - ITVER</title>
     
     <!-- CSS -->
+    <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/alumnos/alumnos.css">
+    <link rel="stylesheet" href="../css/alumnos/navegacion.css">
+    <link rel="stylesheet" href="../css/alumnos/encuestas.css">
     <link rel="stylesheet" href="../css/alumnos/opciones_alumnos/noticias.css">
+    <link rel="stylesheet" href="../css/alumnos/perfil.css">
     
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -21,7 +25,7 @@
                 <h1>Sistema de Encuestas ITVER</h1>
             </div>
             <div class="app-bar-right">
-                <div class="user-info">
+                <div class="user-info" id="user-profile-btn" style="cursor: pointer;" title="Ver perfil">
                     <span class="user-name" id="nombre-alumno">Cargando...</span>
                     <div class="user-avatar">
                         <i class="fas fa-user-graduate"></i>
@@ -29,12 +33,6 @@
                 </div>
                 <nav class="main-nav">
                     <ul>
-                        <li>
-                            <a href="#" id="btn-historial" title="Historial de encuestas contestadas">
-                                <i class="fas fa-history"></i>
-                                <span>Historial</span>
-                            </a>
-                        </li>
                         <li>
                             <a href="#" id="btn-cerrar-sesion" title="Cerrar sesión">
                                 <i class="fas fa-sign-out-alt"></i>
@@ -74,13 +72,85 @@
                 </div>
             </section>
 
-            <!-- Sección de Encuestas Pendientes (en desarrollo) -->
+            <!-- Sección de Encuestas Pendientes -->
             <section class="surveys-section">
-                <h2>Encuestas Pendientes</h2>
-                <div class="coming-soon">
-                    <i class="fas fa-tools"></i>
-                    <p>Esta sección está en desarrollo. Próximamente podrás ver tus encuestas pendientes aquí.</p>
+                <h2>Encuestas</h2>
+                <div id="encuestas-container" class="encuestas-container">
+                    <div class="loading-encuestas">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Cargando encuestas...</p>
+                    </div>
                 </div>
+                
+                <!-- Template para encuesta activa -->
+                <template id="template-encuesta-activa">
+                    <div class="encuesta-card activa">
+                        <div class="encuesta-header">
+                            <h3 class="encuesta-titulo">Título de la encuesta</h3>
+                            <span class="encuesta-badge activa">Activa</span>
+                        </div>
+                        <div class="encuesta-body">
+                            <p class="encuesta-descripcion">Descripción de la encuesta</p>
+                            <div class="encuesta-fecha">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Disponible hasta: <span class="fecha-fin">01/01/2025</span></span>
+                            </div>
+                            <div class="encuesta-progreso">
+                                <div class="progreso-label">
+                                    <span>Progreso:</span>
+                                    <span class="progreso-porcentaje">20%</span>
+                                </div>
+                                <div class="progreso-barra">
+                                    <div class="progreso-completado" style="width: 20%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="encuesta-footer">
+                            <!-- Este botón se mostrará cuando no se ha iniciado la encuesta -->
+                            <button class="btn-comenzar-encuesta" style="display: none">
+                                <i class="fas fa-play-circle"></i> Comenzar Encuesta
+                            </button>
+                            <!-- Este botón se mostrará cuando ya se inició pero no se completó -->
+                            <button class="btn-continuar-encuesta" style="display: none">
+                                <i class="fas fa-clipboard-list"></i> Continuar Encuesta
+                            </button>
+                        </div>
+                    </div>
+                </template>
+                
+                <!-- Template para encuesta completada -->
+                <template id="template-encuesta-completada">
+                    <div class="encuesta-card completada">
+                        <div class="encuesta-header">
+                            <h3 class="encuesta-titulo">Título de la encuesta</h3>
+                            <span class="encuesta-badge completada">Completada</span>
+                        </div>
+                        <div class="encuesta-body">
+                            <p class="encuesta-descripcion">Descripción de la encuesta</p>
+                            <div class="encuesta-fecha">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Completada el: <span class="fecha-completado">01/01/2025</span></span>
+                            </div>
+                            <div class="modulos-completados">
+                                <h4>Módulos Completados:</h4>
+                                <div class="modulos-nav"></div>
+                            </div>
+                        </div>
+                        <div class="encuesta-footer">
+                            <button class="btn-ver-respuestas">
+                                <i class="fas fa-eye"></i> Ver Mis Respuestas
+                            </button>
+                        </div>
+                    </div>
+                </template>
+                
+                <!-- Template para sin encuestas -->
+                <template id="template-sin-encuestas">
+                    <div class="no-encuestas">
+                        <i class="fas fa-clipboard-check"></i>
+                        <p>No hay encuestas disponibles en este momento.</p>
+                    </div>
+                </template>
             </section>
         </main>
 
@@ -88,6 +158,71 @@
         <footer class="footer">
             <p>© 2025 Instituto Tecnológico de Veracruz - Sistema de Encuestas</p>
         </footer>
+    </div>
+
+    <!-- Modal de Perfil de Usuario -->
+    <div id="modal-perfil" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Perfil de Usuario</h2>
+            <div class="user-profile-container">
+                <div class="user-profile-avatar">
+                    <i class="fas fa-user-graduate fa-5x"></i>
+                </div>
+                <div class="user-profile-details">
+                    <div class="profile-row">
+                        <label>Número de Control:</label>
+                        <span id="perfil-numero-control">Cargando...</span>
+                    </div>
+                    <div class="profile-row">
+                        <label>Nombre:</label>
+                        <span id="perfil-nombre-completo">Cargando...</span>
+                    </div>
+                    <div class="profile-row">
+                        <label>Correo:</label>
+                        <span id="perfil-email">Cargando...</span>
+                    </div>
+                    <div class="profile-row">
+                        <label>Carrera:</label>
+                        <span id="perfil-carrera">Cargando...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="change-password-section">
+                <h3>Cambiar Contraseña</h3>
+                <form id="form-cambiar-password">
+                    <div class="form-group">
+                        <label for="password-actual">Contraseña Actual:</label>
+                        <div class="password-input-container">
+                            <input type="password" id="password-actual" required>
+                            <button type="button" class="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password-nueva">Nueva Contraseña:</label>
+                        <div class="password-input-container">
+                            <input type="password" id="password-nueva" required>
+                            <button type="button" class="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <small>Mínimo 6 caracteres</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="password-confirmar">Confirmar Contraseña:</label>
+                        <div class="password-input-container">
+                            <input type="password" id="password-confirmar" required>
+                            <button type="button" class="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-cambiar-password">Cambiar Contraseña</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase SDK -->
@@ -98,7 +233,10 @@
     
     <!-- Scripts propios -->
     <script src="../js/firebase-init.js"></script>
+    <script src="../js/auth.js"></script>
     <script src="../js/alumnos/alumnos.js"></script>
     <script src="../js/alumnos/opciones_alumnos/noticias.js"></script>
+    <script src="../js/alumnos/encuestas.js"></script>
+    <script src="../js/alumnos/perfil.js"></script>
 </body>
 </html>

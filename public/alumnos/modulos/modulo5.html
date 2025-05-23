@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 5: Desempeño Profesional - Encuesta de Egresados</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+    <link rel="stylesheet" href="/public/css/alumnos/alumnos.css">
+    <link rel="stylesheet" href="/public/css/alumnos/navegacion.css">
+    <link rel="stylesheet" href="/public/css/alumnos/opciones_alumnos/modulos/modulo5.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Encabezado con logo y título -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="/public/assets/images/itver.png" alt="Logo ITVER" class="logo">
+                <img src="/public/assets/images/tecnm.png" alt="Logo TecNM" class="logo">
+                <img src="/public/assets/images/sep.png" alt="Logo SEP" class="logo">
+            </div>
+            <h1>Sistema de Seguimiento de Egresados</h1>
+            <div class="user-info">
+                <span id="nombre-usuario">Cargando...</span>
+                <button id="btn-cerrar-sesion" class="btn-cerrar-sesion">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- Menú de navegación -->
+        <nav class="nav">
+            <ul>
+                <li><a href="/public/alumnos/dashboard.html"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="#" class="active"><i class="fas fa-clipboard-list"></i> Encuesta</a></li>
+                <li><a href="#"><i class="fas fa-user"></i> Mi Perfil</a></li>
+            </ul>
+        </nav>
+
+        <!-- Contenido principal -->
+        <main class="main">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" style="width: 100%"></div>
+                </div>
+                <div class="progress-labels">
+                    <span class="completed">Datos Personales</span>
+                    <span class="completed">Formación Académica</span>
+                    <span class="completed">Ubicación Laboral</span>
+                    <span class="completed">Datos de Empleo</span>
+                    <span class="active">Desempeño Profesional</span>
+                    <span>Expectativas</span>
+                    <span>Comentarios</span>
+                </div>
+            </div>
+
+            <section class="module-container">
+                <h2>Módulo 5: Desempeño Profesional</h2>
+                
+                <!-- Mensaje de cargando -->
+                <div id="loading-module" class="loading-module">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Cargando formulario...</p>
+                </div>
+                
+                <!-- Formulario -->
+                <form id="form-modulo5" class="form-module" style="display: none;">
+                    
+                    <!-- Eficiencia para realizar actividades laborales -->
+                    <div class="form-section">
+                        <h3>Eficiencia y Desempeño Laboral</h3>
+                        
+                        <div class="form-group wide">
+                            <label>IV.1 Eficiencia para realizar las actividades laborales, en relación con su formación académica:</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="eficiencia_muy" name="eficiencia" value="muy_eficiente" required>
+                                    <label for="eficiencia_muy">Muy eficiente</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="eficiencia_eficiente" name="eficiencia" value="eficiente">
+                                    <label for="eficiencia_eficiente">Eficiente</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="eficiencia_poco" name="eficiencia" value="poco_eficiente">
+                                    <label for="eficiencia_poco">Poco eficiente</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="eficiencia_deficiente" name="eficiencia" value="deficiente">
+                                    <label for="eficiencia_deficiente">Deficiente</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label>IV.2 Cómo califica su formación académica con respecto a su desempeño laboral:</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="formacion_excelente" name="formacion" value="excelente" required>
+                                    <label for="formacion_excelente">Excelente</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="formacion_bueno" name="formacion" value="bueno">
+                                    <label for="formacion_bueno">Bueno</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="formacion_regular" name="formacion" value="regular">
+                                    <label for="formacion_regular">Regular</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="formacion_malo" name="formacion" value="malo">
+                                    <label for="formacion_malo">Malo</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="formacion_pesimo" name="formacion" value="pesimo">
+                                    <label for="formacion_pesimo">Pésimo</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label>IV.3 Utilidad de las residencias/prácticas profesionales para su desarrollo laboral y profesional:</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="residencias_excelente" name="residencias" value="excelente" required>
+                                    <label for="residencias_excelente">Excelente</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="residencias_bueno" name="residencias" value="bueno">
+                                    <label for="residencias_bueno">Bueno</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="residencias_regular" name="residencias" value="regular">
+                                    <label for="residencias_regular">Regular</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="residencias_malo" name="residencias" value="malo">
+                                    <label for="residencias_malo">Malo</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="residencias_pesimo" name="residencias" value="pesimo">
+                                    <label for="residencias_pesimo">Pésimo</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Aspectos que valora la empresa -->
+                    <div class="form-section">
+                        <h3>IV.4 Aspectos que valora la empresa/organismo para la contratación de egresados</h3>
+                        <p class="form-help">Califique cada aspecto en una escala del 1 al 5, donde 1 representa poco valor y 5 mucho valor.</p>
+                        
+                        <div class="valoracion-grid">
+                            <!-- Área o Campo de Estudio -->
+                            <div class="valoracion-item">
+                                <div class="valoracion-label">1. Área o Campo de Estudio</div>
+                                <div class="valoracion-options">
+                                    <div class="rating-option">
+                                        <input type="radio" id="area_estudio_1" name="area_estudio" value="1" required>
+                                        <label for="area_estudio_1">1</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="area_estudio_2" name="area_estudio" value="2">
+                                        <label for="area_estudio_2">2</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="area_estudio_3" name="area_estudio" value="3">
+                                        <label for="area_estudio_3">3</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="area_estudio_4" name="area_estudio" value="4">
+                                        <label for="area_estudio_4">4</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="area_estudio_5" name="area_estudio" value="5">
+                                        <label for="area_estudio_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Titulación -->
+                            <div class="valoracion-item">
+                                <div class="valoracion-label">2. Titulación</div>
+                                <div class="valoracion-options">
+                                    <div class="rating-option">
+                                        <input type="radio" id="titulacion_1" name="titulacion" value="1" required>
+                                        <label for="titulacion_1">1</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="titulacion_2" name="titulacion" value="2">
+                                        <label for="titulacion_2">2</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="titulacion_3" name="titulacion" value="3">
+                                        <label for="titulacion_3">3</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="titulacion_4" name="titulacion" value="4">
+                                        <label for="titulacion_4">4</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="titulacion_5" name="titulacion" value="5">
+                                        <label for="titulacion_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Experiencia laboral/práctica -->
+                            <div class="valoracion-item">
+                                <div class="valoracion-label">3. Experiencia laboral/práctica (antes de egresar)</div>
+                                <div class="valoracion-options">
+                                    <div class="rating-option">
+                                        <input type="radio" id="experiencia_1" name="experiencia" value="1" required>
+                                        <label for="experiencia_1">1</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="experiencia_2" name="experiencia" value="2">
+                                        <label for="experiencia_2">2</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="experiencia_3" name="experiencia" value="3">
+                                        <label for="experiencia_3">3</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="experiencia_4" name="experiencia" value="4">
+                                        <label for="experiencia_4">4</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="experiencia_5" name="experiencia" value="5">
+                                        <label for="experiencia_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Competencia laboral -->
+                            <div class="valoracion-item">
+                                <div class="valoracion-label">4. Competencia laboral (resolución de problemas, análisis, aprendizaje, creatividad, etc.)</div>
+                                <div class="valoracion-options">
+                                    <div class="rating-option">
+                                        <input type="radio" id="competencia_1" name="competencia" value="1" required>
+                                        <label for="competencia_1">1</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="competencia_2" name="competencia" value="2">
+                                        <label for="competencia_2">2</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="competencia_3" name="competencia" value="3">
+                                        <label for="competencia_3">3</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="competencia_4" name="competencia" value="4">
+                                        <label for="competencia_4">4</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="competencia_5" name="competencia" value="5">
+                                        <label for="competencia_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Posicionamiento de la institución -->
+                            <div class="valoracion-item">
+                                <div class="valoracion-label">5. Posicionamiento de la institución de egreso</div>
+                                <div class="valoracion-options">
+                                    <div class="rating-option">
+                                        <input type="radio" id="posicionamiento_1" name="posicionamiento" value="1" required>
+                                        <label for="posicionamiento_1">1</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="posicionamiento_2" name="posicionamiento" value="2">
+                                        <label for="posicionamiento_2">2</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="posicionamiento_3" name="posicionamiento" value="3">
+                                        <label for="posicionamiento_3">3</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="posicionamiento_4" name="posicionamiento" value="4">
+                                        <label for="posicionamiento_4">4</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="posicionamiento_5" name="posicionamiento" value="5">
+                                        <label for="posicionamiento_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Conocimiento de idiomas extranjeros -->
+                            <div class="valoracion-item">
+                                <div class="valoracion-label">6. Conocimiento de idiomas extranjeros</div>
+                                <div class="valoracion-options">
+                                    <div class="rating-option">
+                                        <input type="radio" id="idiomas_1" name="idiomas" value="1" required>
+                                        <label for="idiomas_1">1</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="idiomas_2" name="idiomas" value="2">
+                                        <label for="idiomas_2">2</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="idiomas_3" name="idiomas" value="3">
+                                        <label for="idiomas_3">3</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="idiomas_4" name="idiomas" value="4">
+                                        <label for="idiomas_4">4</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="idiomas_5" name="idiomas" value="5">
+                                        <label for="idiomas_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Recomendaciones/referencias -->
+                            <div class="valoracion-item">
+                                <div class="valoracion-label">7. Recomendaciones/referencias</div>
+                                <div class="valoracion-options">
+                                    <div class="rating-option">
+                                        <input type="radio" id="recomendaciones_1" name="recomendaciones" value="1" required>
+                                        <label for="recomendaciones_1">1</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="recomendaciones_2" name="recomendaciones" value="2">
+                                        <label for="recomendaciones_2">2</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="recomendaciones_3" name="recomendaciones" value="3">
+                                        <label for="recomendaciones_3">3</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="recomendaciones_4" name="recomendaciones" value="4">
+                                        <label for="recomendaciones_4">4</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="recomendaciones_5" name="recomendaciones" value="5">
+                                        <label for="recomendaciones_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Personalidad/actitudes -->
+                            <div class="valoracion-item">
+                                <div class="valoracion-label">8. Personalidad/actitudes</div>
+                                <div class="valoracion-options">
+                                    <div class="rating-option">
+                                        <input type="radio" id="personalidad_1" name="personalidad" value="1" required>
+                                        <label for="personalidad_1">1</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="personalidad_2" name="personalidad" value="2">
+                                        <label for="personalidad_2">2</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="personalidad_3" name="personalidad" value="3">
+                                        <label for="personalidad_3">3</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="personalidad_4" name="personalidad" value="4">
+                                        <label for="personalidad_4">4</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="personalidad_5" name="personalidad" value="5">
+                                        <label for="personalidad_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Capacidad de liderazgo -->
+                            <div class="valoracion-item">
+                                <div class="valoracion-label">9. Capacidad de liderazgo</div>
+                                <div class="valoracion-options">
+                                    <div class="rating-option">
+                                        <input type="radio" id="liderazgo_1" name="liderazgo" value="1" required>
+                                        <label for="liderazgo_1">1</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="liderazgo_2" name="liderazgo" value="2">
+                                        <label for="liderazgo_2">2</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="liderazgo_3" name="liderazgo" value="3">
+                                        <label for="liderazgo_3">3</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="liderazgo_4" name="liderazgo" value="4">
+                                        <label for="liderazgo_4">4</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="liderazgo_5" name="liderazgo" value="5">
+                                        <label for="liderazgo_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Otros (especificar) -->
+                            <div class="valoracion-item otros-container">
+                                <div class="valoracion-label">
+                                    <label for="otros_factores">10. Otros factores (especificar):</label>
+                                    <input type="text" id="otros_factores" name="otros_factores" class="form-control">
+                                </div>
+                                <div class="valoracion-options">
+                                    <div class="rating-option">
+                                        <input type="radio" id="otros_1" name="otros" value="1">
+                                        <label for="otros_1">1</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="otros_2" name="otros" value="2">
+                                        <label for="otros_2">2</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="otros_3" name="otros" value="3">
+                                        <label for="otros_3">3</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="otros_4" name="otros" value="4">
+                                        <label for="otros_4">4</label>
+                                    </div>
+                                    <div class="rating-option">
+                                        <input type="radio" id="otros_5" name="otros" value="5">
+                                        <label for="otros_5">5</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="error-container" class="error-container"></div>
+
+                    <div class="form-actions">
+                        <button type="button" id="btn-guardar-modulo5" class="btn-guardar">Finalizar Encuesta</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <!-- Pie de página -->
+        <footer class="footer">
+            <p>© 2025 Instituto Tecnológico de Veracruz - Sistema de Encuestas</p>
+        </footer>
+    </div>
+
+    <!-- Overlay de carga -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Guardando información...</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Scripts de la aplicación -->
+    <script src="/public/js/firebase-init.js"></script>
+    <script src="/public/js/auth.js"></script>
+    <script src="/public/models/Usuario.js"></script>
+    <script src="/public/models/modulos/modulo5.js"></script>
+    <script src="/public/js/alumnos/opciones_alumnos/modulos/modulo5/index.js"></script>
+</body>
+</html>

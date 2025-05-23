@@ -25,6 +25,15 @@ try {
 // Referencias a servicios de Firebase para uso en toda la aplicación
 // Eliminamos la referencia a auth ya que no estamos usando Authentication
 const db = firebase.firestore();
-const storage = firebase.storage();
 
-console.log('Firebase inicializado solo con Firestore (sin Authentication)');
+// Verificar si Storage está disponible antes de usarlo
+let storage = null;
+try {
+    if (firebase.storage) {
+        storage = firebase.storage();
+    }
+} catch (error) {
+    console.log('Firebase Storage no está disponible:', error);
+}
+
+console.log('Firebase inicializado con Firestore');

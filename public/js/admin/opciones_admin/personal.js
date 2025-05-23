@@ -376,12 +376,32 @@ if (typeof window.PersonalModule !== 'undefined') {
 
     // Función para limpiar el formulario y salir del modo edición
     function limpiarFormulario() {
-        elementos.form.reset();
-        elementos.inputId.value = '';
+        // Verificar que el formulario existe antes de operarlo
+        if (!elementos || !elementos.form) {
+            console.error('DEPURACIÓN - No se encontró el formulario en limpiarFormulario');
+            return;
+        }
         
-        // Restaurar campos requeridos para contraseñas
-        elementos.form.elements['contrasena'].required = true;
-        elementos.form.elements['confirmar-contrasena'].required = true;
+        // Restablecer el formulario
+        elementos.form.reset();
+        
+        // Verificar que el inputId existe
+        if (elementos.inputId) {
+            elementos.inputId.value = '';
+        }
+        
+        // Restaurar campos requeridos para contraseñas sólo si existen
+        if (elementos.form.elements['contrasena']) {
+            elementos.form.elements['contrasena'].required = true;
+        } else {
+            console.log('DEPURACIÓN - Campo contrasena no encontrado en el formulario');
+        }
+        
+        if (elementos.form.elements['confirmar-contrasena']) {
+            elementos.form.elements['confirmar-contrasena'].required = true;
+        } else {
+            console.log('DEPURACIÓN - Campo confirmar-contrasena no encontrado en el formulario');
+        }
         
         // Restaurar texto del botón
         const submitBtn = elementos.form.querySelector('button[type="submit"]');

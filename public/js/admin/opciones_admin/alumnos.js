@@ -40,6 +40,7 @@ let totalPaginas = 1;
 let alumnosFiltrados = [];
 let todasLasCarreras = [];
 let todosLosAlumnos = [];
+let todosLosPeriodosEncuesta = []; // Para almacenar todos los períodos de encuesta
 
 // Función para inicializar la gestión de alumnos
 function inicializarGestorAlumnos() {
@@ -65,6 +66,13 @@ function inicializarGestorAlumnos() {
     // Cargar datos
     cargarCarreras();
     cargarAlumnos();
+    
+    // Inicializar el filtro de encuestas
+    if (typeof inicializarFiltroEncuesta === 'function') {
+        inicializarFiltroEncuesta();
+    } else {
+        console.error('No se encontró la función inicializarFiltroEncuesta. Asegúrate de que el script filtro_encuesta.js esté cargado.');
+    }
     
     // Cargar contenido de encuestas
     cargarContenidoEncuestas();
@@ -119,6 +127,11 @@ function configurarEventos() {
     });
     
     document.getElementById('filtro-verificado')?.addEventListener('change', () => {
+        paginaActual = 1;
+        filtrarAlumnos();
+    });
+    
+    document.getElementById('filtro-periodo-encuesta')?.addEventListener('change', () => {
         paginaActual = 1;
         filtrarAlumnos();
     });
@@ -184,6 +197,52 @@ async function cargarCarreras() {
 }
 
 /**
+ * Carga los periodos de encuesta desde Firestore
+ */
+async function cargarPeriodosEncuesta() {
+    try {
+        const snapshot = await firebase.firestore()
+            .collection('encuestas')
+            .orderBy('fechaInicio', 'desc')
+            .get();
+        
+        if (snapshot.empty) {
+            console.log('No hay periodos de encuesta disponibles');
+            return;
+        }
+        
+        // Procesar encuestas
+        todosLosPeriodosEncuesta = snapshot.docs.map(doc => {
+            const data = doc.data();
+            // Formatear fechas para mostrar en la UI
+            const fechaInicio = data.fechaInicio.toDate().toLocaleDateString('es-MX');
+            const fechaFin = data.fechaFin.toDate().toLocaleDateString('es-MX');
+            
+            return {
+                id: doc.id,
+                titulo: data.titulo,
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                label: `${data.titulo} (${fechaInicio} - ${fechaFin})`
+            };
+        });
+        
+        // Llenar el select de filtro
+        const options = todosLosPeriodosEncuesta.map(periodo => {
+            return `<option value="${periodo.id}">${periodo.label}</option>`;
+        }).join('');
+        
+        const filtroPeriodo = document.getElementById('filtro-periodo-encuesta');
+        if (filtroPeriodo) {
+            filtroPeriodo.innerHTML = '<option value="">Todos los periodos</option>' + options;
+        }
+        
+    } catch (error) {
+        console.error('Error al cargar periodos de encuesta:', error);
+    }
+}
+
+/**
  * Carga todos los alumnos desde Firestore
  */
 async function cargarAlumnos() {
@@ -207,8 +266,19 @@ async function cargarAlumnos() {
         todosLosAlumnos = await Promise.all(snapshot.docs.map(async doc => {
             const alumno = Usuario.fromFirestore(doc.id, doc.data());
             
-            // Buscar el nombre de la carrera si tiene carreraId
-            if (alumno.carreraId) {
+            // Obtener directamente el nombre de la carrera del alumno
+            // En los datos del usuario ya existe la propiedad 'carrera'
+            const datosOriginales = doc.data();
+            console.log(`DEPURACIÓN CARRERA - Datos originales del alumno ${alumno.nombre}:`, datosOriginales);
+            
+            if (datosOriginales.carrera) {
+                // Usar directamente la carrera que viene en el documento
+                console.log(`DEPURACIÓN CARRERA - Alumno ${alumno.nombre} tiene carrera: ${datosOriginales.carrera}`);
+                alumno.nombreCarrera = datosOriginales.carrera;
+            } else if (alumno.carreraId) {
+                // Como respaldo, buscar por ID si existe pero no tiene el nombre
+                console.log(`DEPURACIÓN CARRERA - Alumno tiene carreraId pero no carrera: ${alumno.carreraId}`);
+                
                 try {
                     const carreraDoc = await firebase.firestore()
                         .collection('carreras')
@@ -216,7 +286,7 @@ async function cargarAlumnos() {
                         .get();
                     
                     if (carreraDoc.exists) {
-                        alumno.nombreCarrera = carreraDoc.data().nombre;
+                        alumno.nombreCarrera = carreraDoc.data().nombre || 'Sin nombre';
                     } else {
                         alumno.nombreCarrera = 'No asignada';
                     }
@@ -225,7 +295,37 @@ async function cargarAlumnos() {
                     alumno.nombreCarrera = 'Error al cargar';
                 }
             } else {
+                console.log(`DEPURACIÓN CARRERA - Alumno ${alumno.nombre} no tiene información de carrera`);
                 alumno.nombreCarrera = 'No asignada';
+            }
+            
+            // Obtener el historial de encuestas del alumno
+            try {
+                // Usar collectionGroup para buscar en todas las subcolecciónes de historial_encuestas
+                const historialSnapshot = await firebase.firestore()
+                    .collectionGroup('historial_encuestas')
+                    .where('userId', '==', doc.id)
+                    .get();
+                
+                console.log(`Historial encontrado para alumno ${alumno.nombre}:`, historialSnapshot.size);
+                
+                if (!historialSnapshot.empty) {
+                    alumno.historialEncuestas = historialSnapshot.docs.map(historialDoc => {
+                        const historialData = historialDoc.data();
+                        const encuestaId = historialData.encuestaId;
+                        console.log(`Encuesta contestada: ${encuestaId} por alumno ${alumno.nombre}`);
+                        return {
+                            encuestaId: encuestaId,
+                            fechaCompletado: historialData.fechaCompletado?.toDate(),
+                            modulosCompletados: historialData.modulosCompletados || []
+                        };
+                    });
+                } else {
+                    alumno.historialEncuestas = [];
+                }
+            } catch (error) {
+                console.error(`Error al obtener historial de encuestas para ${alumno.nombre}:`, error);
+                alumno.historialEncuestas = [];
             }
             
             return alumno;
@@ -253,12 +353,14 @@ function filtrarAlumnos() {
     const busqueda = document.getElementById('busqueda');
     const filtroCarrera = document.getElementById('filtro-carrera');
     const filtroVerificado = document.getElementById('filtro-verificado');
+    const filtroPeriodoEncuesta = document.getElementById('filtro-periodo-encuesta');
     
     if (!busqueda || !filtroCarrera || !filtroVerificado) return;
     
     const textoBusqueda = busqueda.value.toLowerCase().trim();
     const carreraId = filtroCarrera.value;
     const estadoVerificacion = filtroVerificado.value;
+    const periodoEncuestaId = filtroPeriodoEncuesta ? filtroPeriodoEncuesta.value : '';
     
     alumnosFiltrados = todosLosAlumnos.filter(alumno => {
         // Filtrar por texto de búsqueda
@@ -267,14 +369,54 @@ function filtrarAlumnos() {
             alumno.usuario.toLowerCase().includes(textoBusqueda) ||
             (alumno.nombreCarrera && alumno.nombreCarrera.toLowerCase().includes(textoBusqueda));
         
-        // Filtrar por carrera
-        const cumpleCarrera = carreraId === '' || alumno.carreraId === carreraId;
+        // Filtrar por carrera - Ahora puede filtrar tanto por ID como por nombre
+        let cumpleCarrera = carreraId === ''; // Si no hay filtro, todos cumplen
+        
+        if (carreraId !== '') {
+            // Buscar la carrera seleccionada para tener su nombre
+            const carreraSeleccionada = todasLasCarreras.find(c => c.id === carreraId);
+            
+            if (carreraSeleccionada) {
+                // Comparar por ID o por nombre de carrera
+                cumpleCarrera = 
+                    alumno.carreraId === carreraId || // Coincide por ID
+                    (alumno.nombreCarrera && 
+                    carreraSeleccionada.nombre && 
+                    alumno.nombreCarrera.toLowerCase() === carreraSeleccionada.nombre.toLowerCase()); // Coincide por nombre
+            } else {
+                // Si no encontramos la carrera seleccionada, solo filtrar por ID
+                cumpleCarrera = alumno.carreraId === carreraId;
+            }
+        }
         
         // Filtrar por estado de verificación
         const cumpleVerificacion = estadoVerificacion === '' || 
             alumno.emailVerificado.toString() === estadoVerificacion;
+            
+        // Filtrar por periodo de encuesta
+        let cumplePeriodoEncuesta = periodoEncuestaId === ''; // Si no hay filtro, todos cumplen
         
-        return cumpleBusqueda && cumpleCarrera && cumpleVerificacion;
+        if (periodoEncuestaId !== '') {
+            console.log(`Filtrando alumno ${alumno.nombre} para periodo ${periodoEncuestaId}`);
+            console.log('Historial de encuestas:', alumno.historialEncuestas);
+            
+            // Verificar explícitamente si el alumno tiene historial y si contiene la encuesta buscada
+            if (alumno.historialEncuestas && Array.isArray(alumno.historialEncuestas) && alumno.historialEncuestas.length > 0) {
+                // Buscar si alguna entrada en el historial coincide con el ID de encuesta seleccionado
+                const tieneEncuesta = alumno.historialEncuestas.some(historial => {
+                    console.log(`Comparando ${historial.encuestaId} con ${periodoEncuestaId}`);
+                    return historial.encuestaId === periodoEncuestaId;
+                });
+                
+                cumplePeriodoEncuesta = tieneEncuesta;
+                console.log(`Alumno ${alumno.nombre} ${tieneEncuesta ? 'CUMPLE' : 'NO CUMPLE'} con el filtro de periodo`);
+            } else {
+                cumplePeriodoEncuesta = false;
+                console.log(`Alumno ${alumno.nombre} NO tiene historial de encuestas`);
+            }
+        }
+        
+        return cumpleBusqueda && cumpleCarrera && cumpleVerificacion && cumplePeriodoEncuesta;
     });
     
     // Mostrar resultados paginados

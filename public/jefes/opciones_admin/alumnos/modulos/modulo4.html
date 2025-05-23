@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 4: Datos de Empleo - Vista Admin</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+    <link rel="stylesheet" href="/public/css/alumnos/alumnos.css">
+    <link rel="stylesheet" href="/public/css/alumnos/opciones_alumnos/modulos/modulo4.css">
+    <link rel="stylesheet" href="/public/css/admin/alumnos/modulos/modal.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: transparent;
+        }
+        
+        .contenedor-principal {
+            padding: 20px;
+        }
+        
+        .seccion {
+            margin-bottom: 30px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .info-completado {
+            background-color: #e2f0d9;
+            border-left: 5px solid #4caf50;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            color: #2e7d32;
+        }
+        
+        .fecha-completado {
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        h3 {
+            color: #2c3e50;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .campo-dato {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .campo-dato label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .campo-dato .valor {
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            color: #333;
+            border: 1px solid #ced4da;
+        }
+
+        .requisitos-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .requisitos-list li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+
+        .requisitos-list li:last-child {
+            border-bottom: none;
+        }
+
+        .skills-container {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skill-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .skill-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .skill-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .skill-progress {
+            height: 100%;
+            background-color: #4caf50;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .skill-percent {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor-principal">
+        <div class="info-completado">
+            <p><strong>Estado:</strong> <span id="estado-modulo">Completado</span></p>
+            <p class="fecha-completado">Completado el: <span id="fecha-completado">Cargando...</span></p>
+        </div>
+        
+        <!-- Tiempo para obtener empleo -->
+        <div class="seccion">
+            <h3>Tiempo y Medio para Obtener Empleo</h3>
+            
+            <div class="campo-dato">
+                <label>Tiempo transcurrido para obtener el primer empleo:</label>
+                <div class="valor" id="tiempo-primer-empleo">Cargando...</div>
+            </div>
+            
+            <div class="campo-dato">
+                <label>Medio para obtener el empleo:</label>
+                <div class="valor" id="medio-obtener-empleo">Cargando...</div>
+            </div>
+            
+            <div class="campo-dato" id="campo-medio-otro" style="display: none;">
+                <label>Otro medio especificado:</label>
+                <div class="valor" id="medio-otro">Cargando...</div>
+            </div>
+        </div>
+        
+        <!-- Requisitos de contratación -->
+        <div class="seccion">
+            <h3>Requisitos de Contratación</h3>
+            
+            <div class="campo-dato">
+                <label>Requisitos de contratación:</label>
+                <ul class="requisitos-list" id="requisitos-contratacion">
+                    <li>Cargando requisitos...</li>
+                </ul>
+            </div>
+            
+            <div class="campo-dato" id="campo-requisito-otro" style="display: none;">
+                <label>Otro requisito especificado:</label>
+                <div class="valor" id="requisito-otro">Cargando...</div>
+            </div>
+        </div>
+        
+        <!-- Idioma extranjero -->
+        <div class="seccion">
+            <h3>Conocimiento de Idioma Extranjero</h3>
+            
+            <div class="campo-dato">
+                <label>Idioma que utiliza:</label>
+                <div class="valor" id="idioma-utilizado">Cargando...</div>
+            </div>
+            
+            <div class="campo-dato" id="campo-idioma-otro" style="display: none;">
+                <label>Otro idioma especificado:</label>
+                <div class="valor" id="idioma-otro">Cargando...</div>
+            </div>
+            
+            <div class="campo-dato">
+                <label>Habilidades del idioma:</label>
+                <div class="skills-container">
+                    <div class="skill-item">
+                        <div class="skill-name">Hablar</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" id="habilidad-hablar-bar" style="width: 0%"></div>
+                            <div class="skill-percent" id="habilidad-hablar">0%</div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Escribir</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" id="habilidad-escribir-bar" style="width: 0%"></div>
+                            <div class="skill-percent" id="habilidad-escribir">0%</div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Leer</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" id="habilidad-leer-bar" style="width: 0%"></div>
+                            <div class="skill-percent" id="habilidad-leer">0%</div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-name">Escuchar</div>
+                        <div class="skill-bar">
+                            <div class="skill-progress" id="habilidad-escuchar-bar" style="width: 0%"></div>
+                            <div class="skill-percent" id="habilidad-escuchar">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Antigüedad -->
+        <div class="seccion">
+            <h3>Antigüedad en el Empleo</h3>
+            
+            <div class="campo-dato">
+                <label>Antigüedad en el empleo actual:</label>
+                <div class="valor" id="antiguedad-empleo">Cargando...</div>
+            </div>
+            
+            <div class="campo-dato">
+                <label>Año de ingreso:</label>
+                <div class="valor" id="anio-ingreso">Cargando...</div>
+            </div>
+        </div>
+        
+        <!-- Datos económicos y jerárquicos -->
+        <div class="seccion">
+            <h3>Información Económica y Jerárquica</h3>
+            
+            <div class="campo-dato">
+                <label>Ingreso mensual:</label>
+                <div class="valor" id="ingreso-mensual">Cargando...</div>
+            </div>
+            
+            <div class="campo-dato">
+                <label>Nivel jerárquico:</label>
+                <div class="valor" id="nivel-jerarquico">Cargando...</div>
+            </div>
+        </div>
+        
+        <!-- Condición de trabajo -->
+        <div class="seccion">
+            <h3>Condición de Trabajo</h3>
+            
+            <div class="campo-dato">
+                <label>Condición de trabajo:</label>
+                <div class="valor" id="condicion-trabajo">Cargando...</div>
+            </div>
+            
+            <div class="campo-dato" id="campo-condicion-otro" style="display: none;">
+                <label>Otra condición especificada:</label>
+                <div class="valor" id="condicion-otro">Cargando...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cargar Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    
+    <!-- Cargar modelo Usuario -->
+    <script src="/public/models/Usuario.js"></script>
+    
+    <!-- Cargar scripts específicos del módulo -->
+    <script src="/public/js/admin/alumnos/modulos/modulo4.js"></script>
+</body>
+</html>

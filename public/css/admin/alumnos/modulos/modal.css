@@ -1,0 +1,100 @@
+/**
+ * Estilos para el modal de visualización de módulos
+ */
+
+.modal-detalle-modulo {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-contenido-modulo {
+    background-color: #fff;
+    margin: 2% auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 1200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #2c3e50;
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.cerrar-modal-modulo {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.cerrar-modal-modulo:hover {
+    color: #f39c12;
+}
+
+.contenido-modulo {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.iframe-modulo {
+    width: 100%;
+    height: 80vh;
+    border: none;
+}
+
+/* Estilos para los botones de módulos */
+.modulo-tag.modulo-btn {
+    cursor: pointer;
+    background-color: #3498db;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.modulo-tag.modulo-btn:hover {
+    background-color: #2980b9;
+}
+
+/* Estilos para mensajes de carga y error */
+.cargando {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+
+.error {
+    color: #e74c3c;
+    text-align: center;
+    padding: 20px;
+    background-color: #fadbd8;
+    border-radius: 4px;
+}

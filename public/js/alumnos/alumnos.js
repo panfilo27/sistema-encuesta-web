@@ -106,13 +106,36 @@ function cerrarSesion(e) {
     
     // Mostrar confirmación
     if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-        // Limpiar datos de sesión en localStorage
+        console.log('Limpiando datos de sesión y encuestas...');
+        
+        // Limpiar todos los datos relacionados con encuestas
+        const keysToRemove = [];
+        
+        // Buscar todas las claves almacenadas en localStorage
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            
+            // Agregar todas las claves relacionadas con el sistema de encuestas
+            keysToRemove.push(key);
+        }
+        
+        // Eliminar todas las claves encontradas
+        keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+            console.log(`Eliminado: ${key}`);
+        });
+        
+        // Limpiar variables de sesión específicas (por si acaso)
         localStorage.removeItem('userSession');
+        localStorage.removeItem('encuestaActiva');
+        localStorage.removeItem('verEncuestaId');
+        localStorage.removeItem('verModuloId');
         
         // Cerrar sesión en Firebase Auth
         firebase.auth().signOut()
             .then(() => {
                 console.log('Sesión cerrada correctamente');
+                alert('Sesión cerrada y datos eliminados correctamente.');
                 window.location.href = '../auth/login.html';
             })
             .catch((error) => {

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 1: Datos Personales - Encuesta de Egresados</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+    <link rel="stylesheet" href="/public/css/alumnos/alumnos.css">
+    <link rel="stylesheet" href="/public/css/alumnos/navegacion.css">
+    <link rel="stylesheet" href="/public/css/alumnos/opciones_alumnos/modulos/modulo1.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Encabezado con logo y título -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="/public/assets/images/itver.png" alt="Logo ITVER" class="logo">
+                <img src="/public/assets/images/tecnm.png" alt="Logo TecNM" class="logo">
+                <img src="/public/assets/images/sep.png" alt="Logo SEP" class="logo">
+            </div>
+            <h1>Sistema de Seguimiento de Egresados</h1>
+            <div class="user-info">
+                <span id="nombre-usuario">Cargando...</span>
+                <button id="btn-cerrar-sesion" class="btn-cerrar-sesion">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- Menú de navegación -->
+        <nav class="nav">
+            <ul>
+                <li><a href="/public/alumnos/dashboard.html"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="#" class="active"><i class="fas fa-clipboard-list"></i> Encuesta</a></li>
+                <li><a href="#"><i class="fas fa-user"></i> Mi Perfil</a></li>
+            </ul>
+        </nav>
+
+        <!-- Contenido principal -->
+        <main class="main">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" style="width: 14.28%"></div>
+                </div>
+                <div class="progress-labels">
+                    <span class="active">Datos Personales</span>
+                    <span>Formación Académica</span>
+                    <span>Ubicación Laboral</span>
+                    <span>Datos de Empleo</span>
+                    <span>Desempeño Profesional</span>
+                    <span>Expectativas</span>
+                    <span>Comentarios</span>
+                </div>
+            </div>
+
+            <section class="module-section">
+                <h2>Módulo 1: Datos Personales</h2>
+                <div class="module-description">
+                    <p>En este módulo confirmaremos tus datos personales y académicos. Esta información nos ayuda a mantener actualizada nuestra base de datos de egresados y a contactarte para futuras oportunidades profesionales.</p>
+                </div>
+
+                <div id="loading-module" class="loading-container">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Cargando formulario...</p>
+                </div>
+
+                <form id="form-modulo1" class="survey-form" style="display: none;">
+                    <!-- Datos personales -->
+                    <div class="form-section">
+                        <h3>Información Personal</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nombre">Nombre(s):</label>
+                                <input type="text" id="nombre" name="nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="apellidoPaterno">Apellido Paterno:</label>
+                                <input type="text" id="apellidoPaterno" name="apellidoPaterno" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="apellidoMaterno">Apellido Materno:</label>
+                                <input type="text" id="apellidoMaterno" name="apellidoMaterno">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="noControl">Número de Control:</label>
+                                <input type="text" id="noControl" name="noControl" required maxlength="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+                                <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="curp">CURP:</label>
+                                <input type="text" id="curp" name="curp" required maxlength="18">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sexo">Sexo:</label>
+                                <select id="sexo" name="sexo" required>
+                                    <option value="">Seleccione una opción</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="estadoCivil">Estado Civil:</label>
+                                <select id="estadoCivil" name="estadoCivil" required>
+                                    <option value="">Seleccione una opción</option>
+                                    <option value="Soltero/a">Soltero/a</option>
+                                    <option value="Casado/a">Casado/a</option>
+                                    <option value="Divorciado/a">Divorciado/a</option>
+                                    <option value="Viudo/a">Viudo/a</option>
+                                    <option value="Unión Libre">Unión Libre</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Domicilio -->
+                    <div class="form-section">
+                        <h3>Domicilio</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group wide">
+                                <label for="domicilio">Calle y Número:</label>
+                                <input type="text" id="domicilio" name="domicilio" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ciudad">Ciudad:</label>
+                                <input type="text" id="ciudad" name="ciudad" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="municipio">Municipio:</label>
+                                <input type="text" id="municipio" name="municipio" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="estado">Estado:</label>
+                                <input type="text" id="estado" name="estado" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de contacto -->
+                    <div class="form-section">
+                        <h3>Información de Contacto</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="telefono">Teléfono Celular:</label>
+                                <input type="tel" id="telefono" name="telefono" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="telCasa">Teléfono de Casa:</label>
+                                <input type="tel" id="telCasa" name="telCasa">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Correo Electrónico:</label>
+                                <input type="email" id="email" name="email" required disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información académica -->
+                    <div class="form-section">
+                        <h3>Información Académica</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="carrera">Carrera:</label>
+                                <select id="carrera" name="carrera" required>
+                                    <option value="">Seleccione una opción</option>
+                                    <!-- Las opciones se cargarán dinámicamente -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="titulado">¿Está titulado?</label>
+                                <select id="titulado" name="titulado" required>
+                                    <option value="">Seleccione una opción</option>
+                                    <option value="Si">Sí</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="mesEgreso">Mes y Año de Egreso:</label>
+                                <input type="month" id="mesEgreso" name="mesEgreso" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group checkbox-group">
+                                <label>Situación Actual:</label>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="trabaja" name="trabaja">
+                                    <label for="trabaja">Actualmente trabajo</label>
+                                </div>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="estudia" name="estudia">
+                                    <label for="estudia">Actualmente estudio</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conocimientos y habilidades -->
+                    <div class="form-section">
+                        <h3>Conocimientos y Habilidades</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group checkbox-group wide">
+                                <label>Idiomas que domina:</label>
+                                <div class="multi-checkbox">
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="idiomaIngles" name="idiomaIngles">
+                                        <label for="idiomaIngles">Inglés</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="idiomaFrances" name="idiomaFrances">
+                                        <label for="idiomaFrances">Francés</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="idiomaAleman" name="idiomaAleman">
+                                        <label for="idiomaAleman">Alemán</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="idiomaJapones" name="idiomaJapones">
+                                        <label for="idiomaJapones">Japonés</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="idiomaItaliano" name="idiomaItaliano">
+                                        <label for="idiomaItaliano">Italiano</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="idiomaChino" name="idiomaChino">
+                                        <label for="idiomaChino">Chino</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="otroIdioma">Otro idioma:</label>
+                                    <input type="text" id="otroIdioma" name="otroIdioma">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group checkbox-group wide">
+                                <label>Paquetes computacionales que domina:</label>
+                                <div class="multi-checkbox">
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="paqueteWord" name="paqueteWord">
+                                        <label for="paqueteWord">Word</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="paqueteExcel" name="paqueteExcel">
+                                        <label for="paqueteExcel">Excel</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="paquetePowerPoint" name="paquetePowerPoint">
+                                        <label for="paquetePowerPoint">PowerPoint</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="paqueteAccess" name="paqueteAccess">
+                                        <label for="paqueteAccess">Access</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="paqueteCAD" name="paqueteCAD">
+                                        <label for="paqueteCAD">AutoCAD</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="paqueteSolidWorks" name="paqueteSolidWorks">
+                                        <label for="paqueteSolidWorks">SolidWorks</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="paquetePhotoshop" name="paquetePhotoshop">
+                                        <label for="paquetePhotoshop">Photoshop</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="paqueteIllustrator" name="paqueteIllustrator">
+                                        <label for="paqueteIllustrator">Illustrator</label>
+                                    </div>
+                                    <div class="checkbox-container">
+                                        <input type="checkbox" id="paqueteAdobePremiere" name="paqueteAdobePremiere">
+                                        <label for="paqueteAdobePremiere">Adobe Premiere</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="otrosPaquetes">Otros paquetes (separados por comas):</label>
+                                    <input type="text" id="otrosPaquetes" name="otrosPaquetes">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="error-container" class="error-container"></div>
+
+                    <div class="form-actions">
+                        <button type="button" id="btn-guardar-modulo1" class="btn-guardar">Guardar y Continuar</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <!-- Pie de página -->
+        <footer class="footer">
+            <p>© 2025 Instituto Tecnológico de Veracruz - Sistema de Encuestas</p>
+        </footer>
+    </div>
+
+    <!-- Overlay de carga -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Guardando información...</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Scripts de la aplicación -->
+    <script src="/public/js/firebase-init.js"></script>
+    <script src="/public/js/auth.js"></script>
+    <script src="/public/models/Usuario.js"></script>
+    <script src="/public/models/Carrera.js"></script>
+    <script src="/public/models/modulos/modulo1.js"></script>
+    <script src="/public/js/alumnos/opciones_alumnos/modulos/modulo1/index.js"></script>
+</body>
+</html>

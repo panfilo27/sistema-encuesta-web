@@ -33,6 +33,20 @@
                     <option value="false">No verificados</option>
                 </select>
             </div>
+            <div class="filtro">
+                <label for="filtro-periodo-encuesta">Filtrar por periodo encuesta:</label>
+                <select id="filtro-periodo-encuesta">
+                    <option value="">Todos los periodos</option>
+                    <!-- Se llenarán dinámicamente -->
+                </select>
+            </div>
+        </div>
+        
+        <!-- Botón de exportación -->
+        <div class="acciones-alumnos">
+            <button id="btn-exportar-excel" class="btn-accion">
+                <i class="fas fa-file-excel"></i> Exportar a Excel
+            </button>
         </div>
         
         <div class="tabla-container">

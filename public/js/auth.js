@@ -38,7 +38,7 @@ function verificarAutenticacion(callback) {
       // Usuario está autenticado
       console.log("Usuario autenticado:", user.email);
       // Obtener información adicional del usuario desde Firestore
-      db.collection('usuarios').doc(user.uid)
+      db.collection('usuario').doc(user.uid)
         .get()
         .then((doc) => {
           if (doc.exists) {
@@ -70,7 +70,7 @@ function registrarUsuario(email, password, nombre, rol) {
       const user = userCredential.user;
       
       // Guardar información adicional en Firestore
-      return db.collection('usuarios').doc(user.uid).set({
+      return db.collection('usuario').doc(user.uid).set({
         nombre: nombre,
         email: email,
         rol: rol,

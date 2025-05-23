@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 3: Ubicación Laboral - Encuesta de Egresados</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+    <link rel="stylesheet" href="/public/css/alumnos/alumnos.css">
+    <link rel="stylesheet" href="/public/css/alumnos/navegacion.css">
+    <link rel="stylesheet" href="/public/css/alumnos/opciones_alumnos/modulos/modulo3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Encabezado con logo y título -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="/public/assets/images/itver.png" alt="Logo ITVER" class="logo">
+                <img src="/public/assets/images/tecnm.png" alt="Logo TecNM" class="logo">
+                <img src="/public/assets/images/sep.png" alt="Logo SEP" class="logo">
+            </div>
+            <h1>Sistema de Seguimiento de Egresados</h1>
+            <div class="user-info">
+                <span id="nombre-usuario">Cargando...</span>
+                <button id="btn-cerrar-sesion" class="btn-cerrar-sesion">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- Menú de navegación -->
+        <nav class="nav">
+            <ul>
+                <li><a href="/public/alumnos/dashboard.html"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="#" class="active"><i class="fas fa-clipboard-list"></i> Encuesta</a></li>
+                <li><a href="#"><i class="fas fa-user"></i> Mi Perfil</a></li>
+            </ul>
+        </nav>
+
+        <!-- Contenido principal -->
+        <main class="main">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" style="width: 42.85%"></div>
+                </div>
+                <div class="progress-labels">
+                    <span class="completed">Datos Personales</span>
+                    <span class="completed">Formación Académica</span>
+                    <span class="active">Ubicación Laboral</span>
+                    <span>Datos de Empleo</span>
+                    <span>Desempeño Profesional</span>
+                    <span>Expectativas</span>
+                    <span>Comentarios</span>
+                </div>
+            </div>
+
+            <section class="module-container">
+                <h2>Módulo 3: Ubicación Laboral</h2>
+                
+                <!-- Mensaje de cargando -->
+                <div id="loading-module" class="loading-module">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Cargando formulario...</p>
+                </div>
+                
+                <!-- Formulario -->
+                <form id="form-modulo3" class="form-module" style="display: none;">
+                    
+                    <!-- Actividad actual -->
+                    <div class="form-section">
+                        <h3>Actividad Actual</h3>
+                        
+                        <div class="form-group wide">
+                            <label for="actividad_actual">¿Cuál es tu actividad actual?</label>
+                            <select id="actividad_actual" name="actividad_actual" required>
+                                <option value="">Seleccione una opción</option>
+                                <option value="estudia">Estudio</option>
+                                <option value="trabaja">Trabajo</option>
+                                <option value="trabaja_estudia">Estudio y trabajo</option>
+                                <option value="ninguna">No estudio ni trabajo</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Sección de estudios (condicional) -->
+                    <div id="seccion-estudios" class="form-section condicional">
+                        <h3>Información de Estudios</h3>
+                        
+                        <div class="form-group wide">
+                            <label for="tipo_estudio">Tipo de estudio que realizas actualmente:</label>
+                            <select id="tipo_estudio" name="tipo_estudio">
+                                <option value="">Seleccione una opción</option>
+                                <option value="especialidad">Especialidad</option>
+                                <option value="maestria">Maestría</option>
+                                <option value="doctorado">Doctorado</option>
+                                <option value="idiomas">Idiomas</option>
+                                <option value="otra">Otra (especificar)</option>
+                            </select>
+                        </div>
+                        
+                        <div id="otro-estudio-container" class="form-group wide oculto">
+                            <label for="otro_estudio">Especificar otro tipo de estudio:</label>
+                            <input type="text" id="otro_estudio" name="otro_estudio">
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="institucion_educativa">Institución donde estudias:</label>
+                            <input type="text" id="institucion_educativa" name="institucion_educativa">
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="especialidad_posgrado">Especialidad o área de estudio:</label>
+                            <input type="text" id="especialidad_posgrado" name="especialidad_posgrado">
+                        </div>
+                    </div>
+                    
+                    <!-- Sección de trabajo (condicional) -->
+                    <div id="seccion-trabajo" class="form-section condicional">
+                        <h3>Información Laboral</h3>
+                        
+                        <div class="form-group wide">
+                            <label for="nombre_empresa">Nombre de la empresa/institución donde trabajas:</label>
+                            <input type="text" id="nombre_empresa" name="nombre_empresa">
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="puesto">Puesto que ocupas:</label>
+                            <input type="text" id="puesto" name="puesto">
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="sector_empresa">Sector al que pertenece la empresa:</label>
+                            <select id="sector_empresa" name="sector_empresa">
+                                <option value="">Seleccione una opción</option>
+                                <option value="publico">Público</option>
+                                <option value="privado">Privado</option>
+                                <option value="social">Social</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="tipo_contratacion">Tipo de contratación:</label>
+                            <select id="tipo_contratacion" name="tipo_contratacion">
+                                <option value="">Seleccione una opción</option>
+                                <option value="base">Base/Planta</option>
+                                <option value="eventual">Eventual</option>
+                                <option value="contrato">Contrato</option>
+                                <option value="honorarios">Honorarios</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="antiguedad">Antigüedad en el trabajo:</label>
+                            <select id="antiguedad" name="antiguedad">
+                                <option value="">Seleccione una opción</option>
+                                <option value="menos_6_meses">Menos de 6 meses</option>
+                                <option value="6_meses_1_anio">Entre 6 meses y 1 año</option>
+                                <option value="1_3_anios">Entre 1 y 3 años</option>
+                                <option value="mas_3_anios">Más de 3 años</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="nivel_jerarquico">Nivel jerárquico en tu trabajo:</label>
+                            <select id="nivel_jerarquico" name="nivel_jerarquico">
+                                <option value="">Seleccione una opción</option>
+                                <option value="directivo">Directivo</option>
+                                <option value="mando_medio">Mando Medio</option>
+                                <option value="supervisor">Supervisor</option>
+                                <option value="tecnico">Técnico</option>
+                                <option value="operativo">Operativo</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="relacion_estudios">¿Tu trabajo está relacionado con tus estudios?</label>
+                            <select id="relacion_estudios" name="relacion_estudios">
+                                <option value="">Seleccione una opción</option>
+                                <option value="totalmente">Totalmente relacionado</option>
+                                <option value="parcialmente">Parcialmente relacionado</option>
+                                <option value="poco">Poco relacionado</option>
+                                <option value="nada">Nada relacionado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="satisfaccion_trabajo">Nivel de satisfacción con tu trabajo actual:</label>
+                            <select id="satisfaccion_trabajo" name="satisfaccion_trabajo">
+                                <option value="">Seleccione una opción</option>
+                                <option value="muy_satisfecho">Muy satisfecho</option>
+                                <option value="satisfecho">Satisfecho</option>
+                                <option value="regular">Regular</option>
+                                <option value="insatisfecho">Insatisfecho</option>
+                                <option value="muy_insatisfecho">Muy insatisfecho</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="rango_salario">Rango de salario mensual:</label>
+                            <select id="rango_salario" name="rango_salario">
+                                <option value="">Seleccione una opción</option>
+                                <option value="menos_5000">Menos de $5,000</option>
+                                <option value="5000_10000">$5,000 - $10,000</option>
+                                <option value="10000_15000">$10,000 - $15,000</option>
+                                <option value="15000_20000">$15,000 - $20,000</option>
+                                <option value="20000_30000">$20,000 - $30,000</option>
+                                <option value="mas_30000">Más de $30,000</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Sección de búsqueda de empleo (condicional) -->
+                    <div id="seccion-busqueda" class="form-section condicional">
+                        <h3>Búsqueda de Empleo</h3>
+                        
+                        <div class="form-group wide">
+                            <label for="tiempo_sin_empleo">¿Cuánto tiempo llevas sin empleo?</label>
+                            <select id="tiempo_sin_empleo" name="tiempo_sin_empleo">
+                                <option value="">Seleccione una opción</option>
+                                <option value="menos_6_meses">Menos de 6 meses</option>
+                                <option value="6_meses_1_anio">Entre 6 meses y 1 año</option>
+                                <option value="1_2_anios">Entre 1 y 2 años</option>
+                                <option value="mas_2_anios">Más de 2 años</option>
+                                <option value="nunca_trabajado">Nunca he trabajado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="motivo_desempleo">Principal motivo por el que no estás trabajando:</label>
+                            <select id="motivo_desempleo" name="motivo_desempleo">
+                                <option value="">Seleccione una opción</option>
+                                <option value="continuar_estudios">Decidí continuar estudiando</option>
+                                <option value="no_encontrado">No he encontrado trabajo</option>
+                                <option value="salario_insuficiente">Salarios insuficientes</option>
+                                <option value="razones_personales">Razones personales</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label for="dificultades_empleo">Principales dificultades para encontrar empleo:</label>
+                            <select id="dificultades_empleo" name="dificultades_empleo">
+                                <option value="">Seleccione una opción</option>
+                                <option value="falta_experiencia">Falta de experiencia</option>
+                                <option value="falta_vacantes">Falta de vacantes en mi área</option>
+                                <option value="bajos_salarios">Bajos salarios ofrecidos</option>
+                                <option value="falta_conocimientos">Falta de conocimientos específicos</option>
+                                <option value="falta_ingles">Falta de dominio del inglés</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Comentarios adicionales -->
+                    <div class="form-section">
+                        <h3>Comentarios Adicionales</h3>
+                        <div class="form-group wide">
+                            <label for="comentario_laboral">Si tienes algún comentario adicional sobre tu situación laboral, por favor compártelo:</label>
+                            <textarea id="comentario_laboral" name="comentario_laboral" rows="4"></textarea>
+                        </div>
+                    </div>
+
+                    <div id="error-container" class="error-container"></div>
+
+                    <div class="form-actions">
+                        <button type="button" id="btn-guardar-modulo3" class="btn-guardar">Guardar y Continuar</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <!-- Pie de página -->
+        <footer class="footer">
+            <p>© 2025 Instituto Tecnológico de Veracruz - Sistema de Encuestas</p>
+        </footer>
+    </div>
+
+    <!-- Overlay de carga -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Guardando información...</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Scripts de la aplicación -->
+    <script src="/public/js/firebase-init.js"></script>
+    <script src="/public/js/auth.js"></script>
+    <script src="/public/models/Usuario.js"></script>
+    <script src="/public/models/modulos/modulo3.js"></script>
+    <script src="/public/js/alumnos/opciones_alumnos/modulos/modulo3/index.js"></script>
+</body>
+</html>

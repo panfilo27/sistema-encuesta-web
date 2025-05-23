@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Jefe de Departamento - Sistema de Seguimiento de Egresados</title>
+    <link rel="stylesheet" href="../css/admin/admin.css">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="menu">
+        <div class="over_menu">
+            <img id="logo-itver" src="../assets/images/itver.png" alt="ITVER" title="Página principal ITVER">
+            <button id="toggle-menu">
+                <img id="icono-flecha" src="../assets/images/flecha-izquierda.png" alt="Contraer">
+            </button>
+        </div>
+        <div class="cuerpo">
+            <ul>
+                <li>
+                    <button id="btn-alumnos" class="menu-item">
+                        <span class="menu-icon"><i class="fas fa-user-graduate"></i></span>
+                        <span class="menu-text">Gestión de Alumnos</span>
+                    </button>
+                </li>
+
+                <li>
+                    <button id="btn-avisos" class="menu-item">
+                        <span class="menu-icon"><i class="fas fa-bell"></i></span>
+                        <span class="menu-text">Avisos</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="bottom_menu">
+            <button id="btn-cerrar-sesion">Cerrar Sesión</button>
+            <img src="../assets/images/sep.png" alt="SEP">
+        </div>
+    </div>
+    <div class="zona-sensible"></div>
+
+    <div class="main_panel">
+        <div class="first-panel">
+            <label>Bienvenido(a) </label><br>
+            <label>Jefe de Departamento</label><br>
+            <img src="../assets/images/itver.png" alt="ITVER">
+            <div class="anuncios">
+                <label>ANUNCIOS</label>
+                <p>Bienvenido al sistema de seguimiento de egresados - Panel de Jefe de Departamento</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
+    
+    <!-- Scripts propios -->
+    <script src="../js/firebase-init.js"></script>
+    <script src="../js/jefes/pagina_jefes.js" defer></script>
+</body>
+</html>

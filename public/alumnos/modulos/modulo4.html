@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 4: Datos de Empleo - Encuesta de Egresados</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+    <link rel="stylesheet" href="/public/css/alumnos/alumnos.css">
+    <link rel="stylesheet" href="/public/css/alumnos/navegacion.css">
+    <link rel="stylesheet" href="/public/css/alumnos/opciones_alumnos/modulos/modulo4.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Encabezado con logo y título -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="/public/assets/images/itver.png" alt="Logo ITVER" class="logo">
+                <img src="/public/assets/images/tecnm.png" alt="Logo TecNM" class="logo">
+                <img src="/public/assets/images/sep.png" alt="Logo SEP" class="logo">
+            </div>
+            <h1>Sistema de Seguimiento de Egresados</h1>
+            <div class="user-info">
+                <span id="nombre-usuario">Cargando...</span>
+                <button id="btn-cerrar-sesion" class="btn-cerrar-sesion">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- Menú de navegación -->
+        <nav class="nav">
+            <ul>
+                <li><a href="/public/alumnos/dashboard.html"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="#" class="active"><i class="fas fa-clipboard-list"></i> Encuesta</a></li>
+                <li><a href="#"><i class="fas fa-user"></i> Mi Perfil</a></li>
+            </ul>
+        </nav>
+
+        <!-- Contenido principal -->
+        <main class="main">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" style="width: 57.14%"></div>
+                </div>
+                <div class="progress-labels">
+                    <span class="completed">Datos Personales</span>
+                    <span class="completed">Formación Académica</span>
+                    <span class="completed">Ubicación Laboral</span>
+                    <span class="active">Datos de Empleo</span>
+                    <span>Desempeño Profesional</span>
+                    <span>Expectativas</span>
+                    <span>Comentarios</span>
+                </div>
+            </div>
+
+            <section class="module-container">
+                <h2>Módulo 4: Datos de Empleo</h2>
+                
+                <!-- Mensaje de cargando -->
+                <div id="loading-module" class="loading-module">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Cargando formulario...</p>
+                </div>
+                
+                <!-- Formulario -->
+                <form id="form-modulo4" class="form-module" style="display: none;">
+                    
+                    <!-- Tiempo para obtener empleo -->
+                    <div class="form-section">
+                        <h3>Tiempo y Medio para Obtener Empleo</h3>
+                        
+                        <div class="form-group wide">
+                            <label>III.2 Tiempo transcurrido para obtener el primer empleo:</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="tiempo_antes_egresar" name="tiempo_primer_empleo" value="antes_egresar" required>
+                                    <label for="tiempo_antes_egresar">Antes de egresar</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="tiempo_menos_6meses" name="tiempo_primer_empleo" value="menos_6meses">
+                                    <label for="tiempo_menos_6meses">Menos de seis meses</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="tiempo_6meses_1anio" name="tiempo_primer_empleo" value="6meses_1anio">
+                                    <label for="tiempo_6meses_1anio">Entre seis meses y un año</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="tiempo_mas_1anio" name="tiempo_primer_empleo" value="mas_1anio">
+                                    <label for="tiempo_mas_1anio">Más de un año</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label>III.3 Medio para obtener el empleo:</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="medio_bolsa" name="medio_obtener_empleo" value="bolsa_trabajo" required>
+                                    <label for="medio_bolsa">Bolsa de trabajo del plantel</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="medio_contactos" name="medio_obtener_empleo" value="contactos_personales">
+                                    <label for="medio_contactos">Contactos personales</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="medio_residencia" name="medio_obtener_empleo" value="residencia_profesional">
+                                    <label for="medio_residencia">Residencia Profesional</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="medio_medios" name="medio_obtener_empleo" value="medios_comunicacion">
+                                    <label for="medio_medios">Medios masivos de comunicación</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="medio_otro" name="medio_obtener_empleo" value="otro">
+                                    <label for="medio_otro">Otros:</label>
+                                    <input type="text" id="medio_otro_texto" name="medio_otro" class="inline-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Requisitos de contratación -->
+                    <div class="form-section">
+                        <h3>Requisitos de Contratación</h3>
+                        
+                        <div class="form-group wide">
+                            <label>III.4 Requisitos de contratación:</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="requisito_competencias" name="requisito_competencias">
+                                    <label for="requisito_competencias">Competencias laborales</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="requisito_titulo" name="requisito_titulo">
+                                    <label for="requisito_titulo">Título Profesional</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="requisito_examen" name="requisito_examen">
+                                    <label for="requisito_examen">Examen de selección</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="requisito_idioma" name="requisito_idioma">
+                                    <label for="requisito_idioma">Idioma Extranjero</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="requisito_actitudes" name="requisito_actitudes">
+                                    <label for="requisito_actitudes">Actitudes y habilidades socio-comunicativas</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="requisito_ninguno" name="requisito_ninguno">
+                                    <label for="requisito_ninguno">Ninguno</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="requisito_otro" name="requisito_otro_check">
+                                    <label for="requisito_otro">Otros:</label>
+                                    <input type="text" id="requisito_otro_texto" name="requisito_otro" class="inline-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Idioma en el trabajo -->
+                    <div class="form-section">
+                        <h3>Idioma en el Trabajo</h3>
+                        
+                        <div class="form-group wide">
+                            <label>III.5 Idioma que utiliza en su trabajo:</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="idioma_ingles" name="idioma" value="ingles" required>
+                                    <label for="idioma_ingles">Inglés</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="idioma_frances" name="idioma" value="frances">
+                                    <label for="idioma_frances">Francés</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="idioma_aleman" name="idioma" value="aleman">
+                                    <label for="idioma_aleman">Alemán</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="idioma_japones" name="idioma" value="japones">
+                                    <label for="idioma_japones">Japonés</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="idioma_otro" name="idioma" value="otro">
+                                    <label for="idioma_otro">Otros:</label>
+                                    <input type="text" id="idioma_otro_texto" name="idioma_otro" class="inline-input">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label>III.6 Proporción en que utiliza las habilidades del idioma extranjero en su trabajo:</label>
+                            <div class="percentage-group">
+                                <div class="percentage-item">
+                                    <label for="habilidad_hablar">Hablar:</label>
+                                    <input type="number" id="habilidad_hablar" name="habilidad_hablar" min="0" max="100" step="1" value="0"> %
+                                </div>
+                                <div class="percentage-item">
+                                    <label for="habilidad_escribir">Escribir:</label>
+                                    <input type="number" id="habilidad_escribir" name="habilidad_escribir" min="0" max="100" step="1" value="0"> %
+                                </div>
+                                <div class="percentage-item">
+                                    <label for="habilidad_leer">Leer:</label>
+                                    <input type="number" id="habilidad_leer" name="habilidad_leer" min="0" max="100" step="1" value="0"> %
+                                </div>
+                                <div class="percentage-item">
+                                    <label for="habilidad_escuchar">Escuchar:</label>
+                                    <input type="number" id="habilidad_escuchar" name="habilidad_escuchar" min="0" max="100" step="1" value="0"> %
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Antigüedad, ingreso y nivel jerárquico -->
+                    <div class="form-section">
+                        <h3>Antigüedad, Ingreso y Nivel Jerárquico</h3>
+                        
+                        <div class="form-group wide">
+                            <label>III.7 Antigüedad en el empleo:</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="antiguedad_menos_1anio" name="antiguedad" value="menos_1anio" required>
+                                    <label for="antiguedad_menos_1anio">Menos de un año</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="antiguedad_1anio" name="antiguedad" value="1anio">
+                                    <label for="antiguedad_1anio">Un año</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="antiguedad_2anios" name="antiguedad" value="2anios">
+                                    <label for="antiguedad_2anios">Dos años</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="antiguedad_3anios" name="antiguedad" value="3anios">
+                                    <label for="antiguedad_3anios">Tres años</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="antiguedad_mas_3anios" name="antiguedad" value="mas_3anios">
+                                    <label for="antiguedad_mas_3anios">Más de tres años</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="anio_ingreso">Año de ingreso:</label>
+                                <input type="number" id="anio_ingreso" name="anio_ingreso" min="1990" max="2025" value="2025">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label>III.8 Ingreso (salario mínimo mensual):</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="ingreso_menos_5" name="ingreso" value="menos_5" required>
+                                    <label for="ingreso_menos_5">Menos de cinco</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="ingreso_5_7" name="ingreso" value="5_7">
+                                    <label for="ingreso_5_7">Entre cinco y siete</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="ingreso_8_10" name="ingreso" value="8_10">
+                                    <label for="ingreso_8_10">Entre 8 y 10</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="ingreso_mas_10" name="ingreso" value="mas_10">
+                                    <label for="ingreso_mas_10">Más de 10</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group wide">
+                            <label>III.9 Nivel jerárquico en el trabajo:</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="jerarquico_tecnico" name="nivel_jerarquico" value="tecnico" required>
+                                    <label for="jerarquico_tecnico">Técnico</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="jerarquico_supervisor" name="nivel_jerarquico" value="supervisor">
+                                    <label for="jerarquico_supervisor">Supervisor</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="jerarquico_jefe" name="nivel_jerarquico" value="jefe">
+                                    <label for="jerarquico_jefe">Jefe de área</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="jerarquico_funcionario" name="nivel_jerarquico" value="funcionario">
+                                    <label for="jerarquico_funcionario">Funcionario</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="jerarquico_directivo" name="nivel_jerarquico" value="directivo">
+                                    <label for="jerarquico_directivo">Directivo</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="jerarquico_empresario" name="nivel_jerarquico" value="empresario">
+                                    <label for="jerarquico_empresario">Empresario</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Condición de trabajo -->
+                    <div class="form-section">
+                        <h3>Condición de Trabajo</h3>
+                        
+                        <div class="form-group wide">
+                            <label>III.10 Condición de trabajo:</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="condicion_base" name="condicion_trabajo" value="base" required>
+                                    <label for="condicion_base">Base</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="condicion_eventual" name="condicion_trabajo" value="eventual">
+                                    <label for="condicion_eventual">Eventual</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="condicion_contrato" name="condicion_trabajo" value="contrato">
+                                    <label for="condicion_contrato">Contrato</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="condicion_otro" name="condicion_trabajo" value="otro">
+                                    <label for="condicion_otro">Otros:</label>
+                                    <input type="text" id="condicion_otro_texto" name="condicion_otro" class="inline-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="error-container" class="error-container"></div>
+
+                    <div class="form-actions">
+                        <button type="button" id="btn-guardar-modulo4" class="btn-guardar">Guardar y Continuar</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <!-- Pie de página -->
+        <footer class="footer">
+            <p>© 2025 Instituto Tecnológico de Veracruz - Sistema de Encuestas</p>
+        </footer>
+    </div>
+
+    <!-- Overlay de carga -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Guardando información...</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Scripts de la aplicación -->
+    <script src="/public/js/firebase-init.js"></script>
+    <script src="/public/js/auth.js"></script>
+    <script src="/public/models/Usuario.js"></script>
+    <script src="/public/models/modulos/modulo4.js"></script>
+    <script src="/public/js/alumnos/opciones_alumnos/modulos/modulo4/index.js"></script>
+</body>
+</html>

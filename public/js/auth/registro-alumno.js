@@ -26,16 +26,29 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadCarreras() {
     try {
         const carreraSelect = document.getElementById('reg-carrera');
-        // Limpiar opciones actuales (excepto la primera)
-        while (carreraSelect.options.length > 1) {
-            carreraSelect.remove(1);
+        // Preserve or create a placeholder option
+        let placeholderHTML = '';
+        if (carreraSelect.options.length > 0 && 
+            (carreraSelect.options[0].value === "" || carreraSelect.options[0].disabled)) {
+            // If the first option looks like a placeholder (e.g., empty value or disabled), preserve it
+            placeholderHTML = carreraSelect.options[0].outerHTML;
+        } else {
+            // Fallback to a generic placeholder if the original isn't suitable or doesn't exist
+            placeholderHTML = '<option value="" selected disabled>Seleccione una carrera</option>';
         }
+
+        // Clear all existing options by resetting innerHTML to just the placeholder
+        carreraSelect.innerHTML = placeholderHTML;
         
         // Obtener las carreras de Firestore
         const querySnapshot = await firebase.firestore().collection('carreras').get();
         
         if (querySnapshot.empty) {
             console.log('No hay carreras disponibles');
+            // Optionally, update placeholder text if it's the generic one
+            if (carreraSelect.options.length > 0 && carreraSelect.options[0].value === "") {
+                carreraSelect.options[0].textContent = "No hay carreras disponibles";
+            }
             return;
         }
         
@@ -43,15 +56,22 @@ async function loadCarreras() {
         querySnapshot.forEach(doc => {
             const carrera = doc.data();
             const option = document.createElement('option');
-            option.value = doc.id;
-            option.textContent = carrera.nombre;
+            option.value = doc.id; // Firestore document ID
+            option.textContent = carrera.nombre; // Name of the career
             carreraSelect.appendChild(option);
         });
         
         console.log('Carreras cargadas correctamente');
     } catch (error) {
         console.error('Error al cargar las carreras:', error);
-        alert('Error al cargar las carreras. Por favor, intenta nuevamente.');
+                // Consider a user-friendly message in the UI, not just alert
+        // Update placeholder text to indicate error
+        if (carreraSelect.options.length > 0 && carreraSelect.options[0].value === "") {
+            carreraSelect.options[0].textContent = "Error al cargar carreras";
+        } else {
+            // Fallback alert if placeholder manipulation isn't straightforward
+            alert('Error al cargar las carreras. Por favor, intenta nuevamente.');
+        }
     }
 }
 
@@ -105,24 +125,29 @@ async function handleRegistrationAlumno() {
     
     // Validar reCAPTCHA (validación del lado del cliente)
     let recaptchaResponse;
-    try {
-        // Intentar obtener la respuesta del captcha del formulario de registro
-        const captchaContainer = form.querySelector('.g-recaptcha');
-        if (captchaContainer) {
-            recaptchaResponse = grecaptcha.getResponse(captchaContainer.getAttribute('data-widget-id') || 0);
-        } else {
-            // Fallback al método simple
-            recaptchaResponse = grecaptcha.getResponse();
+    // Asegurarse de que captchaWidgets y el widget específico están definidos y son accesibles.
+    // captchaWidgets se define en login.js y debe estar disponible globalmente o importado.
+    if (typeof captchaWidgets !== 'undefined' && captchaWidgets.registroAlumno !== null) {
+        recaptchaResponse = grecaptcha.getResponse(captchaWidgets.registroAlumno);
+    } else {
+        console.error('Error: El widget de reCAPTCHA para registro de alumnos no está definido o inicializado (captchaWidgets.registroAlumno).');
+        alert('Error al verificar el captcha. Por favor, recargue la página e inténtelo de nuevo.');
+        // Deshabilitar botón si ya fue manipulado
+        if (btnRegistrar) {
+            btnRegistrar.disabled = false;
+            btnRegistrar.textContent = 'Registrarse';
         }
-        
-        if (!recaptchaResponse) {
-            alert('Por favor, complete el captcha');
-            return;
+        return;
+    }
+
+    if (!recaptchaResponse) {
+        alert('Por favor, complete el captcha');
+        // Deshabilitar botón si ya fue manipulado
+        if (btnRegistrar) {
+            btnRegistrar.disabled = false;
+            btnRegistrar.textContent = 'Registrarse';
         }
-    } catch (error) {
-        console.error('Error al validar reCAPTCHA:', error);
-        // En desarrollo, permitimos continuar incluso si hay error con reCAPTCHA
-        console.warn('Continuando sin validación de reCAPTCHA (solo en desarrollo)');
+        return;
     }
     
     // Nota: En un entorno de producción, deberías enviar el token al servidor para validación
@@ -162,7 +187,23 @@ async function handleRegistrationAlumno() {
             const carreraDoc = await firebase.firestore().collection('carreras').doc(carreraId).get();
             if (carreraDoc.exists) {
                 carreraNombre = carreraDoc.data().nombre;
+                console.log('Nombre de carrera obtenido:', carreraNombre);
+            } else {
+                console.error('No se encontró la carrera con ID:', carreraId);
+                alert('Error: No se pudo obtener la información de la carrera seleccionada');
+                btnRegistrar.disabled = false;
+                btnRegistrar.textContent = 'Registrarse';
+                return;
             }
+        }
+        
+        // Validar que tenemos el nombre de la carrera
+        if (!carreraNombre) {
+            console.error('No se pudo obtener el nombre de la carrera');
+            alert('Error: No se pudo obtener el nombre de la carrera seleccionada');
+            btnRegistrar.disabled = false;
+            btnRegistrar.textContent = 'Registrarse';
+            return;
         }
         
         // Crear usuario en Firebase Authentication
@@ -177,15 +218,15 @@ async function handleRegistrationAlumno() {
             // Crear nuevo usuario en la colección 'usuario'
             const userData = {
                 usuario: numeroControl,
-                contraseña: password, // Idealmente debería estar encriptada
                 nombre: nombre,
                 apellidoPaterno: apellidoPaterno,
                 apellidoMaterno: apellidoMaterno,
                 email: email,
-                emailVerificado: false,
-                carrera: carreraNombre,
                 rolUser: 'alumno',
-                uid: user.uid, // Guardar el UID de autenticación
+                carreraId: carreraId,
+                carreraNombre: carreraNombre, // Guardar el nombre de la carrera obtenido de Firestore
+                emailVerificado: false,
+                uid: user.uid,
                 fechaCreacion: new Date(),
                 fechaActualizacion: new Date()
             };

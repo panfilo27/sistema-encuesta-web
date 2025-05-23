@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 2: Evaluación Académica - Encuesta de Egresados</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+    <link rel="stylesheet" href="/public/css/alumnos/alumnos.css">
+    <link rel="stylesheet" href="/public/css/alumnos/navegacion.css">
+    <link rel="stylesheet" href="/public/css/alumnos/opciones_alumnos/modulos/modulo2.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Encabezado con logo y título -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="/public/assets/images/itver.png" alt="Logo ITVER" class="logo">
+                <img src="/public/assets/images/tecnm.png" alt="Logo TecNM" class="logo">
+                <img src="/public/assets/images/sep.png" alt="Logo SEP" class="logo">
+            </div>
+            <h1>Sistema de Seguimiento de Egresados</h1>
+            <div class="user-info">
+                <span id="nombre-usuario">Cargando...</span>
+                <button id="btn-cerrar-sesion" class="btn-cerrar-sesion">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- Menú de navegación -->
+        <nav class="nav">
+            <ul>
+                <li><a href="/public/alumnos/dashboard.html"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="#" class="active"><i class="fas fa-clipboard-list"></i> Encuesta</a></li>
+                <li><a href="#"><i class="fas fa-user"></i> Mi Perfil</a></li>
+            </ul>
+        </nav>
+
+        <!-- Contenido principal -->
+        <main class="main">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" style="width: 28.57%"></div>
+                </div>
+                <div class="progress-labels">
+                    <span class="completed">Datos Personales</span>
+                    <span class="active">Formación Académica</span>
+                    <span>Ubicación Laboral</span>
+                    <span>Datos de Empleo</span>
+                    <span>Desempeño Profesional</span>
+                    <span>Expectativas</span>
+                    <span>Comentarios</span>
+                </div>
+            </div>
+
+            <section class="module-section">
+                <h2>Módulo 2: Evaluación de la Formación Académica</h2>
+                <div class="module-description">
+                    <p>En este módulo nos interesa conocer tu opinión sobre la calidad de la formación académica recibida en la institución. Tus respuestas nos ayudarán a mejorar nuestros programas educativos para futuras generaciones.</p>
+                </div>
+
+                <div id="loading-module" class="loading-container">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Cargando formulario...</p>
+                </div>
+
+                <form id="form-modulo2" class="survey-form" style="display: none;">
+                    <!-- Evaluación de la formación académica -->
+                    <div class="form-section">
+                        <h3>Evaluación de Aspectos Académicos</h3>
+                        <p class="form-instructions">Evalúa los siguientes aspectos de tu formación académica en una escala del 1 al 5, donde 1 es "Muy insatisfactorio" y 5 es "Muy satisfactorio".</p>
+                        
+                        <div class="rating-item">
+                            <label>Calidad de los docentes:</label>
+                            <div class="rating-options">
+                                <div class="rating-option">
+                                    <input type="radio" id="calidad_docentes_1" name="calidad_docentes" value="1" required>
+                                    <label for="calidad_docentes_1">1</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="calidad_docentes_2" name="calidad_docentes" value="2">
+                                    <label for="calidad_docentes_2">2</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="calidad_docentes_3" name="calidad_docentes" value="3">
+                                    <label for="calidad_docentes_3">3</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="calidad_docentes_4" name="calidad_docentes" value="4">
+                                    <label for="calidad_docentes_4">4</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="calidad_docentes_5" name="calidad_docentes" value="5">
+                                    <label for="calidad_docentes_5">5</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rating-item">
+                            <label>Plan de estudios (contenido de las asignaturas):</label>
+                            <div class="rating-options">
+                                <div class="rating-option">
+                                    <input type="radio" id="plan_estudios_1" name="plan_estudios" value="1" required>
+                                    <label for="plan_estudios_1">1</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="plan_estudios_2" name="plan_estudios" value="2">
+                                    <label for="plan_estudios_2">2</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="plan_estudios_3" name="plan_estudios" value="3">
+                                    <label for="plan_estudios_3">3</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="plan_estudios_4" name="plan_estudios" value="4">
+                                    <label for="plan_estudios_4">4</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="plan_estudios_5" name="plan_estudios" value="5">
+                                    <label for="plan_estudios_5">5</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rating-item">
+                            <label>Oportunidades para participar en proyectos de investigación o prácticas:</label>
+                            <div class="rating-options">
+                                <div class="rating-option">
+                                    <input type="radio" id="oportunidad_proyectos_1" name="oportunidad_proyectos" value="1" required>
+                                    <label for="oportunidad_proyectos_1">1</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="oportunidad_proyectos_2" name="oportunidad_proyectos" value="2">
+                                    <label for="oportunidad_proyectos_2">2</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="oportunidad_proyectos_3" name="oportunidad_proyectos" value="3">
+                                    <label for="oportunidad_proyectos_3">3</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="oportunidad_proyectos_4" name="oportunidad_proyectos" value="4">
+                                    <label for="oportunidad_proyectos_4">4</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="oportunidad_proyectos_5" name="oportunidad_proyectos" value="5">
+                                    <label for="oportunidad_proyectos_5">5</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rating-item">
+                            <label>Énfasis en la investigación dentro del proceso de enseñanza:</label>
+                            <div class="rating-options">
+                                <div class="rating-option">
+                                    <input type="radio" id="enfasis_investigacion_1" name="enfasis_investigacion" value="1" required>
+                                    <label for="enfasis_investigacion_1">1</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="enfasis_investigacion_2" name="enfasis_investigacion" value="2">
+                                    <label for="enfasis_investigacion_2">2</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="enfasis_investigacion_3" name="enfasis_investigacion" value="3">
+                                    <label for="enfasis_investigacion_3">3</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="enfasis_investigacion_4" name="enfasis_investigacion" value="4">
+                                    <label for="enfasis_investigacion_4">4</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="enfasis_investigacion_5" name="enfasis_investigacion" value="5">
+                                    <label for="enfasis_investigacion_5">5</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rating-item">
+                            <label>Satisfacción con la infraestructura (aulas, laboratorios, biblioteca):</label>
+                            <div class="rating-options">
+                                <div class="rating-option">
+                                    <input type="radio" id="satisfaccion_infraestructura_1" name="satisfaccion_infraestructura" value="1" required>
+                                    <label for="satisfaccion_infraestructura_1">1</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="satisfaccion_infraestructura_2" name="satisfaccion_infraestructura" value="2">
+                                    <label for="satisfaccion_infraestructura_2">2</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="satisfaccion_infraestructura_3" name="satisfaccion_infraestructura" value="3">
+                                    <label for="satisfaccion_infraestructura_3">3</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="satisfaccion_infraestructura_4" name="satisfaccion_infraestructura" value="4">
+                                    <label for="satisfaccion_infraestructura_4">4</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="satisfaccion_infraestructura_5" name="satisfaccion_infraestructura" value="5">
+                                    <label for="satisfaccion_infraestructura_5">5</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rating-item">
+                            <label>Experiencia de residencia profesional o prácticas:</label>
+                            <div class="rating-options">
+                                <div class="rating-option">
+                                    <input type="radio" id="experiencia_residencia_1" name="experiencia_residencia" value="1" required>
+                                    <label for="experiencia_residencia_1">1</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="experiencia_residencia_2" name="experiencia_residencia" value="2">
+                                    <label for="experiencia_residencia_2">2</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="experiencia_residencia_3" name="experiencia_residencia" value="3">
+                                    <label for="experiencia_residencia_3">3</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="experiencia_residencia_4" name="experiencia_residencia" value="4">
+                                    <label for="experiencia_residencia_4">4</label>
+                                </div>
+                                <div class="rating-option">
+                                    <input type="radio" id="experiencia_residencia_5" name="experiencia_residencia" value="5">
+                                    <label for="experiencia_residencia_5">5</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Comentarios Adicionales</h3>
+                        <div class="form-group wide">
+                            <label for="comentario_formacion">Si tienes algún comentario adicional sobre tu formación académica o sugerencia para mejorar, por favor compártelo:</label>
+                            <textarea id="comentario_formacion" name="comentario_formacion" rows="4"></textarea>
+                        </div>
+                    </div>
+
+                    <div id="error-container" class="error-container"></div>
+
+                    <div class="form-actions">
+                        <button type="button" id="btn-guardar-modulo2" class="btn-guardar">Guardar y Continuar</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <!-- Pie de página -->
+        <footer class="footer">
+            <p>© 2025 Instituto Tecnológico de Veracruz - Sistema de Encuestas</p>
+        </footer>
+    </div>
+
+    <!-- Overlay de carga -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Guardando información...</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Scripts de la aplicación -->
+    <script src="/public/js/firebase-init.js"></script>
+    <script src="/public/js/auth.js"></script>
+    <script src="/public/models/Usuario.js"></script>
+    <script src="/public/models/modulos/modulo2.js"></script>
+    <script src="/public/js/alumnos/opciones_alumnos/modulos/modulo2/index.js"></script>
+</body>
+</html>

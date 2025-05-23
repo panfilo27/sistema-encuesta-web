@@ -9,8 +9,9 @@ const rutas = {
     'btn-carreras': "opciones_admin/carreras.html",
     'btn-personal': "opciones_admin/personal.html",
     'btn-alumnos': "opciones_admin/alumnos.html",
-    'btn-resultados': "opciones_admin/formularios.html",
-    'btn-avisos': "opciones_admin/avisos.html"
+    'btn-resultados': "opciones_admin/resultados.html",
+    'btn-avisos': "opciones_admin/avisos.html",
+    'btn-crear-encuestas': "opciones_admin/crear_encuestas/crear_encuestas.html"
 };
 
 Object.keys(rutas).forEach(id => {
@@ -27,11 +28,28 @@ Object.keys(rutas).forEach(id => {
 
             switch (id) {
                 case 'btn-alumnos':
+                    // Cargar primero el script principal de alumnos
                     script.src = "../js/admin/opciones_admin/alumnos.js";
                     script.onload = () => {
-                        if (typeof inicializarGestorAlumnos === 'function') {
-                            inicializarGestorAlumnos();
-                        }
+                        // Cargar scripts adicionales
+                        const scriptHistorial = document.createElement('script');
+                        scriptHistorial.src = "../js/admin/opciones_admin/alumnos/historial.js";
+                        document.body.appendChild(scriptHistorial);
+                        
+                        const scriptEncuesta = document.createElement('script');
+                        scriptEncuesta.src = "../js/admin/opciones_admin/alumnos/encuesta.js";
+                        document.body.appendChild(scriptEncuesta);
+                        
+                        // Cargar el script del filtro de encuestas
+                        const scriptFiltroEncuesta = document.createElement('script');
+                        scriptFiltroEncuesta.src = "../js/admin/opciones_admin/alumnos/filtro_encuesta.js";
+                        scriptFiltroEncuesta.onload = () => {
+                            console.log('Scripts de alumnos cargados');
+                            if (typeof inicializarGestorAlumnos === 'function') {
+                                inicializarGestorAlumnos();
+                            }
+                        };
+                        document.body.appendChild(scriptFiltroEncuesta);
                     };
                     break;
 
@@ -62,7 +80,10 @@ Object.keys(rutas).forEach(id => {
                     break;
 
                 case 'btn-resultados':
-                    // Funcionalidad futura
+                    script.src = "../js/admin/opciones_admin/resultados.js";
+                    script.onload = () => {
+                        console.log('Script de resultados de encuestas cargado');
+                    };
                     break;
 
                 case 'btn-avisos':
@@ -75,6 +96,36 @@ Object.keys(rutas).forEach(id => {
                         } else {
                             console.error('No se encontró la función inicializarGestionAvisos');
                         }
+                    };
+                    break;
+                    
+                case 'btn-crear-encuestas':
+                    // Cargar el CSS primero
+                    const linkCSS = document.createElement('link');
+                    linkCSS.rel = 'stylesheet';
+                    linkCSS.href = '../css/admin/crear_encuestas/estilos.css';
+                    document.head.appendChild(linkCSS);
+                    
+                    // Primero cargar el script de carreras fijo
+                    const scriptCarreras = document.createElement('script');
+                    scriptCarreras.src = "../js/admin/opciones_admin/crear_encuestas/cargar_carreras_fix.js";
+                    document.body.appendChild(scriptCarreras);
+                    
+                    // Luego cargar el JavaScript principal fijo
+                    scriptCarreras.onload = () => {
+                        console.log('Script de carga de carreras cargado (versión fija)');
+                        script.src = "../js/admin/opciones_admin/crear_encuestas/crear_encuestas_fixed.js";
+                        script.onload = () => {
+                            console.log('Script de creación de encuestas cargado (versión fija)');
+                            // Inicializar el creador de encuestas mediante la función global
+                            if (typeof inicializarCreadorEncuestas === 'function') {
+                                setTimeout(inicializarCreadorEncuestas, 100); // Pequeño retraso para asegurar que el DOM se cargue
+                            } else {
+                                console.error('No se encontró la función inicializarCreadorEncuestas');
+                            }
+                        };
+                        document.body.appendChild(script);
+                        return false; // Para evitar que se agregue el script principal abajo
                     };
                     break;
 

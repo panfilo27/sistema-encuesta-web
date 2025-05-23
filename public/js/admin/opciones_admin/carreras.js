@@ -330,7 +330,7 @@ if (typeof window.CarrerasModule !== 'undefined') {
         // Obtenemos los datos del formulario
         const nombre = elementos.form.elements['nombre-carrera'].value.trim();
         const jefeDepartamentoId = elementos.selectJefeDepartamento.value;
-        const id = elementos.inputId.value;
+        let id = elementos.inputId.value; // Usamos let en lugar de const para poder modificar esta variable más adelante
         
         // Validar que el nombre no esté vacío
         if (!nombre) {

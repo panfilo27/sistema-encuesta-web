@@ -59,24 +59,29 @@ async function handleRegistrationPersonal() {
     
     // Validar reCAPTCHA (validación del lado del cliente)
     let recaptchaResponse;
-    try {
-        // Intentar obtener la respuesta del captcha del formulario de registro
-        const captchaContainer = form.querySelector('.g-recaptcha');
-        if (captchaContainer) {
-            recaptchaResponse = grecaptcha.getResponse(captchaContainer.getAttribute('data-widget-id') || 0);
-        } else {
-            // Fallback al método simple
-            recaptchaResponse = grecaptcha.getResponse();
+    // Asegurarse de que captchaWidgets y el widget específico están definidos y son accesibles.
+    // captchaWidgets se define en login.js y debe estar disponible globalmente o importado.
+    if (typeof captchaWidgets !== 'undefined' && captchaWidgets.registroPersonal !== null) {
+        recaptchaResponse = grecaptcha.getResponse(captchaWidgets.registroPersonal);
+    } else {
+        console.error('Error: El widget de reCAPTCHA para registro de personal no está definido o inicializado (captchaWidgets.registroPersonal).');
+        alert('Error al verificar el captcha. Por favor, recargue la página e inténtelo de nuevo.');
+        // Deshabilitar botón si ya fue manipulado
+        if (btnRegistrar) {
+            btnRegistrar.disabled = false;
+            btnRegistrar.textContent = 'Registrarse';
         }
-        
-        if (!recaptchaResponse) {
-            alert('Por favor, complete el captcha');
-            return;
+        return;
+    }
+
+    if (!recaptchaResponse) {
+        alert('Por favor, complete el captcha');
+        // Deshabilitar botón si ya fue manipulado
+        if (btnRegistrar) {
+            btnRegistrar.disabled = false;
+            btnRegistrar.textContent = 'Registrarse';
         }
-    } catch (error) {
-        console.error('Error al validar reCAPTCHA:', error);
-        // En desarrollo, permitimos continuar incluso si hay error con reCAPTCHA
-        console.warn('Continuando sin validación de reCAPTCHA (solo en desarrollo)');
+        return;
     }
     
     // Nota: En un entorno de producción, deberías enviar el token al servidor para validación
@@ -127,7 +132,7 @@ async function handleRegistrationPersonal() {
                 apellidoPaterno: apellidoPaterno,
                 apellidoMaterno: apellidoMaterno,
                 email: email,
-                emailVerificado: false,
+                emailVerificado: true, // Establecido como true directamente
                 // Personal se registra con rol por defecto "jefedepartamento"
                 rolUser: 'jefedepartamento',
                 uid: user.uid, // Guardar el UID de autenticación

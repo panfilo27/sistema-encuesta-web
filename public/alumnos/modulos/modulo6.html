@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 6: Expectativas y Participación Social - Encuesta de Egresados</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+    <link rel="stylesheet" href="/public/css/alumnos/alumnos.css">
+    <link rel="stylesheet" href="/public/css/alumnos/navegacion.css">
+    <link rel="stylesheet" href="/public/css/alumnos/opciones_alumnos/modulos/modulo6.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Encabezado con logo y título -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="/public/assets/images/itver.png" alt="Logo ITVER" class="logo">
+                <img src="/public/assets/images/tecnm.png" alt="Logo TecNM" class="logo">
+                <img src="/public/assets/images/sep.png" alt="Logo SEP" class="logo">
+            </div>
+            <h1>Sistema de Seguimiento de Egresados</h1>
+            <div class="user-info">
+                <span id="nombre-usuario">Cargando...</span>
+                <button id="btn-cerrar-sesion" class="btn-cerrar-sesion">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- Menú de navegación -->
+        <nav class="nav">
+            <ul>
+                <li><a href="/public/alumnos/dashboard.html"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="#" class="active"><i class="fas fa-clipboard-list"></i> Encuesta</a></li>
+                <li><a href="#"><i class="fas fa-user"></i> Mi Perfil</a></li>
+            </ul>
+        </nav>
+
+        <!-- Contenido principal -->
+        <main class="main">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" style="width: 100%"></div>
+                </div>
+                <div class="progress-labels">
+                    <span class="completed">Datos Personales</span>
+                    <span class="completed">Formación Académica</span>
+                    <span class="completed">Ubicación Laboral</span>
+                    <span class="completed">Datos de Empleo</span>
+                    <span class="completed">Desempeño Profesional</span>
+                    <span class="active">Expectativas</span>
+                    <span>Comentarios</span>
+                </div>
+            </div>
+
+            <section class="module-container">
+                <h2>Módulo 6: Expectativas y Participación Social</h2>
+                
+                <!-- Mensaje de cargando -->
+                <div id="loading-module" class="loading-module">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Cargando formulario...</p>
+                </div>
+                
+                <!-- Formulario -->
+                <form id="form-modulo6" class="form-module" style="display: none;">
+                    
+                    <!-- Sección de Expectativas de Desarrollo -->
+                    <div class="form-section">
+                        <h3>Expectativas de Desarrollo y Superación Profesional</h3>
+                        
+                        <div class="form-group wide">
+                            <label>V.1 Actualización de conocimientos:</label>
+                            
+                            <div class="form-subgroup">
+                                <label>¿Le gustaría tomar cursos de actualización?</label>
+                                <div class="radio-group">
+                                    <div class="radio-option">
+                                        <input type="radio" id="cursos_actualizacion_si" name="cursos_actualizacion" value="si" required>
+                                        <label for="cursos_actualizacion_si">Sí</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <input type="radio" id="cursos_actualizacion_no" name="cursos_actualizacion" value="no">
+                                        <label for="cursos_actualizacion_no">No</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="conditional-field" id="cursos_field">
+                                    <label for="cuales_cursos">¿Cuáles?</label>
+                                    <input type="text" id="cuales_cursos" name="cuales_cursos" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="form-subgroup">
+                                <label>¿Le gustaría tomar algún posgrado?</label>
+                                <div class="radio-group">
+                                    <div class="radio-option">
+                                        <input type="radio" id="tomar_posgrado_si" name="tomar_posgrado" value="si" required>
+                                        <label for="tomar_posgrado_si">Sí</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <input type="radio" id="tomar_posgrado_no" name="tomar_posgrado" value="no">
+                                        <label for="tomar_posgrado_no">No</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="conditional-field" id="posgrado_field">
+                                    <label for="cual_posgrado">¿Cuál?</label>
+                                    <input type="text" id="cual_posgrado" name="cual_posgrado" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sección de Participación Social -->
+                    <div class="form-section">
+                        <h3>Participación Social de los Egresados</h3>
+                        
+                        <div class="form-group wide">
+                            <div class="form-subgroup">
+                                <label>¿Pertenece a organizaciones sociales?</label>
+                                <div class="radio-group">
+                                    <div class="radio-option">
+                                        <input type="radio" id="organizaciones_sociales_si" name="organizaciones_sociales" value="si" required>
+                                        <label for="organizaciones_sociales_si">Sí</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <input type="radio" id="organizaciones_sociales_no" name="organizaciones_sociales" value="no">
+                                        <label for="organizaciones_sociales_no">No</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="conditional-field" id="organizaciones_field">
+                                    <label for="cuales_organizaciones">¿Cuáles?</label>
+                                    <input type="text" id="cuales_organizaciones" name="cuales_organizaciones" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="form-subgroup">
+                                <label>¿Pertenece a organismos de profesionistas?</label>
+                                <div class="radio-group">
+                                    <div class="radio-option">
+                                        <input type="radio" id="organismos_profesionales_si" name="organismos_profesionales" value="si" required>
+                                        <label for="organismos_profesionales_si">Sí</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <input type="radio" id="organismos_profesionales_no" name="organismos_profesionales" value="no">
+                                        <label for="organismos_profesionales_no">No</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="conditional-field" id="organismos_field">
+                                    <label for="cual_organismo">¿Cuál?</label>
+                                    <input type="text" id="cual_organismo" name="cual_organismo" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="form-subgroup">
+                                <label>¿Pertenece a la asociación de egresados?</label>
+                                <div class="radio-group">
+                                    <div class="radio-option">
+                                        <input type="radio" id="asociacion_egresados_si" name="asociacion_egresados" value="si" required>
+                                        <label for="asociacion_egresados_si">Sí</label>
+                                    </div>
+                                    <div class="radio-option">
+                                        <input type="radio" id="asociacion_egresados_no" name="asociacion_egresados" value="no">
+                                        <label for="asociacion_egresados_no">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="error-container" class="error-container"></div>
+
+                    <div class="form-actions">
+                        <button type="button" id="btn-guardar-modulo6" class="btn-guardar">Guardar y Continuar</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <!-- Pie de página -->
+        <footer class="footer">
+            <p>© 2025 Instituto Tecnológico de Veracruz - Sistema de Encuestas</p>
+        </footer>
+    </div>
+
+    <!-- Overlay de carga -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Guardando información...</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Scripts de la aplicación -->
+    <script src="/public/js/firebase-init.js"></script>
+    <script src="/public/js/auth.js"></script>
+    <script src="/public/models/Usuario.js"></script>
+    <script src="/public/models/modulos/modulo6.js"></script>
+    <script src="/public/js/alumnos/opciones_alumnos/modulos/modulo6/index.js"></script>
+</body>
+</html>

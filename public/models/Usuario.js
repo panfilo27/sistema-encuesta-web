@@ -12,6 +12,7 @@ class Usuario {
      * @param {string} email - Correo electrónico del usuario
      * @param {string} rolUser - Rol del usuario ('alumno', 'personal', 'admin')
      * @param {string} carreraId - ID de la carrera (solo para alumnos)
+     * @param {string} carreraNombre - Nombre de la carrera (solo para alumnos)
      * @param {string} departamento - Departamento (solo para personal)
      * @param {string} contraseña - Contraseña del usuario
      * @param {boolean} emailVerificado - Indica si el correo ha sido verificado
@@ -27,6 +28,7 @@ class Usuario {
         email,
         rolUser,
         carreraId = '',
+        carreraNombre = '',
         departamento = '',
         contraseña = '',
         emailVerificado = false,
@@ -41,6 +43,7 @@ class Usuario {
         this.email = email;
         this.rolUser = rolUser;
         this.carreraId = carreraId;
+        this.carreraNombre = carreraNombre;
         this.departamento = departamento;
         this.contraseña = contraseña;
         this.emailVerificado = emailVerificado;
@@ -69,6 +72,7 @@ class Usuario {
             email: this.email,
             rolUser: this.rolUser,
             carreraId: this.carreraId,
+            carreraNombre: this.carreraNombre,
             departamento: this.departamento,
             contraseña: this.contraseña,
             emailVerificado: this.emailVerificado,
@@ -121,6 +125,7 @@ class Usuario {
             data.email || '',
             data.rolUser || 'alumno',
             data.carreraId || '',
+            data.carreraNombre || '',
             data.departamento || '',
             data.contraseña || '',
             data.emailVerificado || false,
@@ -135,3 +140,9 @@ class Usuario {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = Usuario;
 }
+
+// Exponer la función para crear un usuario a partir de datos de Firestore en el objeto window
+// para que sea accesible desde cualquier script que incluya este archivo
+window.parseUsuarioFirestore = function(data) {
+    return Usuario.fromFirestore(data.id || null, data);
+};

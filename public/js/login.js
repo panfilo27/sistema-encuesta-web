@@ -49,8 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('link-registro-alumno').addEventListener('click', function(e) {
         e.preventDefault();
         document.getElementById('modal-registro-alumno').style.display = 'block';
-        // Cargar las carreras en el select
-        loadCarreras();
+        // Las carreras se cargarán desde el script registro-alumno.js
     });
     
     // Configurar apertura del modal de registro desde el formulario de personal
@@ -98,7 +97,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // Variable para almacenar los IDs de widgets de reCAPTCHA
 let captchaWidgets = {
     alumnos: null,
-    personal: null
+    personal: null,
+    registroAlumno: null, // Para el captcha del modal de registro de alumnos
+    registroPersonal: null // Para el captcha del modal de registro de personal
 };
 
 /**
@@ -358,10 +359,6 @@ function validateCredentials(credentials, userType) {
             showError('Número de control debe tener 8 dígitos');
             return false;
         }
-        if (!credentials.password || credentials.password.length !== 8) {
-            showError('NIP debe tener 8 caracteres');
-            return false;
-        }
     }
     return true;
 }
@@ -426,6 +423,42 @@ function initializeCaptchas() {
                 console.warn('Error al inicializar captcha de personal:', e.message);
             }
         }
+
+        // Inicializar captcha para el modal de registro de alumnos
+        if (captchaWidgets.registroAlumno === null) {
+            try {
+                const captchaModalAlumnos = document.querySelector('#modal-registro-alumno .g-recaptcha');
+                if (captchaModalAlumnos && !captchaModalAlumnos.hasChildNodes()) { // Solo renderizar si está vacío
+                    captchaWidgets.registroAlumno = grecaptcha.render(captchaModalAlumnos, {
+                        'sitekey': captchaModalAlumnos.getAttribute('data-sitekey'),
+                        'callback': function(response) {
+                            console.log('Captcha modal alumnos completado');
+                        }
+                    });
+                    console.log('Captcha de modal alumnos inicializado con ID:', captchaWidgets.registroAlumno);
+                }
+            } catch (e) {
+                console.warn('Error al inicializar captcha de modal alumnos:', e.message);
+            }
+        }
+
+        // Inicializar captcha para el modal de registro de personal
+        if (captchaWidgets.registroPersonal === null) {
+            try {
+                const captchaModalPersonal = document.querySelector('#modal-registro-personal .g-recaptcha');
+                if (captchaModalPersonal && !captchaModalPersonal.hasChildNodes()) { // Solo renderizar si está vacío
+                    captchaWidgets.registroPersonal = grecaptcha.render(captchaModalPersonal, {
+                        'sitekey': captchaModalPersonal.getAttribute('data-sitekey'),
+                        'callback': function(response) {
+                            console.log('Captcha modal personal completado');
+                        }
+                    });
+                    console.log('Captcha de modal personal inicializado con ID:', captchaWidgets.registroPersonal);
+                }
+            } catch (e) {
+                console.warn('Error al inicializar captcha de modal personal:', e.message);
+            }
+        }
     } catch (error) {
         // Evitamos errores en la consola
         console.warn('Advertencia al inicializar captchas:', error.message);
@@ -444,260 +477,19 @@ function resetAllCaptchas() {
         if (captchaWidgets.personal !== null) {
             grecaptcha.reset(captchaWidgets.personal);
         }
+        // Resetear captchas de los modales de registro
+        if (captchaWidgets.registroAlumno !== null) {
+            grecaptcha.reset(captchaWidgets.registroAlumno);
+        }
+        if (captchaWidgets.registroPersonal !== null) {
+            grecaptcha.reset(captchaWidgets.registroPersonal);
+        }
     } catch (error) {
         console.error('Error al restablecer captchas:', error);
-    }
+    }   
 }
 
-/**
- * Carga las carreras desde Firestore para el desplegable de registro
- */
-async function loadCarreras() {
-    try {
-        const carreraSelect = document.getElementById('reg-carrera');
-        // Limpiar opciones actuales (excepto la primera)
-        while (carreraSelect.options.length > 1) {
-            carreraSelect.remove(1);
-        }
-        
-        // Obtener las carreras de Firestore
-        const querySnapshot = await db.collection('carreras').get();
-        
-        if (querySnapshot.empty) {
-            console.log('No hay carreras disponibles');
-            return;
-        }
-        
-        // Agregar cada carrera como una opción al select
-        querySnapshot.forEach(doc => {
-            const carrera = doc.data();
-            const option = document.createElement('option');
-            option.value = doc.id;
-            option.textContent = carrera.nombre;
-            carreraSelect.appendChild(option);
-        });
-        
-        console.log('Carreras cargadas correctamente');
-    } catch (error) {
-        console.error('Error al cargar las carreras:', error);
-        showError('Error al cargar las carreras. Por favor, intenta nuevamente.');
-    }
-}
-
-/**
- * Maneja el proceso de registro de un nuevo alumno
- */
-async function handleRegistration() {
-    const form = document.getElementById('form-registro');
-    const btnRegistrar = form.querySelector('.btn-registrar');
-    
-    // Obtener valores del formulario
-    const numeroControl = document.getElementById('reg-numero-control').value;
-    const nombre = document.getElementById('reg-nombre').value;
-    const apellidoPaterno = document.getElementById('reg-apellido-paterno').value;
-    const apellidoMaterno = document.getElementById('reg-apellido-materno').value || '';
-    const carreraId = document.getElementById('reg-carrera').value;
-    const email = document.getElementById('reg-email').value;
-    const password = document.getElementById('reg-password').value;
-    const confirmPassword = document.getElementById('reg-confirm-password').value;
-    
-    // Validaciones básicas
-    if (!numeroControl || numeroControl.length < 8) {
-        showError('El número de control debe tener al menos 8 caracteres');
-        return;
-    }
-    
-    if (!nombre || !apellidoPaterno) {
-        showError('El nombre y apellido paterno son obligatorios');
-        return;
-    }
-    
-    if (!carreraId) {
-        showError('Debes seleccionar una carrera');
-        return;
-    }
-    
-    if (!email || !validateEmail(email)) {
-        showError('Debes ingresar un correo electrónico válido');
-        return;
-    }
-    
-    if (password.length < 6) {
-        showError('La contraseña debe tener al menos 6 caracteres');
-        return;
-    }
-    
-    if (password !== confirmPassword) {
-        showError('Las contraseñas no coinciden');
-        return;
-    }
-    
-    // Deshabilitar botón durante el proceso
-    btnRegistrar.disabled = true;
-    btnRegistrar.textContent = 'Registrando...';
-    
-    try {
-        // Verificar si ya existe un usuario con ese número de control o correo
-        const userQuery = await db.collection('usuario')
-            .where('usuario', '==', numeroControl)
-            .get();
-            
-        const emailQuery = await db.collection('usuario')
-            .where('email', '==', email)
-            .get();
-        
-        if (!userQuery.empty) {
-            showError('Ya existe un usuario con este número de control');
-            btnRegistrar.disabled = false;
-            btnRegistrar.textContent = 'Registrarse';
-            return;
-        }
-        
-        if (!emailQuery.empty) {
-            showError('Este correo electrónico ya está registrado');
-            btnRegistrar.disabled = false;
-            btnRegistrar.textContent = 'Registrarse';
-            return;
-        }
-        
-        // Obtener la referencia de la carrera
-        let carreraNombre = '';
-        if (carreraId) {
-            const carreraDoc = await db.collection('carreras').doc(carreraId).get();
-            if (carreraDoc.exists) {
-                carreraNombre = carreraDoc.data().nombre;
-            }
-        }
-        
-        // Crear usuario en Firebase Authentication
-        try {
-            // Crear usuario con correo y contraseña
-            const authResult = await firebase.auth().createUserWithEmailAndPassword(email, password);
-            const user = authResult.user;
-            
-            // Configurar URL de acción para el correo de verificación
-            const actionCodeSettings = {
-                url: window.location.origin + '/auth/email-verificado.html',
-                handleCodeInApp: false
-            };
-            
-            // Enviar correo de verificación con URL personalizada
-            await user.sendEmailVerification(actionCodeSettings);
-            
-            // Crear nuevo usuario en la colección 'usuario'
-            const userData = {
-                usuario: numeroControl,
-                contraseña: password, // Idealmente debería estar encriptada
-                nombre: nombre,
-                apellidoPaterno: apellidoPaterno,
-                apellidoMaterno: apellidoMaterno,
-                email: email,
-                emailVerificado: false,
-                carrera: carreraNombre,
-                rolUser: 'alumno',
-                uid: user.uid, // Guardar el UID de autenticación
-                fechaCreacion: new Date(),
-                fechaActualizacion: new Date()
-            };
-            
-            await db.collection('usuario').add(userData);
-            
-            // Cerrar sesión para que el usuario tenga que iniciar sesión después de verificar
-            await firebase.auth().signOut();
-            
-            // Mostrar el modal de verificación
-            showVerificationModal(email);
-            
-            // Cerrar el modal de registro
-            document.getElementById('modal-registro').style.display = 'none';
-            
-            // Limpiar formulario
-            form.reset();
-            
-            // Enfocar el campo de número de control en el formulario de login
-            document.getElementById('numero_control').focus();
-            switchForm('alumnos'); // Cambiamos al formulario de alumnos
-        } catch (authError) {
-            console.error('Error de autenticación:', authError);
-            if (authError.code === 'auth/email-already-in-use') {
-                showError('Este correo electrónico ya está registrado en el sistema de autenticación');
-            } else if (authError.code === 'auth/invalid-email') {
-                showError('El formato del correo electrónico no es válido');
-            } else {
-                showError('Error en el registro: ' + authError.message);
-            }
-        }
-    } catch (error) {
-        console.error('Error al registrar alumno:', error);
-        showError('Error al registrar. Por favor, intenta nuevamente.');
-    } finally {
-        btnRegistrar.disabled = false;
-        btnRegistrar.textContent = 'Registrarse';
-    }
-}
-
-/**
- * Valida el formato de un correo electrónico
- * @param {string} email - Correo electrónico a validar
- * @returns {boolean} true si el formato es válido
- */
-function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-}
-
-/**
- * Muestra un modal con instrucciones para verificar el correo electrónico
- * @param {string} email - Correo electrónico al que se envió la verificación
- */
-function showVerificationModal(email) {
-    // Crear el modal si no existe
-    let verificationModal = document.getElementById('verification-modal');
-    
-    if (!verificationModal) {
-        verificationModal = document.createElement('div');
-        verificationModal.id = 'verification-modal';
-        verificationModal.className = 'modal';
-        verificationModal.innerHTML = `
-            <div class="modal-content verification-content">
-                <span class="close">&times;</span>
-                <h2>Verificación de Correo</h2>
-                <p>Se ha enviado un correo de verificación a:</p>
-                <p class="email-highlight"></p>
-                <p>Por favor, revisa tu bandeja de entrada (o carpeta de spam) y haz clic en el enlace de verificación.</p>
-                <p>Debes verificar tu correo electrónico antes de poder iniciar sesión.</p>
-                <button class="btn-ok">Entendido</button>
-            </div>
-        `;
-        document.body.appendChild(verificationModal);
-        
-        // Configurar eventos del modal
-        const closeBtn = verificationModal.querySelector('.close');
-        const okBtn = verificationModal.querySelector('.btn-ok');
-        
-        closeBtn.addEventListener('click', function() {
-            verificationModal.style.display = 'none';
-        });
-        
-        okBtn.addEventListener('click', function() {
-            verificationModal.style.display = 'none';
-        });
-        
-        window.addEventListener('click', function(event) {
-            if (event.target == verificationModal) {
-                verificationModal.style.display = 'none';
-            }
-        });
-    }
-    
-    // Actualizar el correo electrónico en el modal
-    verificationModal.querySelector('.email-highlight').textContent = email;
-    
-    // Mostrar el modal
-    verificationModal.style.display = 'block';
-}
-
-/**
+/** 
  * Alternar visibilidad de contraseña
  */
 function toggleVisibility(inputId, iconId) {

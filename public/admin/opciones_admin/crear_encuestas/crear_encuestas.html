@@ -1,0 +1,254 @@
+<!-- Crear Encuestas - Interfaz de Administrador -->
+<div class="contenedor-crear-encuestas">
+    <div class="encabezado">
+        <h1>Creación de Encuestas</h1>
+        <p>Crea y personaliza encuestas para los alumnos del ITVER.</p>
+    </div>
+
+    <div class="panel-control">
+        <button id="btn-nueva-encuesta" class="btn-principal">
+            <i class="fas fa-plus-circle"></i> Nueva Encuesta
+        </button>
+        <button id="btn-ver-encuestas" class="btn-secundario">
+            <i class="fas fa-list"></i> Ver Encuestas Existentes
+        </button>
+    </div>
+
+    <!-- Panel para crear una nueva encuesta -->
+    <div id="panel-nueva-encuesta" class="panel-encuesta hidden">
+        <h2>Detalles de la Encuesta</h2>
+        <form id="form-encuesta">
+            <div class="form-group">
+                <label for="nombre-encuesta">Nombre de la Encuesta:</label>
+                <input type="text" id="nombre-encuesta" required placeholder="Ej: Encuesta de Satisfacción Escolar">
+            </div>
+            <div class="form-group">
+                <label for="descripcion-encuesta">Descripción:</label>
+                <textarea id="descripcion-encuesta" rows="3" placeholder="Describe el propósito de esta encuesta"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="estado-encuesta">Estado:</label>
+                <select id="estado-encuesta">
+                    <option value="borrador">Borrador</option>
+                    <option value="activa">Activa</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="carrera-encuesta">Asignar a Carrera:</label>
+                <select id="carrera-encuesta">
+                    <!-- Las opciones se cargarán dinámicamente desde Firestore -->
+                    <option value="cargando">Cargando carreras...</option>
+                </select>
+                <p class="texto-info">Selecciona 'Todas las carreras' para una encuesta general o elige una carrera específica.</p>
+            </div>
+
+            <div class="modulos-container">
+                <h3>Módulos de la Encuesta <span class="texto-info">(Máximo 5)</span></h3>
+                <div id="lista-modulos">
+                    <!-- Aquí se insertarán los módulos dinámicamente -->
+                </div>
+                <button type="button" id="btn-agregar-modulo" class="btn-agregar" disabled>
+                    <i class="fas fa-plus"></i> Agregar Módulo
+                </button>
+            </div>
+
+            <div class="acciones-encuesta">
+                <button type="submit" class="btn-guardar">
+                    <i class="fas fa-save"></i> Guardar Encuesta
+                </button>
+                <button type="button" id="btn-cancelar-encuesta" class="btn-cancelar">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Plantilla para el módulo (se clonará vía JavaScript) -->
+    <template id="template-modulo">
+        <div class="modulo-encuesta" data-modulo-id="">
+            <div class="encabezado-modulo">
+                <h4>Módulo <span class="numero-modulo"></span>: <span class="titulo-modulo"></span></h4>
+                <div class="controles-modulo">
+                    <button type="button" class="btn-editar-modulo">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn-eliminar-modulo">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="preguntas-modulo">
+                <p class="info-preguntas">Número de preguntas: <span class="contador-preguntas">0</span>/10</p>
+            </div>
+        </div>
+    </template>
+
+    <!-- Modal para configurar un módulo -->
+    <div id="modal-modulo" class="modal">
+        <div class="modal-contenido">
+            <span class="cerrar">&times;</span>
+            <h2>Configurar Módulo</h2>
+            <form id="form-modulo">
+                <div class="form-group">
+                    <label for="nombre-modulo">Nombre del Módulo:</label>
+                    <input type="text" id="nombre-modulo" required placeholder="Ej: Datos Personales">
+                </div>
+                
+                <div class="preguntas-container">
+                    <h3>Preguntas <span class="texto-info">(Máximo 10)</span></h3>
+                    <div id="lista-preguntas">
+                        <!-- Aquí se insertarán las preguntas dinámicamente -->
+                    </div>
+                    <button type="button" id="btn-agregar-pregunta" class="btn-agregar">
+                        <i class="fas fa-plus"></i> Agregar Pregunta
+                    </button>
+                </div>
+
+                <div class="acciones-modulo">
+                    <button type="submit" class="btn-guardar">
+                        <i class="fas fa-save"></i> Guardar Módulo
+                    </button>
+                    <button type="button" id="btn-cancelar-modulo" class="btn-cancelar">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Plantilla para una pregunta (se clonará vía JavaScript) -->
+    <template id="template-pregunta">
+        <div class="pregunta" data-pregunta-id="">
+            <div class="encabezado-pregunta">
+                <h4>Pregunta <span class="numero-pregunta"></span></h4>
+                <div class="controles-pregunta">
+                    <button type="button" class="btn-editar-pregunta">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn-eliminar-pregunta">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="contenido-pregunta">
+                <p class="texto-pregunta"></p>
+                <p class="tipo-pregunta"></p>
+                <p class="estado-pregunta"></p>
+            </div>
+        </div>
+    </template>
+
+    <!-- Modal para configurar una pregunta -->
+    <div id="modal-pregunta" class="modal">
+        <div class="modal-contenido">
+            <span class="cerrar">&times;</span>
+            <h2>Configurar Pregunta</h2>
+            <form id="form-pregunta">
+                <div class="form-group">
+                    <label for="texto-pregunta">Texto de la Pregunta:</label>
+                    <input type="text" id="texto-pregunta" required placeholder="Ej: ¿Cómo calificarías la calidad de la enseñanza?">
+                </div>
+                <div class="form-group">
+                    <label for="tipo-pregunta">Tipo de Pregunta:</label>
+                    <select id="tipo-pregunta">
+                        <option value="abierta">Abierta (Texto libre)</option>
+                        <option value="opcion_multiple">Opción Múltiple</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="obligatoria-pregunta">¿Es obligatoria?</label>
+                    <select id="obligatoria-pregunta">
+                        <option value="true">Sí</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+
+                <!-- Sección para opciones múltiples (visible solo si se selecciona opción múltiple) -->
+                <div id="seccion-opciones" class="hidden">
+                    <h3>Opciones de Respuesta <span class="texto-info">(Máximo 5)</span></h3>
+                    <div id="lista-opciones">
+                        <!-- Aquí se insertarán las opciones dinámicamente -->
+                    </div>
+                    <button type="button" id="btn-agregar-opcion" class="btn-agregar">
+                        <i class="fas fa-plus"></i> Agregar Opción
+                    </button>
+                </div>
+
+                <div class="acciones-pregunta">
+                    <button type="submit" class="btn-guardar">
+                        <i class="fas fa-save"></i> Guardar Pregunta
+                    </button>
+                    <button type="button" id="btn-cancelar-pregunta" class="btn-cancelar">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Panel para ver encuestas existentes -->
+    <div id="panel-ver-encuestas" class="panel-encuesta hidden">
+        <h2>Encuestas Existentes</h2>
+        <div class="filtros-encuestas">
+            <div class="form-group">
+                <label for="filtro-estado">Filtrar por estado:</label>
+                <select id="filtro-estado">
+                    <option value="todos">Todos</option>
+                    <option value="borrador">Borradores</option>
+                    <option value="activa">Activas</option>
+                </select>
+            </div>
+            <div class="form-group busqueda">
+                <input type="text" id="busqueda-encuesta" placeholder="Buscar encuesta...">
+                <button id="btn-buscar-encuesta" class="btn-buscar">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="tabla-encuestas">
+            <table id="tabla-encuestas">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Módulos</th>
+                        <th>Estado</th>
+                        <th>Creada</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-tabla-encuestas">
+                    <!-- Aquí se insertarán las encuestas dinámicamente -->
+                </tbody>
+            </table>
+            <div id="mensaje-no-encuestas" class="mensaje-info hidden">
+                No se encontraron encuestas.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Indicador de carga -->
+<div id="cargando" style="display: none;">
+    <div class="spinner"></div>
+    <p>Procesando, por favor espere...</p>
+</div>
+
+<script>
+    // Asegurarse de que el indicador de carga esté oculto cuando se carga la página
+    document.addEventListener('DOMContentLoaded', function() {
+        const cargando = document.getElementById('cargando');
+        if (cargando) {
+            cargando.style.display = 'none';
+        }
+    });
+    
+    // En caso de que haya algún problema, ocultar el cargando después de 3 segundos
+    setTimeout(function() {
+        const cargando = document.getElementById('cargando');
+        if (cargando) {
+            cargando.style.display = 'none';
+        }
+    }, 3000);
+</script>
