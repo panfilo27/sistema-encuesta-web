@@ -5,12 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administración de Alumnos</title>
     <link rel="stylesheet" href="/public/css/admin/opciones_admin/alumnos.css">
+    <link rel="stylesheet" href="/public/css/admin/opciones_admin/estilos_exportar.css">
+    <link rel="stylesheet" href="/public/css/admin/alumnos/historial.css">
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="contenedor">
-        <h1>Administración de Alumnos</h1>
+        <div class="encabezado-flex">
+            <h1>Administración de Alumnos</h1>
+            <div class="acciones-top">
+                <button id="btn-exportar-excel" class="btn btn-success" title="Exportar alumnos filtrados a Excel">
+                    <i class="fas fa-file-excel"></i> Exportar a Excel
+                </button>
+            </div>
+        </div>
         
         <div class="buscador">
             <input type="text" id="busqueda" placeholder="Buscar por nombre, número de control o carrera...">
@@ -40,11 +49,7 @@
                     <!-- Se llenarán dinámicamente -->
                 </select>
             </div>
-            <div class="filtro accion">
-                <button id="btn-exportar-excel" class="btn btn-success" title="Exportar alumnos filtrados a Excel">
-                    <i class="fas fa-file-excel"></i> Exportar a Excel
-                </button>
-            </div>
+            <!-- Botón de exportar movido a la parte superior derecha -->
         </div>
         
         <div class="tabla-container">

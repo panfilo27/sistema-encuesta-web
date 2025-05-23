@@ -1,0 +1,58 @@
+/* Estilos para la visualización de horas en las encuestas */
+
+/* Estilo para mostrar la hora de encuestas */
+.hora-encuesta {
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 3px;
+    font-style: italic;
+}
+
+/* Ajustes a la tabla para la visualización de fechas y horas */
+.tabla-encuestas td {
+    vertical-align: top;
+    padding: 12px 8px;
+}
+
+/* Mejoras para inputs de hora */
+input[type="time"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 14px;
+    width: 100%;
+}
+
+/* Contenedor para fecha/hora con mejor espaciado */
+.fecha-hora-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.fecha-hora-container .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Indicador visual para diferenciar hora y fecha */
+.form-group label[for="hora-inicio-encuesta"],
+.form-group label[for="hora-fin-encuesta"] {
+    display: flex;
+    align-items: center;
+}
+
+.form-group label[for="hora-inicio-encuesta"]::before,
+.form-group label[for="hora-fin-encuesta"]::before {
+    content: "⏱️";
+    margin-right: 5px;
+    font-size: 14px;
+}
+
+.form-group label[for="fecha-inicio-encuesta"]::before,
+.form-group label[for="fecha-fin-encuesta"]::before {
+    content: "📅";
+    margin-right: 5px;
+    font-size: 14px;
+}

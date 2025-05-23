@@ -27,11 +27,21 @@ async function mostrarHistorialEncuestasAlumno(alumnoId, contenedorId) {
         
         // Construir HTML con el historial
         const itemsHTML = historial.map(item => {
-            // Generar botones para cada módulo completado
-            const modulosHTML = item.modulosCompletados.map(modulo => {
-                const moduloNum = modulo.replace('Módulo ', '');
-                return `<button class="modulo-tag modulo-btn" data-modulo="${moduloNum}" data-encuesta-id="${item.id}" data-alumno-id="${alumnoId}">${modulo}</button>`;
-            }).join('');
+            // Asegurarse de que modulosCompletados siempre sea un array
+            if (!item.modulosCompletados) {
+                item.modulosCompletados = [];
+            }
+            
+            // Generar botones para cada módulo
+            // Siempre mostrar todos los módulos (1-7), pero resaltar los completados
+            let modulosHTML = '';
+            for (let i = 1; i <= 7; i++) {
+                const estaCompletado = item.modulosCompletados.includes(`Módulo ${i}`);
+                modulosHTML += `<button class="modulo-tag modulo-btn ${estaCompletado ? 'completado' : 'no-completado'}" 
+                    data-modulo="${i}" data-encuesta-id="${item.id}" data-alumno-id="${alumnoId}">
+                    Módulo ${i}
+                </button>`;
+            }
             
             const estadoEncuesta = item.completada 
                 ? '<span class="estado-completo">Completada</span>' 
@@ -150,15 +160,31 @@ async function obtenerHistorialEncuestasAlumno(alumnoId) {
             }
             
             // Contar módulos completados
-            const modulosCompletados = [
-                data.modulo1 && data.modulo1.completado ? 'Módulo 1' : null,
-                data.modulo2 && data.modulo2.completado ? 'Módulo 2' : null,
-                data.modulo3 && data.modulo3.completado ? 'Módulo 3' : null,
-                data.modulo4 && data.modulo4.completado ? 'Módulo 4' : null,
-                data.modulo5 && data.modulo5.completado ? 'Módulo 5' : null,
-                data.modulo6 && data.modulo6.completado ? 'Módulo 6' : null,
-                data.modulo7 && data.modulo7.completado ? 'Módulo 7' : null
-            ].filter(m => m !== null);
+            let modulosCompletados = [];
+            
+            // Comprobar si existe la nueva estructura de datos (data.modulos)
+            if (data.modulos) {
+                // Nueva estructura
+                modulosCompletados = Object.keys(data.modulos)
+                    .filter(modulo => data.modulos[modulo] && typeof data.modulos[modulo] === 'object')
+                    .map(modulo => `Módulo ${modulo}`);
+            } else {
+                // Estructura antigua
+                modulosCompletados = [
+                    data.modulo1 && data.modulo1.completado ? 'Módulo 1' : null,
+                    data.modulo2 && data.modulo2.completado ? 'Módulo 2' : null,
+                    data.modulo3 && data.modulo3.completado ? 'Módulo 3' : null,
+                    data.modulo4 && data.modulo4.completado ? 'Módulo 4' : null,
+                    data.modulo5 && data.modulo5.completado ? 'Módulo 5' : null,
+                    data.modulo6 && data.modulo6.completado ? 'Módulo 6' : null,
+                    data.modulo7 && data.modulo7.completado ? 'Módulo 7' : null
+                ].filter(m => m !== null);
+            }
+            
+            // Asegurarse de que modulosCompletados siempre sea un array
+            if (!Array.isArray(modulosCompletados)) {
+                modulosCompletados = [];
+            }
             
             return {
                 id: doc.id,

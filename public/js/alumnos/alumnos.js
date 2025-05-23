@@ -18,12 +18,23 @@ function initDashboard() {
     // Verificar la sesión del usuario
     verificarSesion();
 
-    // Agregar event listeners
-    document.getElementById('btn-cerrar-sesion').addEventListener('click', cerrarSesion);
-    document.getElementById('btn-historial').addEventListener('click', function(e) {
-        e.preventDefault();
-        alert('La sección de historial de encuestas está en desarrollo.');
-    });
+    // Agregar event listeners (verificando primero que los elementos existan)
+    const btnCerrarSesion = document.getElementById('btn-cerrar-sesion');
+    if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener('click', cerrarSesion);
+    } else {
+        console.warn('Elemento #btn-cerrar-sesion no encontrado');
+    }
+    
+    const btnHistorial = document.getElementById('btn-historial');
+    if (btnHistorial) {
+        btnHistorial.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('La sección de historial de encuestas está en desarrollo.');
+        });
+    } else {
+        console.warn('Elemento #btn-historial no encontrado (esto es normal si no está en la página actual)');
+    }
 }
 
 /**
@@ -108,39 +119,49 @@ function cerrarSesion(e) {
     if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
         console.log('Limpiando datos de sesión y encuestas...');
         
-        // Limpiar todos los datos relacionados con encuestas
-        const keysToRemove = [];
+        // 1. LIMPIAR LOCALSTORAGE COMPLETAMENTE
+        console.log(`Limpiando todo el localStorage (${localStorage.length} elementos)`);
+        localStorage.clear(); // Limpia todo el localStorage de una vez
         
-        // Buscar todas las claves almacenadas en localStorage
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            
-            // Agregar todas las claves relacionadas con el sistema de encuestas
-            keysToRemove.push(key);
+        // 2. LIMPIAR SESSIONSTORAGE POR SI ACASO
+        if (sessionStorage.length > 0) {
+            console.log(`Limpiando sessionStorage (${sessionStorage.length} elementos)`);
+            sessionStorage.clear();
         }
         
-        // Eliminar todas las claves encontradas
-        keysToRemove.forEach(key => {
-            localStorage.removeItem(key);
-            console.log(`Eliminado: ${key}`);
+        // 3. LIMPIAR COOKIES RELACIONADAS (si las hay)
+        document.cookie.split(';').forEach(cookie => {
+            const [name] = cookie.trim().split('=');
+            if (name) {
+                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                console.log(`Cookie eliminada: ${name}`);
+            }
         });
         
-        // Limpiar variables de sesión específicas (por si acaso)
-        localStorage.removeItem('userSession');
-        localStorage.removeItem('encuestaActiva');
-        localStorage.removeItem('verEncuestaId');
-        localStorage.removeItem('verModuloId');
+        // 4. LIMPIAR DATOS ESPECÍFICOS DE ENCUESTAS (por si quedaron)
+        try {
+            // Limpiar datos específicos de encuestas
+            if (window.encuestasDatos) window.encuestasDatos = null;
+            if (window.historialEncuestas) window.historialEncuestas = null;
+            if (window.encuestaActual) window.encuestaActual = null;
+            if (window.currentUser) window.currentUser = null;
+            console.log('Variables globales de encuestas limpiadas');
+        } catch (e) {
+            console.log('No se encontraron variables globales para limpiar:', e);
+        }
         
-        // Cerrar sesión en Firebase Auth
+        // 5. CERRAR SESIÓN EN FIREBASE AUTH
         firebase.auth().signOut()
             .then(() => {
-                console.log('Sesión cerrada correctamente');
-                alert('Sesión cerrada y datos eliminados correctamente.');
+                console.log('Sesión cerrada correctamente en Firebase Auth');
+                alert('Sesión cerrada y todos los datos eliminados correctamente.');
+                // Redirigir a la página de login
                 window.location.href = '../auth/login.html';
             })
             .catch((error) => {
-                console.error('Error al cerrar sesión:', error);
+                console.error('Error al cerrar sesión en Firebase Auth:', error);
                 // Redirigir de todas formas
+                alert('Sesión cerrada pero hubo un error con Firebase. Todos los datos locales fueron eliminados.');
                 window.location.href = '../auth/login.html';
             });
     }

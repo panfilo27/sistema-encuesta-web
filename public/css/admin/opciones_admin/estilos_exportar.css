@@ -1,0 +1,49 @@
+/* Estilos para el botón de exportar a Excel */
+
+#btn-exportar-excel {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#btn-exportar-excel:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+#btn-exportar-excel:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+#btn-exportar-excel i {
+    font-size: 1.1em;
+    color: #e6ffec;
+}
+
+/* Estilo para cuando está procesando la exportación */
+#btn-exportar-excel.procesando {
+    background-color: #6c757d;
+    cursor: wait;
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+/* Estilo para dispositivos móviles */
+@media (max-width: 768px) {
+    #btn-exportar-excel {
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+}

@@ -301,10 +301,11 @@ async function cargarAlumnos() {
             
             // Obtener el historial de encuestas del alumno
             try {
-                // Usar collectionGroup para buscar en todas las subcolecciónes de historial_encuestas
+                // Usar la ruta correcta: usuario/[id_usuario]/historial_encuestas
                 const historialSnapshot = await firebase.firestore()
-                    .collectionGroup('historial_encuestas')
-                    .where('userId', '==', doc.id)
+                    .collection('usuario')
+                    .doc(doc.id)
+                    .collection('historial_encuestas')
                     .get();
                 
                 console.log(`Historial encontrado para alumno ${alumno.nombre}:`, historialSnapshot.size);
@@ -675,14 +676,30 @@ function cargarContenidoEncuestas() {
                         <textarea id="descripcion-encuesta" required></textarea>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="fecha-inicio-encuesta">Fecha de Inicio:</label>
-                        <input type="date" id="fecha-inicio-encuesta" required>
+                    <h4>Periodo de Inicio</h4>
+                    <div class="fecha-hora-container">
+                        <div class="form-group">
+                            <label for="fecha-inicio-encuesta">Fecha de Inicio:</label>
+                            <input type="date" id="fecha-inicio-encuesta" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="hora-inicio-encuesta">Hora de Inicio:</label>
+                            <input type="time" id="hora-inicio-encuesta" value="08:00" required>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="fecha-fin-encuesta">Fecha de Fin:</label>
-                        <input type="date" id="fecha-fin-encuesta" required>
+                    <h4>Periodo de Fin</h4>
+                    <div class="fecha-hora-container">
+                        <div class="form-group">
+                            <label for="fecha-fin-encuesta">Fecha de Fin:</label>
+                            <input type="date" id="fecha-fin-encuesta" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="hora-fin-encuesta">Hora de Fin:</label>
+                            <input type="time" id="hora-fin-encuesta" value="23:59" required>
+                        </div>
                     </div>
                     
                     <span id="error-encuesta" class="error-mensaje"></span>
@@ -735,12 +752,20 @@ function cargarContenidoEncuestas() {
         });
     }
     
-    // Cargar los estilos
-    if (!document.querySelector('link[href*="encuesta.css"]')) {
+    // Cargar estilos si no existen
+    if (!document.querySelector('link[href*="/public/css/admin/opciones_admin/alumnos/encuesta.css"]')) {
         const linkEstilos = document.createElement('link');
         linkEstilos.rel = 'stylesheet';
         linkEstilos.href = '/public/css/admin/opciones_admin/alumnos/encuesta.css';
         document.head.appendChild(linkEstilos);
+    }
+    
+    // Cargar estilos para horas de encuestas
+    if (!document.querySelector('link[href*="/public/css/admin/opciones_admin/alumnos/hora_encuesta.css"]')) {
+        const linkHoraEstilos = document.createElement('link');
+        linkHoraEstilos.rel = 'stylesheet';
+        linkHoraEstilos.href = '/public/css/admin/opciones_admin/alumnos/hora_encuesta.css';
+        document.head.appendChild(linkHoraEstilos);
     }
     
     // Cargar el script

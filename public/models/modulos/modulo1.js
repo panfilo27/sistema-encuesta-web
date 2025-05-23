@@ -21,7 +21,7 @@ function crearModulo1DesdeFormulario(form, userData = {}) {
   return {
     // Identificación
     uid: userData?.uid || '',
-    email: userData?.email || '',
+    email: (form.email?.value || userData?.email || '').trim(),
     
     // Datos personales
     nombre: (form.nombre?.value || '').trim(),

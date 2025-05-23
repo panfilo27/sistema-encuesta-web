@@ -22,11 +22,28 @@ body {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
-    text-align: center;
-    color: #004e7f;
-    margin-bottom: 10px;
+/* Encabezado con diseño flexible para colocar el botón a la derecha */
+.encabezado-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
     padding-bottom: 10px;
+    border-bottom: 1px solid #eaeaea;
+}
+
+h1 {
+    text-align: left;
+    color: #004e7f;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+}
+
+.acciones-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* Separador de secciones */

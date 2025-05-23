@@ -1,0 +1,231 @@
+/* Estilos para el historial de encuestas de alumnos */
+
+/* Estilos para las tarjetas de encuesta */
+.encuesta-historial-item {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+}
+
+.encuesta-historial-item:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+/* Encabezado de la tarjeta */
+.encuesta-historial-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.encuesta-historial-titulo {
+    font-weight: 600;
+    color: #3a4e63;
+    font-size: 1.1em;
+}
+
+/* Estados de encuesta */
+.estado-completo, .estado-incompleto {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.estado-completo {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.estado-incompleto {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+/* Detalles de la encuesta */
+.encuesta-historial-detalles {
+    padding: 15px;
+}
+
+.encuesta-historial-fecha {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+/* Botones de módulos */
+.modulos-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.modulo-tag {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-align: center;
+}
+
+.modulo-btn {
+    display: inline-block;
+}
+
+.modulo-btn.completado {
+    background-color: #17a2b8;
+    color: white;
+    border: 1px solid #138496;
+}
+
+.modulo-btn.no-completado {
+    background-color: #e9ecef;
+    color: #495057;
+    border: 1px solid #ced4da;
+    opacity: 0.8;
+}
+
+.modulo-btn.completado:hover {
+    background-color: #138496;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.modulo-btn.no-completado:hover {
+    background-color: #dee2e6;
+}
+
+/* Para encuestas completas */
+.encuesta-historial-item.completa {
+    border-left: 4px solid #28a745;
+}
+
+/* Para encuestas incompletas */
+.encuesta-historial-item.incompleta {
+    border-left: 4px solid #ffc107;
+}
+
+/* Estilo para mensajes sin resultados */
+.sin-resultados {
+    text-align: center;
+    padding: 30px 15px;
+    color: #6c757d;
+    font-style: italic;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px dashed #dee2e6;
+}
+
+/* Indicador de carga */
+.cargando {
+    text-align: center;
+    padding: 20px 15px;
+    color: #6c757d;
+}
+
+/* Estilos para el modal de detalle de módulo */
+.modal-detalle-modulo {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-contenido-modulo {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 900px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #3a4e63;
+}
+
+.cerrar-modal-modulo {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.cerrar-modal-modulo:hover {
+    color: #555;
+}
+
+.contenido-modulo {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Iframe para cargar el módulo */
+.iframe-modulo {
+    width: 100%;
+    height: 70vh;
+    border: none;
+}
+
+/* Mensajes de error */
+.error {
+    color: #721c24;
+    background-color: #f8d7da;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    border: 1px solid #f5c6cb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-contenido-modulo {
+        width: 95%;
+        margin: 10% auto;
+    }
+    
+    .encuesta-historial-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .encuesta-historial-estado {
+        margin-top: 10px;
+    }
+}

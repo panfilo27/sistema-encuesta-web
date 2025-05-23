@@ -251,6 +251,27 @@ function preLlenarFormulario() {
 }
 
 /**
+ * Valida el formulario del módulo 7
+ * @returns {Object} Resultado de la validación con propiedades valido y errores
+ */
+function validarFormulario() {
+    const errores = [];
+    const comentario = document.getElementById('comentario').value.trim();
+    
+    // Validar comentario (opcional, puede estar vacío)
+    // No se requieren validaciones específicas para este módulo ya que el comentario es opcional
+    // Pero si quisiéramos asegurar un mínimo de caracteres, podríamos hacer algo como:
+    // if (comentario.length > 0 && comentario.length < 10) {
+    //     errores.push('El comentario debe tener al menos 10 caracteres');
+    // }
+    
+    return {
+        valido: errores.length === 0,
+        errores: errores
+    };
+}
+
+/**
  * Configura los eventos del formulario
  */
 function configurarEventos() {

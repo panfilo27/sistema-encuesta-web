@@ -399,11 +399,8 @@ function configurarEventos() {
             // Crear objeto con los datos del formulario
             const datosModulo1 = window.crearModulo1DesdeFormulario(formulario);
             
-            // Guardar respuestas en Firestore
+            // Guardar respuestas (solo en historial_encuestas, sin modificar documento principal)
             await guardarRespuestas(datosModulo1);
-            
-            // Actualizar datos del usuario si es necesario
-            await actualizarDatosUsuario(datosModulo1);
             
             alert('Información guardada correctamente. Serás redirigido al siguiente módulo.');
             

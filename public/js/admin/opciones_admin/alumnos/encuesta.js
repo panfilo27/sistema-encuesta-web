@@ -149,8 +149,14 @@ async function cargarEncuestasActivas() {
                             <tr>
                                 <td>${encuesta.titulo}</td>
                                 <td>${encuesta.descripcion}</td>
-                                <td>${encuesta.fechaInicio.toLocaleDateString()}</td>
-                                <td>${encuesta.fechaFin.toLocaleDateString()}</td>
+                                <td>
+                                    <div>${encuesta.fechaInicio.toLocaleDateString()}</div>
+                                    <div class="hora-encuesta">${encuesta.fechaInicio.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                                </td>
+                                <td>
+                                    <div>${encuesta.fechaFin.toLocaleDateString()}</div>
+                                    <div class="hora-encuesta">${encuesta.fechaFin.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                                </td>
                                 <td>
                                     <span class="${estaActiva ? 'estado-activo' : 'estado-inactivo'}">
                                         ${estaActiva ? 'Activa' : 'Inactiva'}
@@ -191,25 +197,59 @@ async function crearNuevaEncuesta() {
         // Obtener datos del formulario
         const titulo = document.getElementById('titulo-encuesta').value.trim();
         const descripcion = document.getElementById('descripcion-encuesta').value.trim();
-        const fechaInicio = new Date(document.getElementById('fecha-inicio-encuesta').value);
-        const fechaFin = new Date(document.getElementById('fecha-fin-encuesta').value);
+        
+        // Obtener fechas y horas
+        const fechaInicioInput = document.getElementById('fecha-inicio-encuesta').value;
+        const horaInicioInput = document.getElementById('hora-inicio-encuesta').value || '00:00';
+        const fechaFinInput = document.getElementById('fecha-fin-encuesta').value;
+        const horaFinInput = document.getElementById('hora-fin-encuesta').value || '23:59';
+        
+        // Crear objetos de fecha combinando fecha y hora
+        const fechaInicio = new Date(`${fechaInicioInput}T${horaInicioInput}`);
+        const fechaFin = new Date(`${fechaFinInput}T${horaFinInput}`);
         
         // Validar campos
-        if (!titulo || !descripcion || !fechaInicio || !fechaFin) {
+        if (!titulo || !descripcion || !fechaInicioInput || !fechaFinInput) {
             document.getElementById('error-encuesta').textContent = 'Todos los campos son obligatorios';
             return;
         }
         
         // Validar fechas
         if (fechaInicio >= fechaFin) {
-            document.getElementById('error-encuesta').textContent = 'La fecha de inicio debe ser anterior a la fecha de fin';
+            document.getElementById('error-encuesta').textContent = 'El momento de inicio debe ser anterior al momento de fin';
             return;
         }
         
         // Verificar que no exista una encuesta en el mismo rango de fechas
-        const existeEncuestaEnRango = await verificarEncuestaEnRango(fechaInicio, fechaFin);
-        if (existeEncuestaEnRango) {
-            document.getElementById('error-encuesta').textContent = 'Ya existe una encuesta activa en ese rango de fechas';
+        const verificacionRango = await verificarEncuestaEnRango(fechaInicio, fechaFin);
+        
+        if (verificacionRango.existe) {
+            // Formatear fechas para mejor visualización
+            const inicioFormateado = fechaInicio.toLocaleString('es-MX', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+            
+            const finFormateado = fechaFin.toLocaleString('es-MX', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+            
+            // Mostrar mensaje detallado sobre las encuestas solapadas
+            const mensajeError = `Ya existe ${verificacionRango.encuestasSolapadas.length} encuesta${verificacionRango.encuestasSolapadas.length > 1 ? 's' : ''} activa${verificacionRango.encuestasSolapadas.length > 1 ? 's' : ''} en ese rango de fechas y horas.\n\nTu encuesta: ${inicioFormateado} - ${finFormateado}\n\nEncuesta${verificacionRango.encuestasSolapadas.length > 1 ? 's' : ''} en conflicto:\n${verificacionRango.encuestasSolapadas.map(e => 
+                `- "${e.titulo}" (${e.inicio} - ${e.fin})`
+            ).join('\n')}\n\nNota: Hay solapamiento porque ambas encuestas estarían activas simultáneamente durante cierto periodo.`;
+            
+            document.getElementById('error-encuesta').innerHTML = mensajeError.replace(/\n/g, '<br>');
+            console.log('Encuestas solapadas:', verificacionRango.encuestasSolapadas);
             return;
         }
         
@@ -248,12 +288,14 @@ async function crearNuevaEncuesta() {
 
 /**
  * Verifica si ya existe una encuesta en el rango de fechas proporcionado
- * @param {Date} fechaInicio - Fecha de inicio a verificar
- * @param {Date} fechaFin - Fecha de fin a verificar
- * @returns {Promise<boolean>} - True si existe una encuesta en el rango
+ * @param {Date} fechaInicio - Fecha y hora de inicio a verificar
+ * @param {Date} fechaFin - Fecha y hora de fin a verificar
+ * @returns {Promise<{existe: boolean, mensaje: string, encuestasSolapadas: Array}>} - Resultado de la verificación
  */
 async function verificarEncuestaEnRango(fechaInicio, fechaFin) {
     try {
+        console.log(`Verificando solapamiento para: ${fechaInicio.toLocaleString()} - ${fechaFin.toLocaleString()}`);
+        
         // Consultar encuestas que podrían solaparse con el rango proporcionado
         const snapshot = await firebase.firestore()
             .collection('encuestas')
@@ -261,18 +303,34 @@ async function verificarEncuestaEnRango(fechaInicio, fechaFin) {
             .get();
         
         if (snapshot.empty) {
-            return false;
+            return { existe: false, mensaje: '', encuestasSolapadas: [] };
         }
         
-        // Verificar si alguna encuesta se solapa con el rango
-        return snapshot.docs.some(doc => {
+        // Recopilar encuestas solapadas
+        const encuestasSolapadas = [];
+        
+        snapshot.docs.forEach(doc => {
             const data = doc.data();
             const encuestaInicio = data.fechaInicio.toDate();
             const encuestaFin = data.fechaFin.toDate();
             
-            // Verificar solapamiento de rangos
-            return (fechaInicio <= encuestaFin && fechaFin >= encuestaInicio);
+            // Verificar solapamiento de rangos (considerando fecha y hora)
+            if (fechaInicio <= encuestaFin && fechaFin >= encuestaInicio) {
+                encuestasSolapadas.push({
+                    id: doc.id,
+                    titulo: data.titulo,
+                    inicio: encuestaInicio.toLocaleString(),
+                    fin: encuestaFin.toLocaleString()
+                });
+            }
         });
+        
+        if (encuestasSolapadas.length > 0) {
+            const mensaje = `Ya existe${encuestasSolapadas.length > 1 ? 'n' : ''} ${encuestasSolapadas.length} encuesta${encuestasSolapadas.length > 1 ? 's' : ''} activa${encuestasSolapadas.length > 1 ? 's' : ''} en ese rango de fechas y horas.`;
+            return { existe: true, mensaje, encuestasSolapadas };
+        }
+        
+        return { existe: false, mensaje: '', encuestasSolapadas: [] };
         
     } catch (error) {
         console.error('Error al verificar encuestas en rango:', error);
