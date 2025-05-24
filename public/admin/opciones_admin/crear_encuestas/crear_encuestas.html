@@ -310,7 +310,14 @@
     }, 3000);
 </script>
 
-<!-- Scripts para el creador de encuestas -->
+<!-- Scripts para el creador de encuestas (orden es importante) -->
 <script src="../../../../js/admin/opciones_admin/crear_encuestas/cargar_carreras_fix.js"></script>
 <script src="../../../../js/admin/opciones_admin/crear_encuestas/subpreguntas.js"></script>
-<script src="../../../../js/admin/opciones_admin/crear_encuestas/crear_encuestas_fixed.js"></script>
+<script>
+    // Esperamos a que el script de subpreguntas esté cargado antes de cargar el principal
+    setTimeout(function() {
+        const script = document.createElement('script');
+        script.src = "../../../../js/admin/opciones_admin/crear_encuestas/crear_encuestas_fixed.js";
+        document.body.appendChild(script);
+    }, 100);
+</script>

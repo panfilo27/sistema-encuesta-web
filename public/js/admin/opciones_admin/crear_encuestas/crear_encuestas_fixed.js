@@ -74,11 +74,16 @@
         document.getElementById('tipo-pregunta').addEventListener('change', toggleOpcionesPregunta);
         document.getElementById('btn-agregar-opcion').addEventListener('click', agregarOpcionRespuesta);
         
-        // Configurar eventos para subpreguntas
-        document.getElementById('tipo-subpregunta')?.addEventListener('change', toggleOpcionesSubpregunta);
-        document.getElementById('btn-agregar-opcion-subpregunta')?.addEventListener('click', agregarOpcionSubpregunta);
-        document.getElementById('btn-agregar-subpregunta')?.addEventListener('click', agregarSubpregunta);
-        document.getElementById('opcion-condicional')?.addEventListener('change', seleccionarOpcionCondicional);
+        // Configurar eventos para subpreguntas (verificar que las funciones estén disponibles)
+        if (typeof toggleOpcionesSubpregunta === 'function') {
+            document.getElementById('tipo-subpregunta')?.addEventListener('change', toggleOpcionesSubpregunta);
+            document.getElementById('btn-agregar-opcion-subpregunta')?.addEventListener('click', agregarOpcionSubpregunta);
+            document.getElementById('btn-agregar-subpregunta')?.addEventListener('click', agregarSubpregunta);
+            document.getElementById('opcion-condicional')?.addEventListener('change', seleccionarOpcionCondicional);
+            console.log('Eventos de subpreguntas configurados correctamente');
+        } else {
+            console.warn('Las funciones de subpreguntas no están disponibles. Verifica que subpreguntas.js esté cargado.');
+        }
         
         // Configurar el botón para agregar módulo
         document.getElementById('btn-agregar-modulo').addEventListener('click', mostrarModalModulo);
