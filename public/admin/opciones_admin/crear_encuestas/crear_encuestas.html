@@ -177,60 +177,6 @@
                         <i class="fas fa-plus"></i> Agregar Opción
                     </button>
                 </div>
-                
-                <!-- Sección para configurar subpreguntas condicionales -->
-                <div id="seccion-subpreguntas" class="hidden">
-                    <h3>Subpreguntas Condicionales</h3>
-                    <p class="texto-info">Añade preguntas que aparecerán solo cuando se seleccione una opción específica.</p>
-                    
-                    <div class="form-group" id="selector-opcion-condicional">
-                        <label for="opcion-condicional">Mostrar subpregunta cuando se seleccione:</label>
-                        <select id="opcion-condicional">
-                            <option value="">Selecciona una opción...</option>
-                            <!-- Las opciones se cargarán dinámicamente -->
-                        </select>
-                    </div>
-                    
-                    <div id="configuracion-subpregunta" class="hidden">
-                        <div class="form-group">
-                            <label for="texto-subpregunta">Texto de la Subpregunta:</label>
-                            <input type="text" id="texto-subpregunta" placeholder="Ej: ¿Podrías explicar más sobre tu respuesta?">
-                        </div>
-                        <div class="form-group">
-                            <label for="tipo-subpregunta">Tipo de Subpregunta:</label>
-                            <select id="tipo-subpregunta">
-                                <option value="abierta">Abierta (Texto libre)</option>
-                                <option value="opcion_multiple">Opción Múltiple</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="obligatoria-subpregunta">¿Es obligatoria?</label>
-                            <select id="obligatoria-subpregunta">
-                                <option value="true">Sí</option>
-                                <option value="false">No</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Opciones para subpregunta de opción múltiple -->
-                        <div id="opciones-subpregunta" class="hidden">
-                            <h4>Opciones de Respuesta <span class="texto-info">(Máximo 5)</span></h4>
-                            <div id="lista-opciones-subpregunta">
-                                <!-- Aquí se insertarán las opciones dinámicamente -->
-                            </div>
-                            <button type="button" id="btn-agregar-opcion-subpregunta" class="btn-agregar">
-                                <i class="fas fa-plus"></i> Agregar Opción
-                            </button>
-                        </div>
-                        
-                        <button type="button" id="btn-agregar-subpregunta" class="btn-guardar btn-sm">
-                            <i class="fas fa-plus"></i> Añadir Subpregunta
-                        </button>
-                    </div>
-                    
-                    <div id="lista-subpreguntas">
-                        <!-- Aquí se mostrarán las subpreguntas añadidas -->
-                    </div>
-                </div>
 
                 <div class="acciones-pregunta">
                     <button type="submit" class="btn-guardar">
@@ -308,16 +254,4 @@
             cargando.style.display = 'none';
         }
     }, 3000);
-</script>
-
-<!-- Scripts para el creador de encuestas (orden es importante) -->
-<script src="../../../../js/admin/opciones_admin/crear_encuestas/cargar_carreras_fix.js"></script>
-<script src="../../../../js/admin/opciones_admin/crear_encuestas/subpreguntas.js"></script>
-<script>
-    // Esperamos a que el script de subpreguntas esté cargado antes de cargar el principal
-    setTimeout(function() {
-        const script = document.createElement('script');
-        script.src = "../../../../js/admin/opciones_admin/crear_encuestas/crear_encuestas_fixed.js";
-        document.body.appendChild(script);
-    }, 100);
 </script>

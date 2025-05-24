@@ -19,12 +19,9 @@
     let modulosEncuesta = [];
     let preguntasModulo = {};
     let opcionesPregunta = {};
-    let subpreguntasOpciones = {}; // Para almacenar subpreguntas por opción
-    let opcionesSubpregunta = {}; // Para almacenar opciones de subpreguntas
     let modoEdicion = false;
     let moduloActualId = null;
     let preguntaActualId = null;
-    let opcionActualId = null; // ID de la opción que tendrá una subpregunta
 
     /**
      * Inicializa el creador de encuestas
@@ -34,14 +31,6 @@
         
         // Ocultar inmediatamente el indicador de carga si está visible
         ocultarCargando();
-        
-        // Cargar CSS de subpreguntas
-        if (!document.querySelector('link[href*="../../../../css/admin/opciones_admin/crear_encuestas/subpreguntas.css"]')) {
-            const linkSubpreguntas = document.createElement('link');
-            linkSubpreguntas.rel = 'stylesheet';
-            linkSubpreguntas.href = '../../../../css/admin/opciones_admin/crear_encuestas/subpreguntas.css';
-            document.head.appendChild(linkSubpreguntas);
-        }
         
         // Cargar las carreras en el selector
         const selectorCarrera = document.getElementById('carrera-encuesta');
@@ -73,17 +62,6 @@
         document.getElementById('form-pregunta').addEventListener('submit', guardarPregunta);
         document.getElementById('tipo-pregunta').addEventListener('change', toggleOpcionesPregunta);
         document.getElementById('btn-agregar-opcion').addEventListener('click', agregarOpcionRespuesta);
-        
-        // Configurar eventos para subpreguntas (verificar que las funciones estén disponibles)
-        if (typeof toggleOpcionesSubpregunta === 'function') {
-            document.getElementById('tipo-subpregunta')?.addEventListener('change', toggleOpcionesSubpregunta);
-            document.getElementById('btn-agregar-opcion-subpregunta')?.addEventListener('click', agregarOpcionSubpregunta);
-            document.getElementById('btn-agregar-subpregunta')?.addEventListener('click', agregarSubpregunta);
-            document.getElementById('opcion-condicional')?.addEventListener('change', seleccionarOpcionCondicional);
-            console.log('Eventos de subpreguntas configurados correctamente');
-        } else {
-            console.warn('Las funciones de subpreguntas no están disponibles. Verifica que subpreguntas.js esté cargado.');
-        }
         
         // Configurar el botón para agregar módulo
         document.getElementById('btn-agregar-modulo').addEventListener('click', mostrarModalModulo);
@@ -526,70 +504,75 @@
         document.getElementById('modal-pregunta').style.display = 'none';
     }
 
-    function guardarPregunta(e) {
-        e.preventDefault();
+    function guardarPregunta(event) {
+        event.preventDefault();
         
         const textoPregunta = document.getElementById('texto-pregunta').value.trim();
         const tipoPregunta = document.getElementById('tipo-pregunta').value;
-        const obligatoria = document.getElementById('obligatoria-pregunta').value === 'true';
+        const obligatoriaPregunta = document.getElementById('obligatoria-pregunta').value === 'true';
         
         if (!textoPregunta) {
-            mostrarAlerta('Debes ingresar el texto de la pregunta', 'error');
+            mostrarAlerta('Debes ingresar un texto para la pregunta', 'error');
             return;
         }
         
-        // Obtener opciones si es de opción múltiple
+        // Crear ID de pregunta si es nueva
+        const preguntaId = modoEdicion && preguntaActualId ? preguntaActualId : 'preg_' + Date.now();
+        
+        // Crear objeto de pregunta base
+        const pregunta = {
+            id: preguntaId,
+            texto: textoPregunta,
+            tipo: tipoPregunta,
+            obligatoria: obligatoriaPregunta
+        };
+        
+        // Si es pregunta de opción múltiple, verificar que tenga opciones
         if (tipoPregunta === 'opcion_multiple') {
-            const opcionesElements = document.getElementById('lista-opciones').children;
+            // Obtener todas las opciones ingresadas
+            const opcionesElements = document.querySelectorAll('#lista-opciones .opcion-respuesta');
+            const opciones = [];
             
-            if (opcionesElements.length === 0) {
-                mostrarAlerta('Debes agregar al menos una opción para la pregunta', 'error');
-                return;
-            }
-            
-            // Limpiar opciones anteriores
-            opcionesPregunta[preguntaActualId] = [];
-            
-            // Recopilar opciones
-            Array.from(opcionesElements).forEach(opcionElement => {
-                const textoOpcion = opcionElement.querySelector('.texto-opcion').value.trim();
-                const opcionId = opcionElement.dataset.opcionId;
-                
+            // Procesar cada opción
+            opcionesElements.forEach((opcionElement, index) => {
+                const textoOpcion = opcionElement.querySelector('input').value.trim();
                 if (textoOpcion) {
+                    // Obtener o crear ID de opción
+                    const opcionId = opcionElement.dataset.opcionId || 'opt_' + Date.now() + '_' + index;
+                    opcionElement.dataset.opcionId = opcionId;  // Guardar ID en el elemento DOM
+                    
                     // Crear objeto de opción
                     const opcion = {
                         id: opcionId,
                         texto: textoOpcion
                     };
                     
-                    // Si hay una subpregunta asociada a esta opción, añadir referencia
-                    if (subpreguntasOpciones[opcionId]) {
-                        opcion.tieneSubpregunta = true;
-                        opcion.subpreguntaId = subpreguntasOpciones[opcionId].id;
+                    // Verificar si hay pregunta condicional para esta opción
+                    if (window.PreguntasCondicionales && 
+                        typeof window.PreguntasCondicionales.obtenerPreguntaCondicional === 'function') {
+                        
+                        const preguntaCondicional = window.PreguntasCondicionales.obtenerPreguntaCondicional(preguntaId, opcionId);
+                        
+                        if (preguntaCondicional) {
+                            opcion.preguntaCondicional = preguntaCondicional;
+                        }
                     }
                     
-                    opcionesPregunta[preguntaActualId].push(opcion);
+                    opciones.push(opcion);
                 }
             });
             
             // Verificar que haya al menos 2 opciones
-            if (opcionesPregunta[preguntaActualId].length < 2) {
+            if (opciones.length < 2) {
                 mostrarAlerta('Debes agregar al menos 2 opciones de respuesta', 'error');
                 return;
             }
-        }
-        
-        // Crear objeto de pregunta
-        const pregunta = {
-            id: preguntaActualId,
-            texto: textoPregunta,
-            tipo: tipoPregunta,
-            obligatoria: obligatoria
-        };
-        
-        // Agregar opciones si es pregunta de opción múltiple
-        if (tipoPregunta === 'opcion_multiple' && opcionesPregunta[preguntaActualId]) {
-            pregunta.opciones = opcionesPregunta[preguntaActualId];
+            
+            // Guardar opciones en el objeto pregunta
+            pregunta.opciones = opciones;
+            
+            // También guardar en el mapa de opciones (para compatibilidad)
+            opcionesPregunta[preguntaId] = opciones.map(opt => opt.texto);
         }
         
         // Agregar nueva pregunta al módulo actual
@@ -597,14 +580,24 @@
             preguntasModulo[moduloActualId] = [];
         }
         
-        // Verificar límite de preguntas
-        if (preguntasModulo[moduloActualId].length >= 10) {
+        // Verificar límite de preguntas (sin contar condicionales)
+        if (!modoEdicion && preguntasModulo[moduloActualId].length >= 10) {
             mostrarAlerta('No se pueden agregar más de 10 preguntas por módulo', 'error');
             return;
         }
         
-        // Agregar pregunta a la lista del módulo
-        preguntasModulo[moduloActualId].push(pregunta);
+        // Si estamos en modo edición, reemplazar la pregunta existente
+        if (modoEdicion) {
+            const index = preguntasModulo[moduloActualId].findIndex(p => p.id === preguntaId);
+            if (index !== -1) {
+                preguntasModulo[moduloActualId][index] = pregunta;
+            } else {
+                preguntasModulo[moduloActualId].push(pregunta);
+            }
+        } else {
+            // Agregar pregunta a la lista del módulo
+            preguntasModulo[moduloActualId].push(pregunta);
+        }
         
         // Actualizar contador de preguntas en el módulo
         const moduloElement = document.querySelector(`.modulo-encuesta[data-modulo-id="${moduloActualId}"]`);
@@ -612,14 +605,18 @@
             moduloElement.querySelector('.contador-preguntas').textContent = preguntasModulo[moduloActualId].length;
         }
         
-        // Renderizar nueva pregunta
-        renderizarPregunta(pregunta, preguntasModulo[moduloActualId].length);
+        // Actualizar la visualización de preguntas
+        actualizarVisualizacionPreguntas();
         
         // Cerrar modal
-        document.getElementById('modal-pregunta').style.display = 'none';
+        cerrarModalPregunta();
         
         // Mostrar mensaje de éxito
-        mostrarAlerta('Pregunta agregada correctamente', 'exito');
+        mostrarAlerta(modoEdicion ? 'Pregunta actualizada correctamente' : 'Pregunta agregada correctamente', 'exito');
+        
+        // Resetear modo edición
+        modoEdicion = false;
+        preguntaActualId = null;
     }
 
     function renderizarPregunta(pregunta, numero) {
