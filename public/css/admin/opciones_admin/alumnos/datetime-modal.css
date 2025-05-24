@@ -1,0 +1,77 @@
+/* Estilo minimalista para el modal de selección de fecha y hora */
+.datetime-modal-bg {
+  position: fixed;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.18);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.datetime-modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  display: flex;
+  min-width: 340px;
+  min-height: 270px;
+  overflow: hidden;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.datetime-modal .calendar-section {
+  border-right: 1px solid #f0f0f0;
+  padding: 24px 18px 24px 24px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.datetime-modal .time-section {
+  padding: 24px 24px 24px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+}
+.datetime-modal .calendar-section input[type="date"] {
+  font-size: 1.1em;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: #fff;
+}
+.datetime-modal .time-section select {
+  font-size: 1.1em;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin: 0 3px;
+  background: #fff;
+}
+.datetime-modal .modal-footer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+}
+.datetime-modal .modal-footer button {
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-size: 1em;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.datetime-modal .modal-footer button.cancel {
+  background: #e5e7eb;
+  color: #111;
+}
+.datetime-modal .modal-footer button:hover {
+  background: #1d4ed8;
+}
+.datetime-modal .modal-footer button.cancel:hover {
+  background: #cbd5e1;
+}

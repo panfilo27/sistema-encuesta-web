@@ -677,17 +677,12 @@ function cargarContenidoEncuestas() {
                     </div>
                     
                     <h4>Periodo de Inicio</h4>
-                    <div class="fecha-hora-container">
-                        <div class="form-group">
-                            <label for="fecha-inicio-encuesta">Fecha de Inicio:</label>
-                            <input type="date" id="fecha-inicio-encuesta" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="hora-inicio-encuesta">Hora de Inicio:</label>
-                            <input type="time" id="hora-inicio-encuesta" value="08:00" required>
-                        </div>
-                    </div>
+<div class="fecha-hora-container">
+    <button type="button" id="btn-fecha-hora-inicio" class="btn-fecha-hora-modal">Seleccionar fecha y hora de inicio</button>
+    <input type="hidden" id="fecha-inicio-encuesta" name="fecha-inicio-encuesta" required>
+    <input type="hidden" id="hora-inicio-encuesta" name="hora-inicio-encuesta" required>
+    <span id="preview-fecha-hora-inicio" class="preview-fecha-hora"></span>
+</div>
                     
                     <h4>Periodo de Fin</h4>
                     <div class="fecha-hora-container">
@@ -708,14 +703,6 @@ function cargarContenidoEncuestas() {
                         <button type="button" id="btn-cancelar-encuesta" class="btn-cancelar">Cancelar</button>
                         <button type="submit" class="btn-guardar">Guardar Encuesta</button>
                     </div>
-                    <div class="grupo-formulario">
-                        <label for="fecha-inicio-encuesta">Inicio de la encuesta:</label>
-                        <input type="datetime-local" id="fecha-inicio-encuesta" name="fecha-inicio-encuesta" required>
-                    </div>
-                    <div class="grupo-formulario">
-                        <label for="fecha-fin-encuesta">Fin de la encuesta:</label>
-                        <input type="datetime-local" id="fecha-fin-encuesta" name="fecha-fin-encuesta" required>
-                    </div>
                 </form>
             </div>
             
@@ -730,17 +717,123 @@ function cargarContenidoEncuestas() {
         </div>
     `;
     
-    // Establecer fechas predeterminadas para los inputs de periodo de encuesta
-    const inputInicio = document.getElementById('fecha-inicio-encuesta');
-    const inputFin = document.getElementById('fecha-fin-encuesta');
-    if (inputInicio && inputFin) {
-        const now = new Date();
-        const nowISO = now.toISOString().slice(0,16);
-        const fin = new Date(now.getTime() + 30*60000);
-        const finISO = fin.toISOString().slice(0,16);
-        inputInicio.value = nowISO;
-        inputFin.value = finISO;
+    // Importar CSS del modal si no está cargado
+    if (!document.querySelector('link[href*="datetime-modal.css"]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '../../../../css/admin/opciones_admin/alumnos/datetime-modal.css';
+        document.head.appendChild(link);
     }
+
+    // Lógica para el botón de selección de fecha y hora de inicio
+    (function initFechaHoraInicioModal() {
+        const btn = document.getElementById('btn-fecha-hora-inicio');
+        const inputFecha = document.getElementById('fecha-inicio-encuesta');
+        const inputHora = document.getElementById('hora-inicio-encuesta');
+        const preview = document.getElementById('preview-fecha-hora-inicio');
+        // Valores por defecto: ahora
+        const now = new Date();
+        const pad = n => n.toString().padStart(2, '0');
+        let fecha = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+        let hour = now.getHours();
+        let min = now.getMinutes();
+        let ampm = hour >= 12 ? 'PM' : 'AM';
+        let hour12 = hour % 12; if (hour12 === 0) hour12 = 12;
+        // Mostrar preview inicial
+        function updatePreview() {
+            preview.textContent = `${fecha} ${pad(hour12)}:${pad(min)} ${ampm}`;
+        }
+        updatePreview();
+        inputFecha.value = fecha;
+        inputHora.value = `${pad(hour)}:${pad(min)}`;
+
+        btn.addEventListener('click', function() {
+            // Crear modal solo si no existe
+            if (document.getElementById('datetime-modal-inicio-bg')) {
+                document.getElementById('datetime-modal-inicio-bg').style.display = 'flex';
+                return;
+            }
+            // Modal HTML
+            const modalBg = document.createElement('div');
+            modalBg.className = 'datetime-modal-bg';
+            modalBg.id = 'datetime-modal-inicio-bg';
+            modalBg.innerHTML = `
+                <div class="datetime-modal">
+                    <div class="calendar-section">
+                        <label style="margin-bottom:8px;font-weight:500;">Fecha</label>
+                        <input type="date" id="modal-date-inicio" value="${fecha}" min="${fecha}" style="width:145px;">
+                    </div>
+                    <div class="time-section">
+                        <label style="margin-bottom:8px;font-weight:500;">Hora</label>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <select id="modal-hour-inicio">
+                                ${[...Array(12)].map((_,i)=>`<option value="${i+1}"${i+1===hour12?' selected':''}>${pad(i+1)}</option>`).join('')}
+                            </select>
+                            :
+                            <select id="modal-min-inicio">
+                                ${[0,5,10,15,20,25,30,35,40,45,50,55].map(m=>`<option value="${pad(m)}"${m===min-(min%5)?' selected':''}>${pad(m)}</option>`).join('')}
+                            </select>
+                            <select id="modal-ampm-inicio">
+                                <option value="AM"${ampm==='AM'?' selected':''}>AM</option>
+                                <option value="PM"${ampm==='PM'?' selected':''}>PM</option>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="cancel" type="button" id="cancelar-modal-inicio">Cancelar</button>
+                            <button type="button" id="aceptar-modal-inicio">Aceptar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalBg);
+            // Eventos del modal
+            document.getElementById('modal-date-inicio').addEventListener('change', function(e){
+                fecha = e.target.value;
+            });
+            document.getElementById('modal-hour-inicio').addEventListener('change', function(e){
+                hour12 = parseInt(e.target.value);
+            });
+            document.getElementById('modal-min-inicio').addEventListener('change', function(e){
+                min = parseInt(e.target.value);
+            });
+            document.getElementById('modal-ampm-inicio').addEventListener('change', function(e){
+                ampm = e.target.value;
+            });
+            document.getElementById('cancelar-modal-inicio').addEventListener('click', function(){
+                modalBg.style.display = 'none';
+            });
+            document.getElementById('aceptar-modal-inicio').addEventListener('click', function(){
+                // Calcular hora 24h
+                let h = hour12;
+                if (ampm === 'PM' && h !== 12) h += 12;
+                if (ampm === 'AM' && h === 12) h = 0;
+                inputFecha.value = fecha;
+                inputHora.value = `${pad(h)}:${pad(min)}`;
+                preview.textContent = `${fecha} ${pad(hour12)}:${pad(min)} ${ampm}`;
+                modalBg.style.display = 'none';
+            });
+            // Cerrar modal al hacer click fuera
+            modalBg.addEventListener('click', function(e){
+                if (e.target === modalBg) modalBg.style.display = 'none';
+            });
+        });
+    })();
+
+    // Pre-cargar fechas y horas para el periodo de fin (como antes)
+    (function precargarFechasEncuestaFin() {
+        const now = new Date();
+        const pad = n => n.toString().padStart(2, '0');
+        // Fecha y hora de fin (30 min después)
+        const fin = new Date(now.getTime() + 30*60000);
+        const fechaFin = `${fin.getFullYear()}-${pad(fin.getMonth()+1)}-${pad(fin.getDate())}`;
+        const horaFin = `${pad(fin.getHours())}:${pad(fin.getMinutes())}`;
+        const inputFechaFin = document.getElementById('fecha-fin-encuesta');
+        const inputHoraFin = document.getElementById('hora-fin-encuesta');
+        if (inputFechaFin && inputHoraFin) {
+            inputFechaFin.value = fechaFin;
+            inputHoraFin.value = horaFin;
+        }
+    })();
 
     // Crear modal para estadísticas
     if (!document.getElementById('modal-estadisticas-encuesta')) {
