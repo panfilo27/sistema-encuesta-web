@@ -1,0 +1,265 @@
+/* Estilos para el botón y modal de fecha/hora */
+.btn-datetime {
+  background: #f5f7fa;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-datetime:hover {
+  background: #e5e7eb;
+  border-color: #2563eb;
+}
+.btn-datetime:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+}
+.btn-datetime i {
+  color: #2563eb;
+  font-size: 1.1rem;
+}
+.datetime-value {
+  margin-left: 8px;
+  font-weight: 500;
+  color: #2563eb;
+}
+
+/* Modal emergente */
+.datetime-modal-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.datetime-modal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  width: 650px;
+  max-width: 90vw;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.datetime-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.datetime-modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #111827;
+}
+.datetime-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.datetime-modal-body {
+  display: flex;
+  padding: 0;
+}
+
+/* Calendario */
+.datetime-calendar {
+  padding: 16px;
+  border-right: 1px solid #e5e7eb;
+  width: 60%;
+}
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.calendar-month {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #111827;
+}
+.calendar-nav {
+  display: flex;
+  gap: 8px;
+}
+.calendar-nav-btn {
+  background: #f3f4f6;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #4b5563;
+  transition: background 0.2s;
+}
+.calendar-nav-btn:hover {
+  background: #e5e7eb;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.calendar-weekday {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 500;
+  padding: 6px 0;
+}
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+.calendar-day:hover {
+  background: #e5e7eb;
+}
+.calendar-day.today {
+  background: #e5e7eb;
+  font-weight: bold;
+}
+.calendar-day.selected {
+  background: #2563eb;
+  color: white;
+}
+.calendar-day.other-month {
+  color: #9ca3af;
+}
+
+/* Selector de hora */
+.datetime-time {
+  width: 40%;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+.time-selectors {
+  display: flex;
+  justify-content: space-between;
+  height: 240px;
+}
+.time-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  max-height: 240px;
+  border-radius: 8px;
+  background: #f9fafb;
+  margin: 0 4px;
+}
+.time-column::-webkit-scrollbar {
+  width: 6px;
+}
+.time-column::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+.time-column-header {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+  padding: 6px 0;
+  position: sticky;
+  top: 0;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+}
+.time-option {
+  padding: 8px 0;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+}
+.time-option:hover {
+  background: #e5e7eb;
+}
+.time-option.selected {
+  background: #bfdbfe;
+  font-weight: 500;
+  color: #1e40af;
+}
+.ampm-options {
+  display: flex;
+  flex-direction: column;
+  margin: 0 4px;
+}
+.ampm-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 8px;
+  margin: 2px 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+.ampm-option:hover {
+  background: #e5e7eb;
+}
+.ampm-option.selected {
+  background: #2563eb;
+  color: white;
+}
+
+/* Botones del modal */
+.datetime-modal-footer {
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.datetime-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.datetime-btn-primary {
+  background: #2563eb;
+  color: white;
+}
+.datetime-btn-primary:hover {
+  background: #1d4ed8;
+}
+.datetime-btn-secondary {
+  background: #f3f4f6;
+  color: #111827;
+}
+.datetime-btn-secondary:hover {
+  background: #e5e7eb;
+}

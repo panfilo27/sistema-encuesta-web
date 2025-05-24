@@ -677,42 +677,12 @@ function cargarContenidoEncuestas() {
                     </div>
                     
                     <h4>Periodo de Inicio</h4>
-<div class="inline-datetime-container" id="inicio-datetime-container">
-    <div class="calendar-container">
-        <div class="calendar-header">
-            <h5 id="inicio-calendar-title">Mayo 2025</h5>
-            <div class="calendar-nav">
-                <button id="inicio-prev-month" type="button">&lt;</button>
-                <button id="inicio-next-month" type="button">&gt;</button>
-            </div>
-        </div>
-        <div class="calendar-weekdays">
-            <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
-        </div>
-        <div class="calendar-days" id="inicio-calendar-days">
-            <!-- Los días se generarán mediante JavaScript -->
-        </div>
-    </div>
-    <div class="time-selector">
-        <h5>Hora</h5>
-        <div class="time-controls">
-            <div class="time-spinner">
-                <button type="button" id="inicio-hour-up">&#9650;</button>
-                <div class="time-spinner-value" id="inicio-hour-value">12</div>
-                <button type="button" id="inicio-hour-down">&#9660;</button>
-            </div>
-            <div class="time-separator">:</div>
-            <div class="time-spinner">
-                <button type="button" id="inicio-min-up">&#9650;</button>
-                <div class="time-spinner-value" id="inicio-min-value">00</div>
-                <button type="button" id="inicio-min-down">&#9660;</button>
-            </div>
-        </div>
-        <div class="ampm-toggle">
-            <div class="ampm-btn active" id="inicio-am-btn">AM</div>
-            <div class="ampm-btn" id="inicio-pm-btn">PM</div>
-        </div>
-    </div>
+<div class="fecha-hora-container">
+    <button type="button" id="btn-datetime-inicio" class="btn-datetime">
+        <i class="fas fa-calendar-alt"></i>
+        Seleccionar fecha y hora de inicio
+        <span id="datetime-value-inicio" class="datetime-value"></span>
+    </button>
     <input type="hidden" id="fecha-inicio-encuesta" name="fecha-inicio-encuesta" required>
     <input type="hidden" id="hora-inicio-encuesta" name="hora-inicio-encuesta" required>
 </div>
@@ -750,211 +720,315 @@ function cargarContenidoEncuestas() {
         </div>
     `;
     
-    // Importar CSS para el calendario inline si no está cargado
-    if (!document.querySelector('link[href*="inline-calendar.css"]')) {
+    // Importar CSS para el calendario modal si no está cargado
+    if (!document.querySelector('link[href*="datetime-popup.css"]')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = '../../../../css/admin/opciones_admin/alumnos/inline-calendar.css';
+        link.href = '../../../../css/admin/opciones_admin/alumnos/datetime-popup.css';
         document.head.appendChild(link);
     }
+    
+    // Importar FontAwesome si no está cargado (para los iconos del botón)
+    if (!document.querySelector('link[href*="font-awesome"]')) {
+        const fontAwesome = document.createElement('link');
+        fontAwesome.rel = 'stylesheet';
+        fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+        document.head.appendChild(fontAwesome);
+    }
 
-    // Inicializar el calendario y selector de hora inline para periodo de inicio
-    (function initCalendarioInlineInicio() {
-        // Funciones utilidad
+    // Inicializar el calendario y selector de hora para periodo de inicio
+    (function initDatetimeInicioModal() {
+        // Funciones de utilidad
         const pad = n => n.toString().padStart(2, '0');
         const formatoFecha = (date) => `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
-        
-        // Elementos DOM
-        const inputFecha = document.getElementById('fecha-inicio-encuesta');
-        const inputHora = document.getElementById('hora-inicio-encuesta');
-        const calendarTitle = document.getElementById('inicio-calendar-title');
-        const calendarDays = document.getElementById('inicio-calendar-days');
-        const prevMonthBtn = document.getElementById('inicio-prev-month');
-        const nextMonthBtn = document.getElementById('inicio-next-month');
-        const hourValue = document.getElementById('inicio-hour-value');
-        const minValue = document.getElementById('inicio-min-value');
-        const hourUpBtn = document.getElementById('inicio-hour-up');
-        const hourDownBtn = document.getElementById('inicio-hour-down');
-        const minUpBtn = document.getElementById('inicio-min-up');
-        const minDownBtn = document.getElementById('inicio-min-down');
-        const amBtn = document.getElementById('inicio-am-btn');
-        const pmBtn = document.getElementById('inicio-pm-btn');
-        
-        // Estado inicial: fecha y hora actual
-        const now = new Date();
-        let currentDate = new Date(now);
-        let selectedDate = new Date(now);
-        let hour = now.getHours();
-        let min = now.getMinutes() - (now.getMinutes() % 5); // Redondear a intervalos de 5 min
-        let ampm = hour >= 12 ? 'PM' : 'AM';
-        let hour12 = hour % 12; if (hour12 === 0) hour12 = 12;
-        
-        // Nombres de meses
         const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         
-        // Establecer valores iniciales
-        hourValue.textContent = pad(hour12);
-        minValue.textContent = pad(min);
-        if (ampm === 'PM') {
-            amBtn.classList.remove('active');
-            pmBtn.classList.add('active');
-        } else {
-            amBtn.classList.add('active');
-            pmBtn.classList.remove('active');
-        }
+        // Referencias DOM
+        const btnDatetime = document.getElementById('btn-datetime-inicio');
+        const datetimeValue = document.getElementById('datetime-value-inicio');
+        const inputFecha = document.getElementById('fecha-inicio-encuesta');
+        const inputHora = document.getElementById('hora-inicio-encuesta');
         
-        // Actualizar valores ocultos
-        function updateInputValues() {
-            // Calcular hora 24h
-            let h = hour12;
-            if (ampm === 'PM' && h !== 12) h += 12;
-            if (ampm === 'AM' && h === 12) h = 0;
+        // Estado actual: fecha y hora
+        const now = new Date();
+        let selectedDate = new Date(now);
+        let selectedHour = now.getHours();
+        let selectedMinute = Math.floor(now.getMinutes() / 5) * 5; // Redondear a intervalos de 5 min
+        let selectedAMPM = selectedHour >= 12 ? 'PM' : 'AM';
+        let selectedHour12 = selectedHour % 12;
+        if (selectedHour12 === 0) selectedHour12 = 12;
+        
+        // Modal - se creará cuando se haga clic en el botón
+        let modalCreated = false;
+        let calendarModalEl = null;
+        
+        // Actualizar el valor del botón y los inputs ocultos
+        function updateDatetimeValue() {
+            // Calcular hora 24h para el input oculto
+            let h = selectedHour12;
+            if (selectedAMPM === 'PM' && h !== 12) h += 12;
+            if (selectedAMPM === 'AM' && h === 12) h = 0;
             
+            // Actualizar inputs ocultos para el formulario
             inputFecha.value = formatoFecha(selectedDate);
-            inputHora.value = `${pad(h)}:${pad(min)}`;
+            inputHora.value = `${pad(h)}:${pad(selectedMinute)}`;
+            
+            // Actualizar el texto visible en el botón
+            const formattedDate = `${selectedDate.getDate()} ${meses[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
+            datetimeValue.textContent = `${formattedDate}, ${pad(selectedHour12)}:${pad(selectedMinute)} ${selectedAMPM}`;
         }
         
-        // Inicializar los inputs con los valores predeterminados
-        updateInputValues();
+        // Inicializar con los valores por defecto
+        updateDatetimeValue();
         
-        // Generar título del calendario
-        function updateCalendarTitle() {
-            calendarTitle.textContent = `${meses[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        // Generar el HTML del modal de calendario y hora
+        function createCalendarModal() {
+            if (modalCreated) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'datetime-modal-bg';
+            modal.id = 'datetime-modal-inicio';
+            modal.style.display = 'none';
+            
+            // Inicio del mes para mostrar
+            const currentViewDate = new Date(selectedDate);
+            
+            // Generar opciones de horas (1-12)
+            const hoursOptions = Array.from({length: 12}, (_, i) => {
+                const hour = i + 1;
+                return `<div class="time-option${hour === selectedHour12 ? ' selected' : ''}" data-hour="${hour}">${pad(hour)}</div>`;
+            }).join('');
+            
+            // Generar opciones de minutos (0-55, incrementos de 5)
+            const minutesOptions = Array.from({length: 12}, (_, i) => {
+                const minute = i * 5;
+                return `<div class="time-option${minute === selectedMinute ? ' selected' : ''}" data-minute="${minute}">${pad(minute)}</div>`;
+            }).join('');
+            
+            modal.innerHTML = `
+                <div class="datetime-modal">
+                    <div class="datetime-modal-header">
+                        <h3>Selecciona fecha y hora de inicio</h3>
+                        <button type="button" class="datetime-modal-close" id="datetime-close-inicio">&times;</button>
+                    </div>
+                    <div class="datetime-modal-body">
+                        <div class="datetime-calendar">
+                            <div class="calendar-header">
+                                <div class="calendar-month" id="calendar-month-inicio">${meses[currentViewDate.getMonth()]} ${currentViewDate.getFullYear()}</div>
+                                <div class="calendar-nav">
+                                    <button type="button" class="calendar-nav-btn" id="prev-month-inicio">&lt;</button>
+                                    <button type="button" class="calendar-nav-btn" id="next-month-inicio">&gt;</button>
+                                </div>
+                            </div>
+                            <div class="calendar-grid">
+                                <div class="calendar-weekday">D</div>
+                                <div class="calendar-weekday">L</div>
+                                <div class="calendar-weekday">M</div>
+                                <div class="calendar-weekday">M</div>
+                                <div class="calendar-weekday">J</div>
+                                <div class="calendar-weekday">V</div>
+                                <div class="calendar-weekday">S</div>
+                                <div id="calendar-days-inicio"></div>
+                            </div>
+                        </div>
+                        <div class="datetime-time">
+                            <div class="time-selectors">
+                                <div class="time-column" id="hours-column-inicio">
+                                    <div class="time-column-header">Hora</div>
+                                    ${hoursOptions}
+                                </div>
+                                <div class="time-column" id="minutes-column-inicio">
+                                    <div class="time-column-header">Minuto</div>
+                                    ${minutesOptions}
+                                </div>
+                                <div class="ampm-options">
+                                    <div class="ampm-option${selectedAMPM === 'AM' ? ' selected' : ''}" data-ampm="AM">AM</div>
+                                    <div class="ampm-option${selectedAMPM === 'PM' ? ' selected' : ''}" data-ampm="PM">PM</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="datetime-modal-footer">
+                        <button type="button" class="datetime-btn datetime-btn-secondary" id="cancel-datetime-inicio">Cancelar</button>
+                        <button type="button" class="datetime-btn datetime-btn-primary" id="confirm-datetime-inicio">Aceptar</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            calendarModalEl = modal;
+            modalCreated = true;
+            
+            // Generar el calendario con los días
+            generateCalendarDays(currentViewDate);
+            
+            // Configurar eventos del modal
+            setupModalEvents();
         }
         
-        // Generar días del calendario
-        function generateCalendarDays() {
+        // Generar días del calendario para un mes determinado
+        function generateCalendarDays(date) {
+            const calendarDays = document.getElementById('calendar-days-inicio');
+            if (!calendarDays) return;
+            
+            // Limpiar calendario existente
             calendarDays.innerHTML = '';
             
-            // Primer día del mes actual
-            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-            // Último día del mes
-            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-            // Día de la semana del primer día (0 = domingo, 6 = sábado)
-            const firstDayOfWeek = firstDay.getDay();
+            // Configurar variables para el calendario
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const firstDayOfWeek = firstDay.getDay(); // 0 = domingo, 6 = sábado
             
-            // Añadir días del mes anterior para completar la primera semana
-            const prevMonthLastDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate();
+            // Días del mes anterior para completar la primera semana
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
             for (let i = 0; i < firstDayOfWeek; i++) {
-                const dayElement = document.createElement('div');
-                dayElement.classList.add('calendar-day', 'other-month');
-                dayElement.textContent = prevMonthLastDay - firstDayOfWeek + i + 1;
-                calendarDays.appendChild(dayElement);
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.textContent = prevMonthLastDay - firstDayOfWeek + i + 1;
+                calendarDays.appendChild(day);
             }
             
-            // Añadir días del mes actual
+            // Días del mes actual
             const today = new Date();
-            for (let i = 1; i <= lastDay.getDate(); i++) {
-                const dayElement = document.createElement('div');
-                dayElement.classList.add('calendar-day');
-                dayElement.textContent = i;
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                day.textContent = i;
+                day.dataset.date = `${year}-${pad(month + 1)}-${pad(i)}`;
                 
-                // Marcar día actual
-                if (currentDate.getFullYear() === today.getFullYear() && 
-                    currentDate.getMonth() === today.getMonth() && 
-                    i === today.getDate()) {
-                    dayElement.classList.add('today');
+                // Marcar el día actual
+                if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
+                    day.classList.add('today');
                 }
                 
-                // Marcar día seleccionado
-                if (currentDate.getFullYear() === selectedDate.getFullYear() && 
-                    currentDate.getMonth() === selectedDate.getMonth() && 
-                    i === selectedDate.getDate()) {
-                    dayElement.classList.add('selected');
+                // Marcar el día seleccionado
+                if (year === selectedDate.getFullYear() && month === selectedDate.getMonth() && i === selectedDate.getDate()) {
+                    day.classList.add('selected');
                 }
                 
-                // Evento al hacer click en un día
-                dayElement.addEventListener('click', function() {
-                    // Eliminar clase 'selected' del día anteriormente seleccionado
+                // Evento al hacer clic en un día
+                day.addEventListener('click', function() {
+                    // Quitar selección anterior
                     const prevSelected = calendarDays.querySelector('.calendar-day.selected');
-                    if (prevSelected) {
-                        prevSelected.classList.remove('selected');
-                    }
+                    if (prevSelected) prevSelected.classList.remove('selected');
                     
                     // Marcar este día como seleccionado
-                    dayElement.classList.add('selected');
+                    day.classList.add('selected');
                     
                     // Actualizar fecha seleccionada
-                    selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
-                    
-                    // Actualizar valores de los inputs
-                    updateInputValues();
+                    const [yearStr, monthStr, dayStr] = day.dataset.date.split('-');
+                    selectedDate = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr));
                 });
                 
-                calendarDays.appendChild(dayElement);
+                calendarDays.appendChild(day);
             }
             
-            // Añadir días del mes siguiente para completar la última semana
-            const totalCells = 42; // 6 filas * 7 columnas
-            const cellsToAdd = totalCells - (firstDayOfWeek + lastDay.getDate());
-            for (let i = 1; i <= cellsToAdd; i++) {
-                const dayElement = document.createElement('div');
-                dayElement.classList.add('calendar-day', 'other-month');
-                dayElement.textContent = i;
-                calendarDays.appendChild(dayElement);
+            // Días del mes siguiente para completar la última semana
+            const daysFromNextMonth = 42 - (firstDayOfWeek + daysInMonth); // 6 filas x 7 días = 42 celdas
+            for (let i = 1; i <= daysFromNextMonth; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.textContent = i;
+                calendarDays.appendChild(day);
             }
         }
         
-        // Iniciar el calendario
-        updateCalendarTitle();
-        generateCalendarDays();
+        // Configurar los eventos del modal
+        function setupModalEvents() {
+            // Navegación del calendario
+            const prevMonthBtn = document.getElementById('prev-month-inicio');
+            const nextMonthBtn = document.getElementById('next-month-inicio');
+            const calendarMonth = document.getElementById('calendar-month-inicio');
+            
+            // Fecha actual en vista (para navegación)
+            let currentViewDate = new Date(selectedDate);
+            
+            // Cambiar mes y actualizar calendario
+            prevMonthBtn.addEventListener('click', function() {
+                currentViewDate.setMonth(currentViewDate.getMonth() - 1);
+                calendarMonth.textContent = `${meses[currentViewDate.getMonth()]} ${currentViewDate.getFullYear()}`;
+                generateCalendarDays(currentViewDate);
+            });
+            
+            nextMonthBtn.addEventListener('click', function() {
+                currentViewDate.setMonth(currentViewDate.getMonth() + 1);
+                calendarMonth.textContent = `${meses[currentViewDate.getMonth()]} ${currentViewDate.getFullYear()}`;
+                generateCalendarDays(currentViewDate);
+            });
+            
+            // Selección de hora
+            const hoursColumn = document.getElementById('hours-column-inicio');
+            hoursColumn.addEventListener('click', function(e) {
+                if (e.target.classList.contains('time-option')) {
+                    // Quitar selección anterior
+                    const prevSelected = hoursColumn.querySelector('.time-option.selected');
+                    if (prevSelected) prevSelected.classList.remove('selected');
+                    
+                    // Marcar nueva hora seleccionada
+                    e.target.classList.add('selected');
+                    selectedHour12 = parseInt(e.target.dataset.hour);
+                }
+            });
+            
+            // Selección de minutos
+            const minutesColumn = document.getElementById('minutes-column-inicio');
+            minutesColumn.addEventListener('click', function(e) {
+                if (e.target.classList.contains('time-option')) {
+                    // Quitar selección anterior
+                    const prevSelected = minutesColumn.querySelector('.time-option.selected');
+                    if (prevSelected) prevSelected.classList.remove('selected');
+                    
+                    // Marcar nuevos minutos seleccionados
+                    e.target.classList.add('selected');
+                    selectedMinute = parseInt(e.target.dataset.minute);
+                }
+            });
+            
+            // Selección de AM/PM
+            const ampmOptions = document.querySelector('.ampm-options');
+            ampmOptions.addEventListener('click', function(e) {
+                if (e.target.classList.contains('ampm-option')) {
+                    // Quitar selección anterior
+                    const prevSelected = ampmOptions.querySelector('.ampm-option.selected');
+                    if (prevSelected) prevSelected.classList.remove('selected');
+                    
+                    // Marcar nueva opción seleccionada
+                    e.target.classList.add('selected');
+                    selectedAMPM = e.target.dataset.ampm;
+                }
+            });
+            
+            // Botones de acción
+            document.getElementById('datetime-close-inicio').addEventListener('click', function() {
+                calendarModalEl.style.display = 'none';
+            });
+            
+            document.getElementById('cancel-datetime-inicio').addEventListener('click', function() {
+                calendarModalEl.style.display = 'none';
+            });
+            
+            document.getElementById('confirm-datetime-inicio').addEventListener('click', function() {
+                updateDatetimeValue();
+                calendarModalEl.style.display = 'none';
+            });
+            
+            // Cerrar modal haciendo clic fuera
+            calendarModalEl.addEventListener('click', function(e) {
+                if (e.target === calendarModalEl) {
+                    calendarModalEl.style.display = 'none';
+                }
+            });
+        }
         
-        // Eventos de navegación entre meses
-        prevMonthBtn.addEventListener('click', function() {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            updateCalendarTitle();
-            generateCalendarDays();
-        });
-        
-        nextMonthBtn.addEventListener('click', function() {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            updateCalendarTitle();
-            generateCalendarDays();
-        });
-        
-        // Control de hora
-        hourUpBtn.addEventListener('click', function() {
-            hour12 = hour12 === 12 ? 1 : hour12 + 1;
-            hourValue.textContent = pad(hour12);
-            updateInputValues();
-        });
-        
-        hourDownBtn.addEventListener('click', function() {
-            hour12 = hour12 === 1 ? 12 : hour12 - 1;
-            hourValue.textContent = pad(hour12);
-            updateInputValues();
-        });
-        
-        // Control de minutos
-        minUpBtn.addEventListener('click', function() {
-            min = (min + 5) % 60;
-            minValue.textContent = pad(min);
-            updateInputValues();
-        });
-        
-        minDownBtn.addEventListener('click', function() {
-            min = (min - 5 + 60) % 60; // Suma 60 para evitar números negativos
-            minValue.textContent = pad(min);
-            updateInputValues();
-        });
-        
-        // Control de AM/PM
-        amBtn.addEventListener('click', function() {
-            if (ampm !== 'AM') {
-                ampm = 'AM';
-                amBtn.classList.add('active');
-                pmBtn.classList.remove('active');
-                updateInputValues();
+        // Evento para mostrar el modal al hacer clic en el botón
+        btnDatetime.addEventListener('click', function() {
+            if (!modalCreated) {
+                createCalendarModal();
             }
-        });
-        
-        pmBtn.addEventListener('click', function() {
-            if (ampm !== 'PM') {
-                ampm = 'PM';
-                pmBtn.classList.add('active');
-                amBtn.classList.remove('active');
-                updateInputValues();
-            }
+            calendarModalEl.style.display = 'flex';
         });
     })();
 
