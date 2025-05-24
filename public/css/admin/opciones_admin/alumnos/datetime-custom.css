@@ -1,0 +1,58 @@
+/* Estilos personalizados para los selectores de fecha/hora usando flatpickr */
+
+/* Contenedor de los periodos de inicio y fin en fila */
+.periodos-container {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.periodo-seccion {
+  flex: 1;
+}
+
+.periodo-seccion h4 {
+  margin-bottom: 12px;
+  color: #1e40af;
+  font-size: 1.1rem;
+}
+
+/* Estilo de los inputs de flatpickr */
+.flatpickr-input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  font-size: 1rem;
+  color: #1f2937;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.flatpickr-input:hover {
+  border-color: #2563eb;
+  background-color: #f3f4f6;
+}
+
+.flatpickr-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* Ajustes para el calendario de flatpickr */
+.flatpickr-calendar {
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 5px;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .periodos-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+}

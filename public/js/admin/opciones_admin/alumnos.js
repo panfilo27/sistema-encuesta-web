@@ -676,19 +676,25 @@ function cargarContenidoEncuestas() {
                         <textarea id="descripcion-encuesta" required></textarea>
                     </div>
                     
-                    <h4>Periodo de Inicio</h4>
-<div class="fecha-hora-container">
-    <input type="text" id="datetime-inicio" class="flatpickr-input" placeholder="Seleccionar fecha y hora de inicio" readonly>
-    <input type="hidden" id="fecha-inicio-encuesta" name="fecha-inicio-encuesta" required>
-    <input type="hidden" id="hora-inicio-encuesta" name="hora-inicio-encuesta" required>
-</div>
-                    
-                    <h4>Periodo de Fin</h4>
-<div class="fecha-hora-container">
-    <input type="text" id="datetime-fin" class="flatpickr-input" placeholder="Seleccionar fecha y hora de fin" readonly>
-    <input type="hidden" id="fecha-fin-encuesta" name="fecha-fin-encuesta" required>
-    <input type="hidden" id="hora-fin-encuesta" name="hora-fin-encuesta" required>
-</div>
+                    <div class="periodos-container">
+                        <div class="periodo-seccion">
+                            <h4>Periodo de Inicio</h4>
+                            <div class="fecha-hora-container">
+                                <input type="text" id="datetime-inicio" class="flatpickr-input" placeholder="Seleccionar fecha y hora de inicio" readonly>
+                                <input type="hidden" id="fecha-inicio-encuesta" name="fecha-inicio-encuesta" required>
+                                <input type="hidden" id="hora-inicio-encuesta" name="hora-inicio-encuesta" required>
+                            </div>
+                        </div>
+                        
+                        <div class="periodo-seccion">
+                            <h4>Periodo de Fin</h4>
+                            <div class="fecha-hora-container">
+                                <input type="text" id="datetime-fin" class="flatpickr-input" placeholder="Seleccionar fecha y hora de fin" readonly>
+                                <input type="hidden" id="fecha-fin-encuesta" name="fecha-fin-encuesta" required>
+                                <input type="hidden" id="hora-fin-encuesta" name="hora-fin-encuesta" required>
+                            </div>
+                        </div>
+                    </div>
                     
                     <span id="error-encuesta" class="error-mensaje"></span>
                     
@@ -709,6 +715,14 @@ function cargarContenidoEncuestas() {
             </div>
         </div>
     `;
+    
+    // Importar CSS personalizado para los selectores de fecha/hora
+    if (!document.querySelector('link[href*="datetime-custom.css"]')) {
+        const customCSS = document.createElement('link');
+        customCSS.rel = 'stylesheet';
+        customCSS.href = '../../../../css/admin/opciones_admin/alumnos/datetime-custom.css';
+        document.head.appendChild(customCSS);
+    }
     
     // Importar Flatpickr CSS y JS si no está cargado
     if (!document.querySelector('link[href*="flatpickr.min.css"]')) {
