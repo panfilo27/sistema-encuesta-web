@@ -677,21 +677,44 @@ function cargarContenidoEncuestas() {
                     </div>
                     
                     <h4>Periodo de Inicio</h4>
-<div class="panel-fecha-hora-inicio">
-  <div class="custom-calendar" id="custom-calendar-inicio"></div>
-  <div class="custom-time-picker">
-    <div class="label">Hora</div>
-    <div class="scroll-list" id="custom-hour-list"></div>
-    <div class="label">Minutos</div>
-    <div class="scroll-list" id="custom-min-list"></div>
-    <div class="ampm-btns">
-      <button type="button" class="ampm-btn" id="ampm-am">AM</button>
-      <button type="button" class="ampm-btn" id="ampm-pm">PM</button>
+<div class="inline-datetime-container" id="inicio-datetime-container">
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h5 id="inicio-calendar-title">Mayo 2025</h5>
+            <div class="calendar-nav">
+                <button id="inicio-prev-month" type="button">&lt;</button>
+                <button id="inicio-next-month" type="button">&gt;</button>
+            </div>
+        </div>
+        <div class="calendar-weekdays">
+            <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
+        </div>
+        <div class="calendar-days" id="inicio-calendar-days">
+            <!-- Los días se generarán mediante JavaScript -->
+        </div>
     </div>
-  </div>
-  <input type="hidden" id="fecha-inicio-encuesta" name="fecha-inicio-encuesta" required>
-  <input type="hidden" id="hora-inicio-encuesta" name="hora-inicio-encuesta" required>
-  <span id="preview-fecha-hora-inicio" class="preview-fecha-hora"></span>
+    <div class="time-selector">
+        <h5>Hora</h5>
+        <div class="time-controls">
+            <div class="time-spinner">
+                <button type="button" id="inicio-hour-up">&#9650;</button>
+                <div class="time-spinner-value" id="inicio-hour-value">12</div>
+                <button type="button" id="inicio-hour-down">&#9660;</button>
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-spinner">
+                <button type="button" id="inicio-min-up">&#9650;</button>
+                <div class="time-spinner-value" id="inicio-min-value">00</div>
+                <button type="button" id="inicio-min-down">&#9660;</button>
+            </div>
+        </div>
+        <div class="ampm-toggle">
+            <div class="ampm-btn active" id="inicio-am-btn">AM</div>
+            <div class="ampm-btn" id="inicio-pm-btn">PM</div>
+        </div>
+    </div>
+    <input type="hidden" id="fecha-inicio-encuesta" name="fecha-inicio-encuesta" required>
+    <input type="hidden" id="hora-inicio-encuesta" name="hora-inicio-encuesta" required>
 </div>
                     
                     <h4>Periodo de Fin</h4>
@@ -727,216 +750,211 @@ function cargarContenidoEncuestas() {
         </div>
     `;
     
-    // Importar CSS del modal si no está cargado
-    if (!document.querySelector('link[href*="datetime-modal.css"]')) {
+    // Importar CSS para el calendario inline si no está cargado
+    if (!document.querySelector('link[href*="inline-calendar.css"]')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = '../../../../css/admin/opciones_admin/alumnos/datetime-modal.css';
+        link.href = '../../../../css/admin/opciones_admin/alumnos/inline-calendar.css';
         document.head.appendChild(link);
     }
 
-    // Lógica para el panel custom de selección de fecha y hora de inicio
-    (function customFechaHoraInicioPanel() {
-        // --- CALENDARIO ---
-        const calendarDiv = document.getElementById('custom-calendar-inicio');
-        const inputFecha = document.getElementById('fecha-inicio-encuesta');
-        const inputHora = document.getElementById('hora-inicio-encuesta');
-        const preview = document.getElementById('preview-fecha-hora-inicio');
-        const today = new Date();
-        let selDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        let selHour = today.getHours() % 12 || 12;
-        let selMin = Math.round(today.getMinutes() / 5) * 5;
-        let selAMPM = today.getHours() >= 12 ? 'PM' : 'AM';
-        // --- RENDER CALENDARIO ---
-        function renderCalendar(year, month) {
-            calendarDiv.innerHTML = '';
-            const header = document.createElement('div');
-            header.className = 'calendar-header';
-            const prevBtn = document.createElement('button');
-            prevBtn.textContent = '<';
-            const nextBtn = document.createElement('button');
-            nextBtn.textContent = '>';
-            const monthYear = document.createElement('span');
-            monthYear.textContent = selDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-            header.appendChild(prevBtn); header.appendChild(monthYear); header.appendChild(nextBtn);
-            calendarDiv.appendChild(header);
-            // Tabla días
-            const table = document.createElement('table');
-            const daysRow = document.createElement('tr');
-            ['D','L','M','M','J','V','S'].forEach(d => {
-                const th = document.createElement('th'); th.textContent = d; daysRow.appendChild(th);
-            });
-            table.appendChild(daysRow);
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month+1, 0).getDate();
-            let row = document.createElement('tr');
-            for (let i=0; i<firstDay; i++) row.appendChild(document.createElement('td'));
-            for (let d=1; d<=daysInMonth; d++) {
-                if ((row.children.length) === 7) { table.appendChild(row); row = document.createElement('tr'); }
-                const td = document.createElement('td'); td.textContent = d;
-                const isToday = year===today.getFullYear() && month===today.getMonth() && d===today.getDate();
-                if (isToday) td.classList.add('today');
-                if (d===selDate.getDate() && month===selDate.getMonth() && year===selDate.getFullYear()) td.classList.add('selected');
-                td.addEventListener('click',()=>{
-                    selDate = new Date(year, month, d);
-                    renderCalendar(year, month);
-                    updateAll();
-                });
-                row.appendChild(td);
-            }
-            while(row.children.length<7) row.appendChild(document.createElement('td'));
-            table.appendChild(row);
-            calendarDiv.appendChild(table);
-            prevBtn.onclick = ()=>{ renderCalendar(month===0?year-1:year, month===0?11:month-1); };
-            nextBtn.onclick = ()=>{ renderCalendar(month===11?year+1:year, month===11?0:month+1); };
-        }
-        renderCalendar(selDate.getFullYear(), selDate.getMonth());
-        // --- HORA ---
-        const hourList = document.getElementById('custom-hour-list');
-        hourList.innerHTML = '';
-        for(let h=1; h<=12; h++) {
-            const div = document.createElement('div');
-            div.className = 'time-item' + (h===selHour?' selected':'');
-            div.textContent = h.toString().padStart(2,'0');
-            div.onclick = ()=>{
-                selHour = h;
-                document.querySelectorAll('#custom-hour-list .time-item').forEach(e=>e.classList.remove('selected'));
-                div.classList.add('selected');
-                updateAll();
-            };
-            hourList.appendChild(div);
-        }
-        // --- MINUTOS ---
-        const minList = document.getElementById('custom-min-list');
-        minList.innerHTML = '';
-        for(let m=0; m<60; m+=5) {
-            const div = document.createElement('div');
-            div.className = 'time-item' + (m===selMin?' selected':'');
-            div.textContent = m.toString().padStart(2,'0');
-            div.onclick = ()=>{
-                selMin = m;
-                document.querySelectorAll('#custom-min-list .time-item').forEach(e=>e.classList.remove('selected'));
-                div.classList.add('selected');
-                updateAll();
-            };
-            minList.appendChild(div);
-        }
-        // --- AM/PM ---
-        const amBtn = document.getElementById('ampm-am');
-        const pmBtn = document.getElementById('ampm-pm');
-        function updateAMPMBtns() {
-            amBtn.classList.toggle('selected', selAMPM==='AM');
-            pmBtn.classList.toggle('selected', selAMPM==='PM');
-        }
-        amBtn.onclick = ()=>{ selAMPM='AM'; updateAMPMBtns(); updateAll(); };
-        pmBtn.onclick = ()=>{ selAMPM='PM'; updateAMPMBtns(); updateAll(); };
-        updateAMPMBtns();
-        // --- Update preview e inputs ocultos ---
-        function updateAll() {
-            const yyyy = selDate.getFullYear();
-            const mm = (selDate.getMonth()+1).toString().padStart(2,'0');
-            const dd = selDate.getDate().toString().padStart(2,'0');
-            const fechaStr = `${yyyy}-${mm}-${dd}`;
-            let hour24 = selHour;
-            if(selAMPM==='PM' && hour24!==12) hour24+=12;
-            if(selAMPM==='AM' && hour24===12) hour24=0;
-            const horaStr = `${hour24.toString().padStart(2,'0')}:${selMin.toString().padStart(2,'0')}`;
-            inputFecha.value = fechaStr;
-            inputHora.value = horaStr;
-            preview.textContent = `${fechaStr} ${selHour.toString().padStart(2,'0')}:${selMin.toString().padStart(2,'0')} ${selAMPM}`;
-        }
-        updateAll();
-    })();
-
-        const btn = document.getElementById('btn-fecha-hora-inicio');
-        const inputFecha = document.getElementById('fecha-inicio-encuesta');
-        const inputHora = document.getElementById('hora-inicio-encuesta');
-        const preview = document.getElementById('preview-fecha-hora-inicio');
-        // Valores por defecto: ahora
-        const now = new Date();
+    // Inicializar el calendario y selector de hora inline para periodo de inicio
+    (function initCalendarioInlineInicio() {
+        // Funciones utilidad
         const pad = n => n.toString().padStart(2, '0');
-        let fecha = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+        const formatoFecha = (date) => `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+        
+        // Elementos DOM
+        const inputFecha = document.getElementById('fecha-inicio-encuesta');
+        const inputHora = document.getElementById('hora-inicio-encuesta');
+        const calendarTitle = document.getElementById('inicio-calendar-title');
+        const calendarDays = document.getElementById('inicio-calendar-days');
+        const prevMonthBtn = document.getElementById('inicio-prev-month');
+        const nextMonthBtn = document.getElementById('inicio-next-month');
+        const hourValue = document.getElementById('inicio-hour-value');
+        const minValue = document.getElementById('inicio-min-value');
+        const hourUpBtn = document.getElementById('inicio-hour-up');
+        const hourDownBtn = document.getElementById('inicio-hour-down');
+        const minUpBtn = document.getElementById('inicio-min-up');
+        const minDownBtn = document.getElementById('inicio-min-down');
+        const amBtn = document.getElementById('inicio-am-btn');
+        const pmBtn = document.getElementById('inicio-pm-btn');
+        
+        // Estado inicial: fecha y hora actual
+        const now = new Date();
+        let currentDate = new Date(now);
+        let selectedDate = new Date(now);
         let hour = now.getHours();
-        let min = now.getMinutes();
+        let min = now.getMinutes() - (now.getMinutes() % 5); // Redondear a intervalos de 5 min
         let ampm = hour >= 12 ? 'PM' : 'AM';
         let hour12 = hour % 12; if (hour12 === 0) hour12 = 12;
-        // Mostrar preview inicial
-        function updatePreview() {
-            preview.textContent = `${fecha} ${pad(hour12)}:${pad(min)} ${ampm}`;
+        
+        // Nombres de meses
+        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        
+        // Establecer valores iniciales
+        hourValue.textContent = pad(hour12);
+        minValue.textContent = pad(min);
+        if (ampm === 'PM') {
+            amBtn.classList.remove('active');
+            pmBtn.classList.add('active');
+        } else {
+            amBtn.classList.add('active');
+            pmBtn.classList.remove('active');
         }
-        updatePreview();
-        inputFecha.value = fecha;
-        inputHora.value = `${pad(hour)}:${pad(min)}`;
-
-        btn.addEventListener('click', function() {
-            // Crear modal solo si no existe
-            if (document.getElementById('datetime-modal-inicio-bg')) {
-                document.getElementById('datetime-modal-inicio-bg').style.display = 'flex';
-                return;
+        
+        // Actualizar valores ocultos
+        function updateInputValues() {
+            // Calcular hora 24h
+            let h = hour12;
+            if (ampm === 'PM' && h !== 12) h += 12;
+            if (ampm === 'AM' && h === 12) h = 0;
+            
+            inputFecha.value = formatoFecha(selectedDate);
+            inputHora.value = `${pad(h)}:${pad(min)}`;
+        }
+        
+        // Inicializar los inputs con los valores predeterminados
+        updateInputValues();
+        
+        // Generar título del calendario
+        function updateCalendarTitle() {
+            calendarTitle.textContent = `${meses[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        }
+        
+        // Generar días del calendario
+        function generateCalendarDays() {
+            calendarDays.innerHTML = '';
+            
+            // Primer día del mes actual
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            // Último día del mes
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            // Día de la semana del primer día (0 = domingo, 6 = sábado)
+            const firstDayOfWeek = firstDay.getDay();
+            
+            // Añadir días del mes anterior para completar la primera semana
+            const prevMonthLastDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0).getDate();
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.classList.add('calendar-day', 'other-month');
+                dayElement.textContent = prevMonthLastDay - firstDayOfWeek + i + 1;
+                calendarDays.appendChild(dayElement);
             }
-            // Modal HTML
-            const modalBg = document.createElement('div');
-            modalBg.className = 'datetime-modal-bg';
-            modalBg.id = 'datetime-modal-inicio-bg';
-            modalBg.innerHTML = `
-                <div class="datetime-modal">
-                    <div class="calendar-section">
-                        <label style="margin-bottom:8px;font-weight:500;">Fecha</label>
-                        <input type="date" id="modal-date-inicio" value="${fecha}" min="${fecha}" style="width:145px;">
-                    </div>
-                    <div class="time-section">
-                        <label style="margin-bottom:8px;font-weight:500;">Hora</label>
-                        <div style="display:flex;align-items:center;gap:6px;">
-                            <select id="modal-hour-inicio">
-                                ${[...Array(12)].map((_,i)=>`<option value="${i+1}"${i+1===hour12?' selected':''}>${pad(i+1)}</option>`).join('')}
-                            </select>
-                            :
-                            <select id="modal-min-inicio">
-                                ${[0,5,10,15,20,25,30,35,40,45,50,55].map(m=>`<option value="${pad(m)}"${m===min-(min%5)?' selected':''}>${pad(m)}</option>`).join('')}
-                            </select>
-                            <select id="modal-ampm-inicio">
-                                <option value="AM"${ampm==='AM'?' selected':''}>AM</option>
-                                <option value="PM"${ampm==='PM'?' selected':''}>PM</option>
-                            </select>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="cancel" type="button" id="cancelar-modal-inicio">Cancelar</button>
-                            <button type="button" id="aceptar-modal-inicio">Aceptar</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modalBg);
-            // Eventos del modal
-            document.getElementById('modal-date-inicio').addEventListener('change', function(e){
-                fecha = e.target.value;
-            });
-            document.getElementById('modal-hour-inicio').addEventListener('change', function(e){
-                hour12 = parseInt(e.target.value);
-            });
-            document.getElementById('modal-min-inicio').addEventListener('change', function(e){
-                min = parseInt(e.target.value);
-            });
-            document.getElementById('modal-ampm-inicio').addEventListener('change', function(e){
-                ampm = e.target.value;
-            });
-            document.getElementById('cancelar-modal-inicio').addEventListener('click', function(){
-                modalBg.style.display = 'none';
-            });
-            document.getElementById('aceptar-modal-inicio').addEventListener('click', function(){
-                // Calcular hora 24h
-                let h = hour12;
-                if (ampm === 'PM' && h !== 12) h += 12;
-                if (ampm === 'AM' && h === 12) h = 0;
-                inputFecha.value = fecha;
-                inputHora.value = `${pad(h)}:${pad(min)}`;
-                preview.textContent = `${fecha} ${pad(hour12)}:${pad(min)} ${ampm}`;
-                modalBg.style.display = 'none';
-            });
-            // Cerrar modal al hacer click fuera
-            modalBg.addEventListener('click', function(e){
-                if (e.target === modalBg) modalBg.style.display = 'none';
-            });
+            
+            // Añadir días del mes actual
+            const today = new Date();
+            for (let i = 1; i <= lastDay.getDate(); i++) {
+                const dayElement = document.createElement('div');
+                dayElement.classList.add('calendar-day');
+                dayElement.textContent = i;
+                
+                // Marcar día actual
+                if (currentDate.getFullYear() === today.getFullYear() && 
+                    currentDate.getMonth() === today.getMonth() && 
+                    i === today.getDate()) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Marcar día seleccionado
+                if (currentDate.getFullYear() === selectedDate.getFullYear() && 
+                    currentDate.getMonth() === selectedDate.getMonth() && 
+                    i === selectedDate.getDate()) {
+                    dayElement.classList.add('selected');
+                }
+                
+                // Evento al hacer click en un día
+                dayElement.addEventListener('click', function() {
+                    // Eliminar clase 'selected' del día anteriormente seleccionado
+                    const prevSelected = calendarDays.querySelector('.calendar-day.selected');
+                    if (prevSelected) {
+                        prevSelected.classList.remove('selected');
+                    }
+                    
+                    // Marcar este día como seleccionado
+                    dayElement.classList.add('selected');
+                    
+                    // Actualizar fecha seleccionada
+                    selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+                    
+                    // Actualizar valores de los inputs
+                    updateInputValues();
+                });
+                
+                calendarDays.appendChild(dayElement);
+            }
+            
+            // Añadir días del mes siguiente para completar la última semana
+            const totalCells = 42; // 6 filas * 7 columnas
+            const cellsToAdd = totalCells - (firstDayOfWeek + lastDay.getDate());
+            for (let i = 1; i <= cellsToAdd; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.classList.add('calendar-day', 'other-month');
+                dayElement.textContent = i;
+                calendarDays.appendChild(dayElement);
+            }
+        }
+        
+        // Iniciar el calendario
+        updateCalendarTitle();
+        generateCalendarDays();
+        
+        // Eventos de navegación entre meses
+        prevMonthBtn.addEventListener('click', function() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            updateCalendarTitle();
+            generateCalendarDays();
+        });
+        
+        nextMonthBtn.addEventListener('click', function() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            updateCalendarTitle();
+            generateCalendarDays();
+        });
+        
+        // Control de hora
+        hourUpBtn.addEventListener('click', function() {
+            hour12 = hour12 === 12 ? 1 : hour12 + 1;
+            hourValue.textContent = pad(hour12);
+            updateInputValues();
+        });
+        
+        hourDownBtn.addEventListener('click', function() {
+            hour12 = hour12 === 1 ? 12 : hour12 - 1;
+            hourValue.textContent = pad(hour12);
+            updateInputValues();
+        });
+        
+        // Control de minutos
+        minUpBtn.addEventListener('click', function() {
+            min = (min + 5) % 60;
+            minValue.textContent = pad(min);
+            updateInputValues();
+        });
+        
+        minDownBtn.addEventListener('click', function() {
+            min = (min - 5 + 60) % 60; // Suma 60 para evitar números negativos
+            minValue.textContent = pad(min);
+            updateInputValues();
+        });
+        
+        // Control de AM/PM
+        amBtn.addEventListener('click', function() {
+            if (ampm !== 'AM') {
+                ampm = 'AM';
+                amBtn.classList.add('active');
+                pmBtn.classList.remove('active');
+                updateInputValues();
+            }
+        });
+        
+        pmBtn.addEventListener('click', function() {
+            if (ampm !== 'PM') {
+                ampm = 'PM';
+                pmBtn.classList.add('active');
+                amBtn.classList.remove('active');
+                updateInputValues();
+            }
         });
     })();
 
