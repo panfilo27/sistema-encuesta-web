@@ -9,12 +9,20 @@
 
 .periodo-seccion {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .periodo-seccion h4 {
   margin-bottom: 12px;
   color: #1e40af;
   font-size: 1.1rem;
+}
+
+.fecha-hora-container {
+  margin-top: 8px;
+  width: 100%;
 }
 
 /* Estilo de los inputs de flatpickr */

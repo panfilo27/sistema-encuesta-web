@@ -79,8 +79,10 @@ function configurarEventosEncuesta() {
  */
 function mostrarFormularioNuevaEncuesta() {
     // Establecer fechas mínimas (hoy)
-    const hoy = new Date();
-    const fechaHoy = hoy.toISOString().split('T')[0];
+    const roundToNext5 = date => { const d = new Date(date); const m = d.getMinutes(); let r = Math.ceil(m/5)*5; if(r>=60){ d.setHours(d.getHours()+1); r=0;} d.setMinutes(r,0,0); return d; };
+    const now = new Date();
+    const nowRounded = roundToNext5(now);
+    const fechaHoy = nowRounded.toISOString().split('T')[0];
     
     document.getElementById('fecha-inicio-encuesta').min = fechaHoy;
     document.getElementById('fecha-fin-encuesta').min = fechaHoy;
@@ -205,6 +207,9 @@ async function crearNuevaEncuesta() {
         const horaFinInput = document.getElementById('hora-fin-encuesta').value || '23:59';
         
         // Crear objetos de fecha combinando fecha y hora
+        const roundToNext5 = date => { const d = new Date(date); const m = d.getMinutes(); let r = Math.ceil(m/5)*5; if(r>=60){ d.setHours(d.getHours()+1); r=0;} d.setMinutes(r,0,0); return d; };
+        const now = new Date();
+        const nowRounded = roundToNext5(now);
         const fechaInicio = new Date(`${fechaInicioInput}T${horaInicioInput}`);
         const fechaFin = new Date(`${fechaFinInput}T${horaFinInput}`);
         
@@ -244,11 +249,19 @@ async function crearNuevaEncuesta() {
             });
             
             // Mostrar mensaje detallado sobre las encuestas solapadas
-            const mensajeError = `Ya existe ${verificacionRango.encuestasSolapadas.length} encuesta${verificacionRango.encuestasSolapadas.length > 1 ? 's' : ''} activa${verificacionRango.encuestasSolapadas.length > 1 ? 's' : ''} en ese rango de fechas y horas.\n\nTu encuesta: ${inicioFormateado} - ${finFormateado}\n\nEncuesta${verificacionRango.encuestasSolapadas.length > 1 ? 's' : ''} en conflicto:\n${verificacionRango.encuestasSolapadas.map(e => 
-                `- "${e.titulo}" (${e.inicio} - ${e.fin})`
-            ).join('\n')}\n\nNota: Hay solapamiento porque ambas encuestas estarían activas simultáneamente durante cierto periodo.`;
-            
-            document.getElementById('error-encuesta').innerHTML = mensajeError.replace(/\n/g, '<br>');
+            const count = verificacionRango.encuestasSolapadas.length;
+            const plural = count > 1 ? 's' : '';
+            const conflictoHtml = verificacionRango.encuestasSolapadas
+                .map(e => `<li>"${e.titulo}" (${e.inicio} - ${e.fin})</li>`)
+                .join('');
+            const htmlMessage = `
+                <p>Ya existe ${count} encuesta${plural} activa${plural} en ese rango de fechas y horas.</p>
+                <p><strong>Tu encuesta:</strong> ${inicioFormateado} - ${finFormateado}</p>
+                <p><strong>Encuesta${plural} en conflicto:</strong></p>
+                <ul>${conflictoHtml}</ul>
+                <p class="nota">Nota: Hay solapamiento porque ambas encuestas estarían activas simultáneamente durante cierto periodo.</p>
+            `.trim();
+            document.getElementById('error-encuesta').innerHTML = htmlMessage;
             console.log('Encuestas solapadas:', verificacionRango.encuestasSolapadas);
             return;
         }
@@ -690,3 +703,39 @@ document.addEventListener('DOMContentLoaded', function() {
         inicializarGestorEncuestas();
     }
 });
+
+// Variables para flatpickr
+let fpInicio, fpFin;
+
+// Configurar flatpickr para fechas de inicio y fin
+const datetimeInicio = document.getElementById('datetime-inicio');
+if (datetimeInicio) {
+    const roundToNext5 = date => { const d = new Date(date); const m = d.getMinutes(); let r = Math.ceil(m/5)*5; if(r>=60){ d.setHours(d.getHours()+1); r=0;} d.setMinutes(r,0,0); return d; };
+    const now = new Date();
+    const nowRounded = roundToNext5(now);
+    const nowPlus30 = new Date(nowRounded.getTime() + 30 * 60000);
+    fpInicio = flatpickr(datetimeInicio, {
+        enableTime: true,
+        dateFormat: "d M Y, H:i",
+        defaultDate: nowRounded,
+        minDate: nowRounded,
+        onChange: function(selectedDates, dateStr) {
+            if (fpFin) fpFin.set('minDate', selectedDates[0]);
+        },
+        onClose: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                if (fpFin) fpFin.set('minDate', selectedDates[0]);
+            }
+        }
+    });
+}
+
+const datetimeFin = document.getElementById('datetime-fin');
+if (datetimeFin) {
+    fpFin = flatpickr(datetimeFin, {
+        enableTime: true,
+        dateFormat: "d M Y, H:i",
+        defaultDate: nowPlus30,
+        minDate: nowRounded
+    });
+}
