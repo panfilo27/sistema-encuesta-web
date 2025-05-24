@@ -32,8 +32,65 @@
         // Ocultar inmediatamente el indicador de carga si está visible
         ocultarCargando();
         
-        // Cargar módulo de preguntas condicionales
-        cargarModuloPreguntasCondicionales();
+        // Cargar módulo de preguntas condicionales directamente
+        // Cargar el CSS
+        if (!document.querySelector('link[href*="preguntas_condicionales.css"]')) {
+            const cssCondicional = document.createElement('link');
+            cssCondicional.rel = 'stylesheet';
+            cssCondicional.href = '../../../../css/admin/opciones_admin/crear_encuestas/preguntas_condicionales.css';
+            document.head.appendChild(cssCondicional);
+        }
+        
+        // Cargar el script de funciones de preguntas condicionales
+        if (!window.funcionesPreguntasCondicionalesCargadas) {
+            const scriptFunciones = document.createElement('script');
+            scriptFunciones.src = '../../../../js/admin/opciones_admin/crear_encuestas/funciones_preguntas_condicionales.js';
+            scriptFunciones.onload = function() {
+                window.funcionesPreguntasCondicionalesCargadas = true;
+                console.log('Funciones de preguntas condicionales cargadas');
+                
+                // Cargar el módulo principal
+                cargarModuloGestionPreguntas();
+            };
+            document.head.appendChild(scriptFunciones);
+        } else {
+            cargarModuloGestionPreguntas();
+        }
+        
+        // Función para cargar el módulo principal de gestión de preguntas
+        function cargarModuloGestionPreguntas() {
+            if (!window.moduloPreguntasCondicionalesCargado && !document.querySelector('script[src*="gestionar_preguntas_condicionales.js"]')) {
+                const scriptCondicional = document.createElement('script');
+                scriptCondicional.src = '../../../../js/admin/opciones_admin/crear_encuestas/gestionar_preguntas_condicionales.js';
+                scriptCondicional.onload = function() {
+                    window.moduloPreguntasCondicionalesCargado = true;
+                    console.log('Módulo de preguntas condicionales cargado correctamente');
+                    // Configurar eventos para el modal de pregunta condicional
+                    const modalPreguntaCondicional = document.getElementById('modal-pregunta-condicional');
+                    if (modalPreguntaCondicional) {
+                        modalPreguntaCondicional.querySelectorAll('.cerrar, #btn-cancelar-pregunta-condicional').forEach(elem => {
+                            elem.addEventListener('click', cerrarModalPreguntaCondicional);
+                        });
+                        
+                        const formPreguntaCondicional = document.getElementById('form-pregunta-condicional');
+                        if (formPreguntaCondicional) {
+                            formPreguntaCondicional.addEventListener('submit', guardarPreguntaCondicional);
+                        }
+                        
+                        const tipoPreguntaCondicional = document.getElementById('tipo-pregunta-condicional');
+                        if (tipoPreguntaCondicional) {
+                            tipoPreguntaCondicional.addEventListener('change', toggleOpcionesCondicional);
+                        }
+                        
+                        const btnAgregarOpcionCondicional = document.getElementById('btn-agregar-opcion-condicional');
+                        if (btnAgregarOpcionCondicional) {
+                            btnAgregarOpcionCondicional.addEventListener('click', agregarOpcionRespuestaCondicional);
+                        }
+                    }
+                };
+                document.head.appendChild(scriptCondicional);
+            }
+        }
         
         // Cargar las carreras en el selector
         const selectorCarrera = document.getElementById('carrera-encuesta');
