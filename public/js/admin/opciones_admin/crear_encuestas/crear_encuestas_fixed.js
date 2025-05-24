@@ -32,6 +32,9 @@
         // Ocultar inmediatamente el indicador de carga si está visible
         ocultarCargando();
         
+        // Cargar módulo de preguntas condicionales
+        cargarModuloPreguntasCondicionales();
+        
         // Cargar las carreras en el selector
         const selectorCarrera = document.getElementById('carrera-encuesta');
         if (selectorCarrera && typeof window.cargarCarrerasEnSelect === 'function') {
@@ -507,72 +510,49 @@
     function guardarPregunta(event) {
         event.preventDefault();
         
+        // Obtener datos del formulario
         const textoPregunta = document.getElementById('texto-pregunta').value.trim();
         const tipoPregunta = document.getElementById('tipo-pregunta').value;
-        const obligatoriaPregunta = document.getElementById('obligatoria-pregunta').value === 'true';
+        const obligatoria = document.getElementById('obligatoria-pregunta').value === 'true';
         
+        // Validaciones
         if (!textoPregunta) {
             mostrarAlerta('Debes ingresar un texto para la pregunta', 'error');
             return;
         }
         
-        // Crear ID de pregunta si es nueva
-        const preguntaId = modoEdicion && preguntaActualId ? preguntaActualId : 'preg_' + Date.now();
-        
-        // Crear objeto de pregunta base
-        const pregunta = {
-            id: preguntaId,
-            texto: textoPregunta,
-            tipo: tipoPregunta,
-            obligatoria: obligatoriaPregunta
-        };
-        
         // Si es pregunta de opción múltiple, verificar que tenga opciones
         if (tipoPregunta === 'opcion_multiple') {
             // Obtener todas las opciones ingresadas
-            const opcionesElements = document.querySelectorAll('#lista-opciones .opcion-respuesta');
-            const opciones = [];
+            const opcionesElements = document.querySelectorAll('#lista-opciones .opcion-respuesta input');
+            opcionesPregunta[preguntaActualId] = [];
             
-            // Procesar cada opción
-            opcionesElements.forEach((opcionElement, index) => {
-                const textoOpcion = opcionElement.querySelector('input').value.trim();
+            // Extraer texto de cada opción
+            opcionesElements.forEach(input => {
+                const textoOpcion = input.value.trim();
                 if (textoOpcion) {
-                    // Obtener o crear ID de opción
-                    const opcionId = opcionElement.dataset.opcionId || 'opt_' + Date.now() + '_' + index;
-                    opcionElement.dataset.opcionId = opcionId;  // Guardar ID en el elemento DOM
-                    
-                    // Crear objeto de opción
-                    const opcion = {
-                        id: opcionId,
-                        texto: textoOpcion
-                    };
-                    
-                    // Verificar si hay pregunta condicional para esta opción
-                    if (window.PreguntasCondicionales && 
-                        typeof window.PreguntasCondicionales.obtenerPreguntaCondicional === 'function') {
-                        
-                        const preguntaCondicional = window.PreguntasCondicionales.obtenerPreguntaCondicional(preguntaId, opcionId);
-                        
-                        if (preguntaCondicional) {
-                            opcion.preguntaCondicional = preguntaCondicional;
-                        }
-                    }
-                    
-                    opciones.push(opcion);
+                    opcionesPregunta[preguntaActualId].push(textoOpcion);
                 }
             });
             
             // Verificar que haya al menos 2 opciones
-            if (opciones.length < 2) {
+            if (opcionesPregunta[preguntaActualId].length < 2) {
                 mostrarAlerta('Debes agregar al menos 2 opciones de respuesta', 'error');
                 return;
             }
-            
-            // Guardar opciones en el objeto pregunta
-            pregunta.opciones = opciones;
-            
-            // También guardar en el mapa de opciones (para compatibilidad)
-            opcionesPregunta[preguntaId] = opciones.map(opt => opt.texto);
+        }
+        
+        // Crear objeto de pregunta
+        const pregunta = {
+            id: preguntaActualId,
+            texto: textoPregunta,
+            tipo: tipoPregunta,
+            obligatoria: obligatoria
+        };
+        
+        // Agregar opciones si es pregunta de opción múltiple
+        if (tipoPregunta === 'opcion_multiple' && opcionesPregunta[preguntaActualId]) {
+            pregunta.opciones = opcionesPregunta[preguntaActualId];
         }
         
         // Agregar nueva pregunta al módulo actual
@@ -580,24 +560,14 @@
             preguntasModulo[moduloActualId] = [];
         }
         
-        // Verificar límite de preguntas (sin contar condicionales)
-        if (!modoEdicion && preguntasModulo[moduloActualId].length >= 10) {
+        // Verificar límite de preguntas
+        if (preguntasModulo[moduloActualId].length >= 10) {
             mostrarAlerta('No se pueden agregar más de 10 preguntas por módulo', 'error');
             return;
         }
         
-        // Si estamos en modo edición, reemplazar la pregunta existente
-        if (modoEdicion) {
-            const index = preguntasModulo[moduloActualId].findIndex(p => p.id === preguntaId);
-            if (index !== -1) {
-                preguntasModulo[moduloActualId][index] = pregunta;
-            } else {
-                preguntasModulo[moduloActualId].push(pregunta);
-            }
-        } else {
-            // Agregar pregunta a la lista del módulo
-            preguntasModulo[moduloActualId].push(pregunta);
-        }
+        // Agregar pregunta a la lista del módulo
+        preguntasModulo[moduloActualId].push(pregunta);
         
         // Actualizar contador de preguntas en el módulo
         const moduloElement = document.querySelector(`.modulo-encuesta[data-modulo-id="${moduloActualId}"]`);
@@ -605,18 +575,14 @@
             moduloElement.querySelector('.contador-preguntas').textContent = preguntasModulo[moduloActualId].length;
         }
         
-        // Actualizar la visualización de preguntas
-        actualizarVisualizacionPreguntas();
+        // Renderizar nueva pregunta
+        renderizarPregunta(pregunta, preguntasModulo[moduloActualId].length);
         
         // Cerrar modal
-        cerrarModalPregunta();
+        document.getElementById('modal-pregunta').style.display = 'none';
         
         // Mostrar mensaje de éxito
-        mostrarAlerta(modoEdicion ? 'Pregunta actualizada correctamente' : 'Pregunta agregada correctamente', 'exito');
-        
-        // Resetear modo edición
-        modoEdicion = false;
-        preguntaActualId = null;
+        mostrarAlerta('Pregunta agregada correctamente', 'exito');
     }
 
     function renderizarPregunta(pregunta, numero) {

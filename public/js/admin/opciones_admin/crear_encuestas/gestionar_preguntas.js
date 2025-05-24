@@ -118,6 +118,27 @@ function guardarPregunta(event) {
     // Agregar opciones si es pregunta de opción múltiple
     if (tipoPregunta === 'opcion_multiple') {
         pregunta.opciones = opcionesPregunta[preguntaActualId];
+        
+        // Agregar preguntas condicionales si existen
+        if (typeof window.prepararPreguntasCondicionales === 'function') {
+            const preguntasCondicionalesObj = window.prepararPreguntasCondicionales();
+            const preguntasCondicionalesArray = [];
+            
+            // Convertir de formato de objeto a array para almacenamiento
+            for (let i = 0; i < pregunta.opciones.length; i++) {
+                const opcionId = `${preguntaActualId}_opcion_${i}`;
+                if (preguntasCondicionalesObj[opcionId]) {
+                    preguntasCondicionalesArray.push({
+                        opcionIndice: i,
+                        pregunta: preguntasCondicionalesObj[opcionId]
+                    });
+                }
+            }
+            
+            if (preguntasCondicionalesArray.length > 0) {
+                pregunta.preguntasCondicionales = preguntasCondicionalesArray;
+            }
+        }
     }
     
     if (modoEdicion) {
@@ -299,6 +320,9 @@ function agregarOpcionRespuestaUI(textoOpcion, preguntaId) {
     
     opcionElement.innerHTML = `
         <input type="text" value="${textoOpcion}" placeholder="Texto de la opción">
+        <button type="button" class="btn-condicional-opcion" title="Agregar pregunta condicional">
+            <i class="fas fa-question-circle"></i>
+        </button>
         <button type="button" class="btn-eliminar-opcion">
             <i class="fas fa-trash"></i>
         </button>
@@ -307,6 +331,17 @@ function agregarOpcionRespuestaUI(textoOpcion, preguntaId) {
     // Configurar evento de cambio de texto
     opcionElement.querySelector('input').addEventListener('input', (event) => {
         opcionesPregunta[preguntaId][indice] = event.target.value;
+    });
+    
+    // Configurar evento para agregar pregunta condicional
+    opcionElement.querySelector('.btn-condicional-opcion').addEventListener('click', () => {
+        // Verificar si la función está disponible (importada)
+        if (typeof mostrarModalPreguntaCondicional === 'function') {
+            mostrarModalPreguntaCondicional(preguntaId, indice);
+        } else {
+            console.error('La función mostrarModalPreguntaCondicional no está disponible');
+            mostrarAlerta('No se pudo mostrar el modal de pregunta condicional', 'error');
+        }
     });
     
     // Configurar evento de eliminación
