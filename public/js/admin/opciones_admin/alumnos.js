@@ -678,27 +678,17 @@ function cargarContenidoEncuestas() {
                     
                     <h4>Periodo de Inicio</h4>
 <div class="fecha-hora-container">
-    <button type="button" id="btn-datetime-inicio" class="btn-datetime">
-        <i class="fas fa-calendar-alt"></i>
-        Seleccionar fecha y hora de inicio
-        <span id="datetime-value-inicio" class="datetime-value"></span>
-    </button>
+    <input type="text" id="datetime-inicio" class="flatpickr-input" placeholder="Seleccionar fecha y hora de inicio" readonly>
     <input type="hidden" id="fecha-inicio-encuesta" name="fecha-inicio-encuesta" required>
     <input type="hidden" id="hora-inicio-encuesta" name="hora-inicio-encuesta" required>
 </div>
                     
                     <h4>Periodo de Fin</h4>
-                    <div class="fecha-hora-container">
-                        <div class="form-group">
-                            <label for="fecha-fin-encuesta">Fecha de Fin:</label>
-                            <input type="date" id="fecha-fin-encuesta" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="hora-fin-encuesta">Hora de Fin:</label>
-                            <input type="time" id="hora-fin-encuesta" value="23:59" required>
-                        </div>
-                    </div>
+<div class="fecha-hora-container">
+    <input type="text" id="datetime-fin" class="flatpickr-input" placeholder="Seleccionar fecha y hora de fin" readonly>
+    <input type="hidden" id="fecha-fin-encuesta" name="fecha-fin-encuesta" required>
+    <input type="hidden" id="hora-fin-encuesta" name="hora-fin-encuesta" required>
+</div>
                     
                     <span id="error-encuesta" class="error-mensaje"></span>
                     
@@ -720,333 +710,144 @@ function cargarContenidoEncuestas() {
         </div>
     `;
     
-    // Importar CSS para el calendario modal si no está cargado
-    if (!document.querySelector('link[href*="datetime-popup.css"]')) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = '../../../../css/admin/opciones_admin/alumnos/datetime-popup.css';
-        document.head.appendChild(link);
+    // Importar Flatpickr CSS y JS si no está cargado
+    if (!document.querySelector('link[href*="flatpickr.min.css"]')) {
+        const flatpickrCSS = document.createElement('link');
+        flatpickrCSS.rel = 'stylesheet';
+        flatpickrCSS.href = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css';
+        document.head.appendChild(flatpickrCSS);
+        
+        // Añadir tema azul para un aspecto más moderno
+        const flatpickrTheme = document.createElement('link');
+        flatpickrTheme.rel = 'stylesheet';
+        flatpickrTheme.href = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css';
+        document.head.appendChild(flatpickrTheme);
     }
     
-    // Importar FontAwesome si no está cargado (para los iconos del botón)
-    if (!document.querySelector('link[href*="font-awesome"]')) {
-        const fontAwesome = document.createElement('link');
-        fontAwesome.rel = 'stylesheet';
-        fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
-        document.head.appendChild(fontAwesome);
+    // Cargar el script de Flatpickr si no está cargado
+    if (!window.flatpickr && !document.querySelector('script[src*="flatpickr.min.js"]')) {
+        const flatpickrScript = document.createElement('script');
+        flatpickrScript.src = 'https://cdn.jsdelivr.net/npm/flatpickr';
+        flatpickrScript.onload = function() {
+            // Configurar Flatpickr en español
+            if (window.flatpickr && !window.flatpickr.l10ns.es) {
+                const spanishScript = document.createElement('script');
+                spanishScript.src = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js';
+                spanishScript.onload = initializeDateTimePickers;
+                document.head.appendChild(spanishScript);
+            } else {
+                initializeDateTimePickers();
+            }
+        };
+        document.head.appendChild(flatpickrScript);
+    } else if (window.flatpickr) {
+        initializeDateTimePickers();
     }
 
-    // Inicializar el calendario y selector de hora para periodo de inicio
-    (function initDatetimeInicioModal() {
-        // Funciones de utilidad
-        const pad = n => n.toString().padStart(2, '0');
-        const formatoFecha = (date) => `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
-        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    // Función para inicializar los selectores de fecha/hora
+    function initializeDateTimePickers() {
+        if (!window.flatpickr) return;
         
-        // Referencias DOM
-        const btnDatetime = document.getElementById('btn-datetime-inicio');
-        const datetimeValue = document.getElementById('datetime-value-inicio');
-        const inputFecha = document.getElementById('fecha-inicio-encuesta');
-        const inputHora = document.getElementById('hora-inicio-encuesta');
+        // Función para dar formato a fecha y hora para los inputs ocultos
+        const formatoFechaHora = (dateObj) => {
+            if (!dateObj) return { fecha: '', hora: '' };
+            
+            const pad = n => n.toString().padStart(2, '0');
+            const fecha = `${dateObj.getFullYear()}-${pad(dateObj.getMonth()+1)}-${pad(dateObj.getDate())}`;
+            const hora = `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`;
+            
+            return { fecha, hora };
+        };
         
-        // Estado actual: fecha y hora
+        // Obtener la fecha actual y 30 minutos después
         const now = new Date();
-        let selectedDate = new Date(now);
-        let selectedHour = now.getHours();
-        let selectedMinute = Math.floor(now.getMinutes() / 5) * 5; // Redondear a intervalos de 5 min
-        let selectedAMPM = selectedHour >= 12 ? 'PM' : 'AM';
-        let selectedHour12 = selectedHour % 12;
-        if (selectedHour12 === 0) selectedHour12 = 12;
+        const nowPlus30 = new Date(now.getTime() + 30 * 60000);
         
-        // Modal - se creará cuando se haga clic en el botón
-        let modalCreated = false;
-        let calendarModalEl = null;
+        // Configuración para el selector de inicio
+        const datetimeInicio = document.getElementById('datetime-inicio');
+        const inputFechaInicio = document.getElementById('fecha-inicio-encuesta');
+        const inputHoraInicio = document.getElementById('hora-inicio-encuesta');
         
-        // Actualizar el valor del botón y los inputs ocultos
-        function updateDatetimeValue() {
-            // Calcular hora 24h para el input oculto
-            let h = selectedHour12;
-            if (selectedAMPM === 'PM' && h !== 12) h += 12;
-            if (selectedAMPM === 'AM' && h === 12) h = 0;
+        if (datetimeInicio) {
+            const fpInicio = flatpickr(datetimeInicio, {
+                enableTime: true,
+                dateFormat: "d M Y, H:i",
+                time_24hr: false, // Usar formato 12h con AM/PM
+                minuteIncrement: 5,
+                defaultDate: now,
+                locale: 'es',
+                allowInput: false,
+                disableMobile: true, // Usar siempre nuestro datepicker personalizado
+                position: "auto",
+                static: true,
+                onClose: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        const { fecha, hora } = formatoFechaHora(selectedDates[0]);
+                        inputFechaInicio.value = fecha;
+                        inputHoraInicio.value = hora;
+                    }
+                },
+                onChange: function(selectedDates, dateStr) {
+                    if (selectedDates.length > 0) {
+                        const { fecha, hora } = formatoFechaHora(selectedDates[0]);
+                        inputFechaInicio.value = fecha;
+                        inputHoraInicio.value = hora;
+                    }
+                }
+            });
             
-            // Actualizar inputs ocultos para el formulario
-            inputFecha.value = formatoFecha(selectedDate);
-            inputHora.value = `${pad(h)}:${pad(selectedMinute)}`;
-            
-            // Actualizar el texto visible en el botón
-            const formattedDate = `${selectedDate.getDate()} ${meses[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
-            datetimeValue.textContent = `${formattedDate}, ${pad(selectedHour12)}:${pad(selectedMinute)} ${selectedAMPM}`;
+            // Establecer valores iniciales
+            const { fecha, hora } = formatoFechaHora(now);
+            inputFechaInicio.value = fecha;
+            inputHoraInicio.value = hora;
         }
         
-        // Inicializar con los valores por defecto
-        updateDatetimeValue();
-        
-        // Generar el HTML del modal de calendario y hora
-        function createCalendarModal() {
-            if (modalCreated) return;
-            
-            const modal = document.createElement('div');
-            modal.className = 'datetime-modal-bg';
-            modal.id = 'datetime-modal-inicio';
-            modal.style.display = 'none';
-            
-            // Inicio del mes para mostrar
-            const currentViewDate = new Date(selectedDate);
-            
-            // Generar opciones de horas (1-12)
-            const hoursOptions = Array.from({length: 12}, (_, i) => {
-                const hour = i + 1;
-                return `<div class="time-option${hour === selectedHour12 ? ' selected' : ''}" data-hour="${hour}">${pad(hour)}</div>`;
-            }).join('');
-            
-            // Generar opciones de minutos (0-55, incrementos de 5)
-            const minutesOptions = Array.from({length: 12}, (_, i) => {
-                const minute = i * 5;
-                return `<div class="time-option${minute === selectedMinute ? ' selected' : ''}" data-minute="${minute}">${pad(minute)}</div>`;
-            }).join('');
-            
-            modal.innerHTML = `
-                <div class="datetime-modal">
-                    <div class="datetime-modal-header">
-                        <h3>Selecciona fecha y hora de inicio</h3>
-                        <button type="button" class="datetime-modal-close" id="datetime-close-inicio">&times;</button>
-                    </div>
-                    <div class="datetime-modal-body">
-                        <div class="datetime-calendar">
-                            <div class="calendar-header">
-                                <div class="calendar-month" id="calendar-month-inicio">${meses[currentViewDate.getMonth()]} ${currentViewDate.getFullYear()}</div>
-                                <div class="calendar-nav">
-                                    <button type="button" class="calendar-nav-btn" id="prev-month-inicio">&lt;</button>
-                                    <button type="button" class="calendar-nav-btn" id="next-month-inicio">&gt;</button>
-                                </div>
-                            </div>
-                            <div class="calendar-grid">
-                                <div class="calendar-weekday">D</div>
-                                <div class="calendar-weekday">L</div>
-                                <div class="calendar-weekday">M</div>
-                                <div class="calendar-weekday">M</div>
-                                <div class="calendar-weekday">J</div>
-                                <div class="calendar-weekday">V</div>
-                                <div class="calendar-weekday">S</div>
-                                <div id="calendar-days-inicio"></div>
-                            </div>
-                        </div>
-                        <div class="datetime-time">
-                            <div class="time-selectors">
-                                <div class="time-column" id="hours-column-inicio">
-                                    <div class="time-column-header">Hora</div>
-                                    ${hoursOptions}
-                                </div>
-                                <div class="time-column" id="minutes-column-inicio">
-                                    <div class="time-column-header">Minuto</div>
-                                    ${minutesOptions}
-                                </div>
-                                <div class="ampm-options">
-                                    <div class="ampm-option${selectedAMPM === 'AM' ? ' selected' : ''}" data-ampm="AM">AM</div>
-                                    <div class="ampm-option${selectedAMPM === 'PM' ? ' selected' : ''}" data-ampm="PM">PM</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="datetime-modal-footer">
-                        <button type="button" class="datetime-btn datetime-btn-secondary" id="cancel-datetime-inicio">Cancelar</button>
-                        <button type="button" class="datetime-btn datetime-btn-primary" id="confirm-datetime-inicio">Aceptar</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            calendarModalEl = modal;
-            modalCreated = true;
-            
-            // Generar el calendario con los días
-            generateCalendarDays(currentViewDate);
-            
-            // Configurar eventos del modal
-            setupModalEvents();
-        }
-        
-        // Generar días del calendario para un mes determinado
-        function generateCalendarDays(date) {
-            const calendarDays = document.getElementById('calendar-days-inicio');
-            if (!calendarDays) return;
-            
-            // Limpiar calendario existente
-            calendarDays.innerHTML = '';
-            
-            // Configurar variables para el calendario
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const daysInMonth = lastDay.getDate();
-            const firstDayOfWeek = firstDay.getDay(); // 0 = domingo, 6 = sábado
-            
-            // Días del mes anterior para completar la primera semana
-            const prevMonthLastDay = new Date(year, month, 0).getDate();
-            for (let i = 0; i < firstDayOfWeek; i++) {
-                const day = document.createElement('div');
-                day.className = 'calendar-day other-month';
-                day.textContent = prevMonthLastDay - firstDayOfWeek + i + 1;
-                calendarDays.appendChild(day);
-            }
-            
-            // Días del mes actual
-            const today = new Date();
-            for (let i = 1; i <= daysInMonth; i++) {
-                const day = document.createElement('div');
-                day.className = 'calendar-day';
-                day.textContent = i;
-                day.dataset.date = `${year}-${pad(month + 1)}-${pad(i)}`;
-                
-                // Marcar el día actual
-                if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
-                    day.classList.add('today');
-                }
-                
-                // Marcar el día seleccionado
-                if (year === selectedDate.getFullYear() && month === selectedDate.getMonth() && i === selectedDate.getDate()) {
-                    day.classList.add('selected');
-                }
-                
-                // Evento al hacer clic en un día
-                day.addEventListener('click', function() {
-                    // Quitar selección anterior
-                    const prevSelected = calendarDays.querySelector('.calendar-day.selected');
-                    if (prevSelected) prevSelected.classList.remove('selected');
-                    
-                    // Marcar este día como seleccionado
-                    day.classList.add('selected');
-                    
-                    // Actualizar fecha seleccionada
-                    const [yearStr, monthStr, dayStr] = day.dataset.date.split('-');
-                    selectedDate = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr));
-                });
-                
-                calendarDays.appendChild(day);
-            }
-            
-            // Días del mes siguiente para completar la última semana
-            const daysFromNextMonth = 42 - (firstDayOfWeek + daysInMonth); // 6 filas x 7 días = 42 celdas
-            for (let i = 1; i <= daysFromNextMonth; i++) {
-                const day = document.createElement('div');
-                day.className = 'calendar-day other-month';
-                day.textContent = i;
-                calendarDays.appendChild(day);
-            }
-        }
-        
-        // Configurar los eventos del modal
-        function setupModalEvents() {
-            // Navegación del calendario
-            const prevMonthBtn = document.getElementById('prev-month-inicio');
-            const nextMonthBtn = document.getElementById('next-month-inicio');
-            const calendarMonth = document.getElementById('calendar-month-inicio');
-            
-            // Fecha actual en vista (para navegación)
-            let currentViewDate = new Date(selectedDate);
-            
-            // Cambiar mes y actualizar calendario
-            prevMonthBtn.addEventListener('click', function() {
-                currentViewDate.setMonth(currentViewDate.getMonth() - 1);
-                calendarMonth.textContent = `${meses[currentViewDate.getMonth()]} ${currentViewDate.getFullYear()}`;
-                generateCalendarDays(currentViewDate);
-            });
-            
-            nextMonthBtn.addEventListener('click', function() {
-                currentViewDate.setMonth(currentViewDate.getMonth() + 1);
-                calendarMonth.textContent = `${meses[currentViewDate.getMonth()]} ${currentViewDate.getFullYear()}`;
-                generateCalendarDays(currentViewDate);
-            });
-            
-            // Selección de hora
-            const hoursColumn = document.getElementById('hours-column-inicio');
-            hoursColumn.addEventListener('click', function(e) {
-                if (e.target.classList.contains('time-option')) {
-                    // Quitar selección anterior
-                    const prevSelected = hoursColumn.querySelector('.time-option.selected');
-                    if (prevSelected) prevSelected.classList.remove('selected');
-                    
-                    // Marcar nueva hora seleccionada
-                    e.target.classList.add('selected');
-                    selectedHour12 = parseInt(e.target.dataset.hour);
-                }
-            });
-            
-            // Selección de minutos
-            const minutesColumn = document.getElementById('minutes-column-inicio');
-            minutesColumn.addEventListener('click', function(e) {
-                if (e.target.classList.contains('time-option')) {
-                    // Quitar selección anterior
-                    const prevSelected = minutesColumn.querySelector('.time-option.selected');
-                    if (prevSelected) prevSelected.classList.remove('selected');
-                    
-                    // Marcar nuevos minutos seleccionados
-                    e.target.classList.add('selected');
-                    selectedMinute = parseInt(e.target.dataset.minute);
-                }
-            });
-            
-            // Selección de AM/PM
-            const ampmOptions = document.querySelector('.ampm-options');
-            ampmOptions.addEventListener('click', function(e) {
-                if (e.target.classList.contains('ampm-option')) {
-                    // Quitar selección anterior
-                    const prevSelected = ampmOptions.querySelector('.ampm-option.selected');
-                    if (prevSelected) prevSelected.classList.remove('selected');
-                    
-                    // Marcar nueva opción seleccionada
-                    e.target.classList.add('selected');
-                    selectedAMPM = e.target.dataset.ampm;
-                }
-            });
-            
-            // Botones de acción
-            document.getElementById('datetime-close-inicio').addEventListener('click', function() {
-                calendarModalEl.style.display = 'none';
-            });
-            
-            document.getElementById('cancel-datetime-inicio').addEventListener('click', function() {
-                calendarModalEl.style.display = 'none';
-            });
-            
-            document.getElementById('confirm-datetime-inicio').addEventListener('click', function() {
-                updateDatetimeValue();
-                calendarModalEl.style.display = 'none';
-            });
-            
-            // Cerrar modal haciendo clic fuera
-            calendarModalEl.addEventListener('click', function(e) {
-                if (e.target === calendarModalEl) {
-                    calendarModalEl.style.display = 'none';
-                }
-            });
-        }
-        
-        // Evento para mostrar el modal al hacer clic en el botón
-        btnDatetime.addEventListener('click', function() {
-            if (!modalCreated) {
-                createCalendarModal();
-            }
-            calendarModalEl.style.display = 'flex';
-        });
-    })();
-
-    // Pre-cargar fechas y horas para el periodo de fin (como antes)
-    (function precargarFechasEncuestaFin() {
-        const now = new Date();
-        const pad = n => n.toString().padStart(2, '0');
-        // Fecha y hora de fin (30 min después)
-        const fin = new Date(now.getTime() + 30*60000);
-        const fechaFin = `${fin.getFullYear()}-${pad(fin.getMonth()+1)}-${pad(fin.getDate())}`;
-        const horaFin = `${pad(fin.getHours())}:${pad(fin.getMinutes())}`;
+        // Configuración para el selector de fin
+        const datetimeFin = document.getElementById('datetime-fin');
         const inputFechaFin = document.getElementById('fecha-fin-encuesta');
         const inputHoraFin = document.getElementById('hora-fin-encuesta');
-        if (inputFechaFin && inputHoraFin) {
-            inputFechaFin.value = fechaFin;
-            inputHoraFin.value = horaFin;
+        
+        if (datetimeFin) {
+            const fpFin = flatpickr(datetimeFin, {
+                enableTime: true,
+                dateFormat: "d M Y, H:i",
+                time_24hr: false, // Usar formato 12h con AM/PM
+                minuteIncrement: 5,
+                defaultDate: nowPlus30, // 30 minutos después del inicio
+                locale: 'es',
+                allowInput: false,
+                disableMobile: true,
+                position: "auto",
+                static: true,
+                onClose: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        const { fecha, hora } = formatoFechaHora(selectedDates[0]);
+                        inputFechaFin.value = fecha;
+                        inputHoraFin.value = hora;
+                    }
+                },
+                onChange: function(selectedDates, dateStr) {
+                    if (selectedDates.length > 0) {
+                        const { fecha, hora } = formatoFechaHora(selectedDates[0]);
+                        inputFechaFin.value = fecha;
+                        inputHoraFin.value = hora;
+                    }
+                }
+            });
+            
+            // Establecer valores iniciales
+            const { fecha, hora } = formatoFechaHora(nowPlus30);
+            inputFechaFin.value = fecha;
+            inputHoraFin.value = hora;
         }
-    })();
+    }
+    
+    // Intentar inicializar si flatpickr ya está disponible
+    if (window.flatpickr) {
+        initializeDateTimePickers();
+    }
+
+    // La pre-carga de valores para el periodo de fin ahora se maneja dentro de initializeDateTimePickers()
 
     // Crear modal para estadísticas
     if (!document.getElementById('modal-estadisticas-encuesta')) {
