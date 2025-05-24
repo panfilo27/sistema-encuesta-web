@@ -19,9 +19,12 @@
     let modulosEncuesta = [];
     let preguntasModulo = {};
     let opcionesPregunta = {};
+    let subpreguntasOpciones = {}; // Para almacenar subpreguntas por opción
+    let opcionesSubpregunta = {}; // Para almacenar opciones de subpreguntas
     let modoEdicion = false;
     let moduloActualId = null;
     let preguntaActualId = null;
+    let opcionActualId = null; // ID de la opción que tendrá una subpregunta
 
     /**
      * Inicializa el creador de encuestas
@@ -31,6 +34,14 @@
         
         // Ocultar inmediatamente el indicador de carga si está visible
         ocultarCargando();
+        
+        // Cargar CSS de subpreguntas
+        if (!document.querySelector('link[href*="../../../../css/admin/opciones_admin/crear_encuestas/subpreguntas.css"]')) {
+            const linkSubpreguntas = document.createElement('link');
+            linkSubpreguntas.rel = 'stylesheet';
+            linkSubpreguntas.href = '../../../../css/admin/opciones_admin/crear_encuestas/subpreguntas.css';
+            document.head.appendChild(linkSubpreguntas);
+        }
         
         // Cargar las carreras en el selector
         const selectorCarrera = document.getElementById('carrera-encuesta');
@@ -62,6 +73,12 @@
         document.getElementById('form-pregunta').addEventListener('submit', guardarPregunta);
         document.getElementById('tipo-pregunta').addEventListener('change', toggleOpcionesPregunta);
         document.getElementById('btn-agregar-opcion').addEventListener('click', agregarOpcionRespuesta);
+        
+        // Configurar eventos para subpreguntas
+        document.getElementById('tipo-subpregunta')?.addEventListener('change', toggleOpcionesSubpregunta);
+        document.getElementById('btn-agregar-opcion-subpregunta')?.addEventListener('click', agregarOpcionSubpregunta);
+        document.getElementById('btn-agregar-subpregunta')?.addEventListener('click', agregarSubpregunta);
+        document.getElementById('opcion-condicional')?.addEventListener('change', seleccionarOpcionCondicional);
         
         // Configurar el botón para agregar módulo
         document.getElementById('btn-agregar-modulo').addEventListener('click', mostrarModalModulo);
@@ -320,11 +337,14 @@
         const nombreEncuesta = document.getElementById('nombre-encuesta').value.trim();
         const descripcionEncuesta = document.getElementById('descripcion-encuesta').value.trim();
         const estadoEncuesta = document.getElementById('estado-encuesta').value;
-        const carreraEncuesta = document.getElementById('carrera-encuesta').value;
         
-        // Validar que se haya seleccionado una carrera
-        if (!carreraEncuesta || carreraEncuesta === 'cargando') {
-            mostrarAlerta('Debes seleccionar una carrera para la encuesta', 'error');
+        // Obtener múltiples carreras seleccionadas
+        const selectCarreras = document.getElementById('carrera-encuesta');
+        const carrerasSeleccionadas = Array.from(selectCarreras.selectedOptions).map(option => option.value);
+        
+        // Validar que se haya seleccionado al menos una carrera
+        if (!carrerasSeleccionadas.length || carrerasSeleccionadas.includes('cargando')) {
+            mostrarAlerta('Debes seleccionar al menos una carrera para la encuesta', 'error');
             return;
         }
         
@@ -346,8 +366,8 @@
                 nombre: nombreEncuesta,
                 descripcion: descripcionEncuesta,
                 estado: estadoEncuesta,
-                carrera: carreraEncuesta,
-                esGeneral: carreraEncuesta === 'todas',
+                carreras: carrerasSeleccionadas,
+                esGeneral: carrerasSeleccionadas.includes('todas'),
                 fechaCreacion: new Date(),
                 modulos: modulosEncuesta.map(modulo => ({
                     id: modulo.id,
@@ -501,31 +521,49 @@
         document.getElementById('modal-pregunta').style.display = 'none';
     }
 
-    function guardarPregunta(event) {
-        event.preventDefault();
+    function guardarPregunta(e) {
+        e.preventDefault();
         
-        // Obtener datos del formulario
         const textoPregunta = document.getElementById('texto-pregunta').value.trim();
         const tipoPregunta = document.getElementById('tipo-pregunta').value;
         const obligatoria = document.getElementById('obligatoria-pregunta').value === 'true';
         
-        // Validaciones
         if (!textoPregunta) {
-            mostrarAlerta('Debes ingresar un texto para la pregunta', 'error');
+            mostrarAlerta('Debes ingresar el texto de la pregunta', 'error');
             return;
         }
         
-        // Si es pregunta de opción múltiple, verificar que tenga opciones
+        // Obtener opciones si es de opción múltiple
         if (tipoPregunta === 'opcion_multiple') {
-            // Obtener todas las opciones ingresadas
-            const opcionesElements = document.querySelectorAll('#lista-opciones .opcion-respuesta input');
+            const opcionesElements = document.getElementById('lista-opciones').children;
+            
+            if (opcionesElements.length === 0) {
+                mostrarAlerta('Debes agregar al menos una opción para la pregunta', 'error');
+                return;
+            }
+            
+            // Limpiar opciones anteriores
             opcionesPregunta[preguntaActualId] = [];
             
-            // Extraer texto de cada opción
-            opcionesElements.forEach(input => {
-                const textoOpcion = input.value.trim();
+            // Recopilar opciones
+            Array.from(opcionesElements).forEach(opcionElement => {
+                const textoOpcion = opcionElement.querySelector('.texto-opcion').value.trim();
+                const opcionId = opcionElement.dataset.opcionId;
+                
                 if (textoOpcion) {
-                    opcionesPregunta[preguntaActualId].push(textoOpcion);
+                    // Crear objeto de opción
+                    const opcion = {
+                        id: opcionId,
+                        texto: textoOpcion
+                    };
+                    
+                    // Si hay una subpregunta asociada a esta opción, añadir referencia
+                    if (subpreguntasOpciones[opcionId]) {
+                        opcion.tieneSubpregunta = true;
+                        opcion.subpreguntaId = subpreguntasOpciones[opcionId].id;
+                    }
+                    
+                    opcionesPregunta[preguntaActualId].push(opcion);
                 }
             });
             

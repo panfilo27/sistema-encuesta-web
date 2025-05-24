@@ -1,0 +1,108 @@
+/* Estilos para subpreguntas condicionales */
+.seccion-subpreguntas {
+    margin-top: 20px;
+    border-top: 1px dashed #ccc;
+    padding-top: 15px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+.subpregunta-item {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.subpregunta-item .titulo-subpregunta {
+    font-weight: 500;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.subpregunta-item .titulo-subpregunta .badge {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    background-color: #6c757d;
+    color: white;
+}
+
+.subpregunta-item .badge.badge-abierta {
+    background-color: #28a745;
+}
+
+.subpregunta-item .badge.badge-opcion_multiple {
+    background-color: #007bff;
+}
+
+.subpregunta-info {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.subpregunta-trigger {
+    font-style: italic;
+    color: #dc3545;
+    margin-top: 5px;
+    font-size: 0.85rem;
+}
+
+.eliminar-subpregunta {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.contenido-pregunta .indicador-subpreguntas {
+    margin-top: 5px;
+    font-size: 0.8rem;
+    color: #2c7be5;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.contenido-pregunta .indicador-subpreguntas i {
+    font-size: 0.9rem;
+}
+
+#opciones-subpregunta {
+    margin-bottom: 15px;
+    border-left: 3px solid #28a745;
+    padding-left: 15px;
+}
+
+#configuracion-subpregunta {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.option-label .tiene-subpregunta {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    background-color: #17a2b8;
+    color: white;
+    border-radius: 10px;
+}
