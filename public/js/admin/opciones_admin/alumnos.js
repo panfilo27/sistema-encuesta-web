@@ -708,6 +708,14 @@ function cargarContenidoEncuestas() {
                         <button type="button" id="btn-cancelar-encuesta" class="btn-cancelar">Cancelar</button>
                         <button type="submit" class="btn-guardar">Guardar Encuesta</button>
                     </div>
+                    <div class="grupo-formulario">
+                        <label for="fecha-inicio-encuesta">Inicio de la encuesta:</label>
+                        <input type="datetime-local" id="fecha-inicio-encuesta" name="fecha-inicio-encuesta" required>
+                    </div>
+                    <div class="grupo-formulario">
+                        <label for="fecha-fin-encuesta">Fin de la encuesta:</label>
+                        <input type="datetime-local" id="fecha-fin-encuesta" name="fecha-fin-encuesta" required>
+                    </div>
                 </form>
             </div>
             
@@ -722,6 +730,18 @@ function cargarContenidoEncuestas() {
         </div>
     `;
     
+    // Establecer fechas predeterminadas para los inputs de periodo de encuesta
+    const inputInicio = document.getElementById('fecha-inicio-encuesta');
+    const inputFin = document.getElementById('fecha-fin-encuesta');
+    if (inputInicio && inputFin) {
+        const now = new Date();
+        const nowISO = now.toISOString().slice(0,16);
+        const fin = new Date(now.getTime() + 30*60000);
+        const finISO = fin.toISOString().slice(0,16);
+        inputInicio.value = nowISO;
+        inputFin.value = finISO;
+    }
+
     // Crear modal para estadísticas
     if (!document.getElementById('modal-estadisticas-encuesta')) {
         const modalHTML = `
