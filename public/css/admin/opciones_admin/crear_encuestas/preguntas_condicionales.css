@@ -35,6 +35,26 @@
     box-shadow: 0 2px 5px rgba(66, 153, 225, 0.3);
 }
 
+/* Estilo para el botón cuando ya tiene una pregunta condicional asociada */
+.btn-condicional-activo {
+    background-color: #9ae6b4;
+    color: #22543d;
+    border-color: #48bb78;
+}
+
+.btn-condicional-activo:hover {
+    background-color: #48bb78;
+    color: white;
+    border-color: #38a169;
+    box-shadow: 0 2px 5px rgba(72, 187, 120, 0.3);
+}
+
+.btn-condicional-activo::before {
+    content: '\2713';
+    margin-right: 4px;
+    font-weight: bold;
+}
+
 .btn-condicional-opcion::after {
     content: "Pregunta condicional";
     position: absolute;
