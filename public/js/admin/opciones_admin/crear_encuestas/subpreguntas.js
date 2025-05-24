@@ -308,3 +308,15 @@ function cargarSubpreguntasExistentes(preguntaId) {
 function generarId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 }
+
+// Exponemos las funciones al ámbito global para que sean accesibles desde otros archivos
+window.toggleOpcionesSubpregunta = toggleOpcionesSubpregunta;
+window.agregarOpcionSubpregunta = agregarOpcionSubpregunta;
+window.agregarSubpregunta = agregarSubpregunta;
+window.seleccionarOpcionCondicional = seleccionarOpcionCondicional;
+window.mostrarSeccionSubpreguntas = mostrarSeccionSubpreguntas;
+window.actualizarSelectorOpcionesCondicionales = actualizarSelectorOpcionesCondicionales;
+window.cargarSubpreguntasExistentes = cargarSubpreguntasExistentes;
+window.eliminarSubpregunta = eliminarSubpregunta;
+window.actualizarOpcionesConSubpreguntas = actualizarOpcionesConSubpreguntas;
+window.limpiarFormularioSubpregunta = limpiarFormularioSubpregunta;
