@@ -122,20 +122,38 @@ Object.keys(rutas).forEach(id => {
                     scriptCarreras.src = "../js/admin/opciones_admin/crear_encuestas/cargar_carreras_fix.js";
                     document.body.appendChild(scriptCarreras);
                     
-                    // Luego cargar el JavaScript principal fijo
+                    // Cargar primero el script de subpreguntas
                     scriptCarreras.onload = () => {
                         console.log('Script de carga de carreras cargado (versión fija)');
-                        script.src = "../js/admin/opciones_admin/crear_encuestas/crear_encuestas_fixed.js";
-                        script.onload = () => {
-                            console.log('Script de creación de encuestas cargado (versión fija)');
-                            // Inicializar el creador de encuestas mediante la función global
-                            if (typeof inicializarCreadorEncuestas === 'function') {
-                                setTimeout(inicializarCreadorEncuestas, 100); // Pequeño retraso para asegurar que el DOM se cargue
-                            } else {
-                                console.error('No se encontró la función inicializarCreadorEncuestas');
-                            }
+                        
+                        // Crear script para subpreguntas
+                        const scriptSubpreguntas = document.createElement('script');
+                        scriptSubpreguntas.src = "../js/admin/opciones_admin/crear_encuestas/subpreguntas.js";
+                        document.body.appendChild(scriptSubpreguntas);
+                        
+                        // Luego cargar el JavaScript principal fijo
+                        scriptSubpreguntas.onload = () => {
+                            console.log('Script de subpreguntas cargado');
+                            
+                            script.src = "../js/admin/opciones_admin/crear_encuestas/crear_encuestas_fixed.js";
+                            script.onload = () => {
+                                console.log('Script de creación de encuestas cargado (versión fija)');
+                                // Inicializar el creador de encuestas mediante la función global
+                                if (typeof inicializarCreadorEncuestas === 'function') {
+                                    // Verificar que las funciones de subpreguntas estén disponibles
+                                    if (typeof toggleOpcionesSubpregunta === 'function') {
+                                        console.log('Funciones de subpreguntas cargadas correctamente');
+                                    } else {
+                                        console.warn('Las funciones de subpreguntas no están disponibles aún');
+                                    }
+                                    setTimeout(inicializarCreadorEncuestas, 100); // Pequeño retraso para asegurar que el DOM se cargue
+                                } else {
+                                    console.error('No se encontró la función inicializarCreadorEncuestas');
+                                }
+                            };
+                            document.body.appendChild(script);
                         };
-                        document.body.appendChild(script);
+                        
                         return false; // Para evitar que se agregue el script principal abajo
                     };
                     break;
