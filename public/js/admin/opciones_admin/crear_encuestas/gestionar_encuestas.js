@@ -8,7 +8,7 @@
  * @param {Object} encuesta - Datos de la encuesta a crear
  */
 function crearNuevaEncuesta(encuesta) {
-    firebase.firestore().collection('encuestas')
+    firebase.firestore().collection('encuestascreadas')
         .add(encuesta)
         .then(docRef => {
             mostrarCargando(false);
@@ -34,7 +34,7 @@ function crearNuevaEncuesta(encuesta) {
  * @param {Object} encuesta - Nuevos datos de la encuesta
  */
 function actualizarEncuesta(encuestaId, encuesta) {
-    firebase.firestore().collection('encuestas')
+    firebase.firestore().collection('encuestascreadas')
         .doc(encuestaId)
         .update({
             nombre: encuesta.nombre,
@@ -69,7 +69,7 @@ function eliminarEncuesta(encuestaId) {
     if (confirm('¿Estás seguro de que deseas eliminar esta encuesta? Esta acción no se puede deshacer.')) {
         mostrarCargando(true);
         
-        firebase.firestore().collection('encuestas')
+        firebase.firestore().collection('encuestascreadas')
             .doc(encuestaId)
             .delete()
             .then(() => {
@@ -96,7 +96,7 @@ function eliminarEncuesta(encuestaId) {
 function cambiarEstadoEncuesta(encuestaId, nuevoEstado) {
     mostrarCargando(true);
     
-    firebase.firestore().collection('encuestas')
+    firebase.firestore().collection('encuestascreadas')
         .doc(encuestaId)
         .update({
             estado: nuevoEstado,
@@ -131,7 +131,7 @@ function cargarEncuestasExistentes() {
     mostrarCargando(true);
     
     // Obtener encuestas de Firestore
-    firebase.firestore().collection('encuestas')
+    firebase.firestore().collection('encuestascreadas')
         .orderBy('fechaCreacion', 'desc')
         .get()
         .then(querySnapshot => {
@@ -234,7 +234,7 @@ function agregarFilaEncuesta(encuesta) {
 function editarEncuesta(encuestaId) {
     mostrarCargando(true);
     
-    firebase.firestore().collection('encuestas')
+    firebase.firestore().collection('encuestascreadas')
         .doc(encuestaId)
         .get()
         .then(doc => {

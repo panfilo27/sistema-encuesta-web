@@ -147,7 +147,7 @@
             }
             
             // Obtener encuestas desde Firestore
-            firebase.firestore().collection('encuestas')
+            firebase.firestore().collection('encuestascreadas')
                 .get()
                 .then((snapshot) => {
                     // Ocultar indicador de carga
@@ -371,7 +371,7 @@
             };
             
             // Guardar en Firestore
-            firebase.firestore().collection('encuestas')
+            firebase.firestore().collection('encuestascreadas')
                 .add(nuevaEncuesta)
                 .then((docRef) => {
                     // Ocultar indicador de carga
@@ -840,7 +840,7 @@
         // Implementación simplificada
         if (confirm('¿Estás seguro de que deseas eliminar esta encuesta?')) {
             try {
-                firebase.firestore().collection('encuestas').doc(encuestaId)
+                firebase.firestore().collection('encuestascreadas').doc(encuestaId)
                     .delete()
                     .then(() => {
                         mostrarAlerta('Encuesta eliminada correctamente', 'exito');
