@@ -1,0 +1,91 @@
+/* Estilos para el mensaje de error de superposición de encuestas */
+.error-overlap-container {
+  border: 1px solid #ff5252;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 82, 82, 0.15);
+  margin: 20px 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.error-overlap-header {
+  background-color: #ff5252;
+  color: white;
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.error-overlap-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.error-overlap-header i {
+  font-size: 1.2rem;
+}
+
+.error-overlap-body {
+  padding: 15px;
+}
+
+.error-overlap-title {
+  font-size: 1rem;
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-weight: 500;
+}
+
+.error-overlap-section {
+  margin-bottom: 15px;
+  padding-left: 5px;
+}
+
+.error-overlap-section h5 {
+  margin: 0 0 8px 0;
+  color: #555;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.error-overlap-time {
+  color: #e53935;
+  font-weight: 500;
+  margin: 0;
+  padding: 5px 0;
+  font-size: 0.95rem;
+}
+
+.error-overlap-list {
+  margin: 8px 0;
+  padding-left: 25px;
+}
+
+.error-overlap-list li {
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.error-overlap-footer {
+  background-color: #fff8f8;
+  padding: 10px 15px;
+  border-top: 1px solid #ffcdd2;
+  margin-top: 10px;
+}
+
+.error-overlap-footer .nota {
+  margin: 0;
+  color: #757575;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error-overlap-footer i {
+  color: #ff7043;
+  font-size: 1rem;
+}

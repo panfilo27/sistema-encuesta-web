@@ -27,6 +27,14 @@ function inicializarGestorEncuestas() {
     // Cargar datos
     cargarEncuestasActivas();
     cargarEstadisticasEncuestas();
+    
+    // Cargar estilos para mensajes de error de superposición
+    if (!document.querySelector('link[href*="../../../../css/admin/opciones_admin/alumnos/error-overlap.css"]')) {
+        const linkErrorEstilos = document.createElement('link');
+        linkErrorEstilos.rel = 'stylesheet';
+        linkErrorEstilos.href = '../../../../css/admin/opciones_admin/alumnos/error-overlap.css';
+        document.head.appendChild(linkErrorEstilos);
+    }
 }
 
 /**
@@ -255,11 +263,31 @@ async function crearNuevaEncuesta() {
                 .map(e => `<li>"${e.titulo}" (${e.inicio} - ${e.fin})</li>`)
                 .join('');
             const htmlMessage = `
-                <p>Ya existe ${count} encuesta${plural} activa${plural} en ese rango de fechas y horas.</p>
-                <p><strong>Tu encuesta:</strong> ${inicioFormateado} - ${finFormateado}</p>
-                <p><strong>Encuesta${plural} en conflicto:</strong></p>
-                <ul>${conflictoHtml}</ul>
-                <p class="nota">Nota: Hay solapamiento porque ambas encuestas estarían activas simultáneamente durante cierto periodo.</p>
+                <div class="error-overlap-container">
+                    <div class="error-overlap-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h4>Conflicto de horarios</h4>
+                    </div>
+                    <div class="error-overlap-body">
+                        <p class="error-overlap-title">Ya existe ${count} encuesta${plural} activa${plural} en ese rango de fechas y horas.</p>
+                        
+                        <div class="error-overlap-section">
+                            <h5>Tu encuesta:</h5>
+                            <p class="error-overlap-time">${inicioFormateado} - ${finFormateado}</p>
+                        </div>
+                        
+                        <div class="error-overlap-section">
+                            <h5>Encuesta${plural} en conflicto:</h5>
+                            <ul class="error-overlap-list">
+                                ${conflictoHtml}
+                            </ul>
+                        </div>
+                        
+                        <div class="error-overlap-footer">
+                            <p class="nota"><i class="fas fa-info-circle"></i> Hay solapamiento porque ambas encuestas estarían activas simultáneamente durante cierto periodo.</p>
+                        </div>
+                    </div>
+                </div>
             `.trim();
             document.getElementById('error-encuesta').innerHTML = htmlMessage;
             console.log('Encuestas solapadas:', verificacionRango.encuestasSolapadas);
