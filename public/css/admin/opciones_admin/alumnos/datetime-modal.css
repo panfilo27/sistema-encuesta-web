@@ -1,3 +1,164 @@
+/* Estilo para el botón y preview de selección de fecha/hora */
+.panel-fecha-hora-inicio {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.custom-calendar {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  padding: 12px 14px 18px 14px;
+  min-width: 240px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.custom-calendar .calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.custom-calendar .calendar-header button {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #2563eb;
+  padding: 2px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.custom-calendar .calendar-header button:hover {
+  background: #e0e7ef;
+}
+.custom-calendar table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+}
+.custom-calendar th, .custom-calendar td {
+  width: 32px;
+  height: 32px;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1em;
+}
+.custom-calendar td {
+  transition: background 0.13s, color 0.13s;
+}
+.custom-calendar td.selected, .custom-calendar td:hover {
+  background: #2563eb;
+  color: #fff;
+}
+.custom-calendar td.today {
+  border: 1.5px solid #2563eb;
+}
+.custom-calendar th {
+  color: #888;
+  font-size: 0.97em;
+  font-weight: 500;
+}
+
+.custom-time-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+  gap: 8px;
+}
+.custom-time-picker .label {
+  font-size: 1em;
+  color: #333;
+  margin-bottom: 3px;
+  font-weight: 500;
+}
+.scroll-list {
+  max-height: 120px;
+  overflow-y: auto;
+  background: #f5f6fa;
+  border-radius: 8px;
+  padding: 4px 0;
+  margin-bottom: 5px;
+  width: 68px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.scroll-list::-webkit-scrollbar {
+  width: 6px;
+  background: #e5e7eb;
+}
+.scroll-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+}
+.scroll-list .time-item {
+  padding: 6px 0;
+  font-size: 1.12em;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 90%;
+  text-align: center;
+  margin: 1px 0;
+  transition: background 0.13s, color 0.13s;
+}
+.scroll-list .time-item.selected, .scroll-list .time-item:hover {
+  background: #2563eb;
+  color: #fff;
+}
+.ampm-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.ampm-btn {
+  font-size: 1.08em;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background: #e0e7ef;
+  color: #2563eb;
+  padding: 7px 22px;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.ampm-btn.selected, .ampm-btn:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f5f6fa;
+  color: #222;
+  font-size: 1.05em;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.18s, border 0.18s;
+  margin-right: 18px;
+  margin-bottom: 8px;
+}
+.btn-fecha-hora-modal:hover {
+  background: #e0e7ef;
+  border-color: #2563eb;
+}
+.preview-fecha-hora {
+  font-size: 1.09em;
+  color: #2563eb;
+  font-weight: 500;
+  margin-left: 8px;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+}
+.fecha-hora-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
 /* Estilo minimalista para el modal de selección de fecha y hora */
 .datetime-modal-bg {
   position: fixed;

@@ -677,11 +677,21 @@ function cargarContenidoEncuestas() {
                     </div>
                     
                     <h4>Periodo de Inicio</h4>
-<div class="fecha-hora-container">
-    <button type="button" id="btn-fecha-hora-inicio" class="btn-fecha-hora-modal">Seleccionar fecha y hora de inicio</button>
-    <input type="hidden" id="fecha-inicio-encuesta" name="fecha-inicio-encuesta" required>
-    <input type="hidden" id="hora-inicio-encuesta" name="hora-inicio-encuesta" required>
-    <span id="preview-fecha-hora-inicio" class="preview-fecha-hora"></span>
+<div class="panel-fecha-hora-inicio">
+  <div class="custom-calendar" id="custom-calendar-inicio"></div>
+  <div class="custom-time-picker">
+    <div class="label">Hora</div>
+    <div class="scroll-list" id="custom-hour-list"></div>
+    <div class="label">Minutos</div>
+    <div class="scroll-list" id="custom-min-list"></div>
+    <div class="ampm-btns">
+      <button type="button" class="ampm-btn" id="ampm-am">AM</button>
+      <button type="button" class="ampm-btn" id="ampm-pm">PM</button>
+    </div>
+  </div>
+  <input type="hidden" id="fecha-inicio-encuesta" name="fecha-inicio-encuesta" required>
+  <input type="hidden" id="hora-inicio-encuesta" name="hora-inicio-encuesta" required>
+  <span id="preview-fecha-hora-inicio" class="preview-fecha-hora"></span>
 </div>
                     
                     <h4>Periodo de Fin</h4>
@@ -725,8 +735,119 @@ function cargarContenidoEncuestas() {
         document.head.appendChild(link);
     }
 
-    // Lógica para el botón de selección de fecha y hora de inicio
-    (function initFechaHoraInicioModal() {
+    // Lógica para el panel custom de selección de fecha y hora de inicio
+    (function customFechaHoraInicioPanel() {
+        // --- CALENDARIO ---
+        const calendarDiv = document.getElementById('custom-calendar-inicio');
+        const inputFecha = document.getElementById('fecha-inicio-encuesta');
+        const inputHora = document.getElementById('hora-inicio-encuesta');
+        const preview = document.getElementById('preview-fecha-hora-inicio');
+        const today = new Date();
+        let selDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        let selHour = today.getHours() % 12 || 12;
+        let selMin = Math.round(today.getMinutes() / 5) * 5;
+        let selAMPM = today.getHours() >= 12 ? 'PM' : 'AM';
+        // --- RENDER CALENDARIO ---
+        function renderCalendar(year, month) {
+            calendarDiv.innerHTML = '';
+            const header = document.createElement('div');
+            header.className = 'calendar-header';
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '<';
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '>';
+            const monthYear = document.createElement('span');
+            monthYear.textContent = selDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+            header.appendChild(prevBtn); header.appendChild(monthYear); header.appendChild(nextBtn);
+            calendarDiv.appendChild(header);
+            // Tabla días
+            const table = document.createElement('table');
+            const daysRow = document.createElement('tr');
+            ['D','L','M','M','J','V','S'].forEach(d => {
+                const th = document.createElement('th'); th.textContent = d; daysRow.appendChild(th);
+            });
+            table.appendChild(daysRow);
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month+1, 0).getDate();
+            let row = document.createElement('tr');
+            for (let i=0; i<firstDay; i++) row.appendChild(document.createElement('td'));
+            for (let d=1; d<=daysInMonth; d++) {
+                if ((row.children.length) === 7) { table.appendChild(row); row = document.createElement('tr'); }
+                const td = document.createElement('td'); td.textContent = d;
+                const isToday = year===today.getFullYear() && month===today.getMonth() && d===today.getDate();
+                if (isToday) td.classList.add('today');
+                if (d===selDate.getDate() && month===selDate.getMonth() && year===selDate.getFullYear()) td.classList.add('selected');
+                td.addEventListener('click',()=>{
+                    selDate = new Date(year, month, d);
+                    renderCalendar(year, month);
+                    updateAll();
+                });
+                row.appendChild(td);
+            }
+            while(row.children.length<7) row.appendChild(document.createElement('td'));
+            table.appendChild(row);
+            calendarDiv.appendChild(table);
+            prevBtn.onclick = ()=>{ renderCalendar(month===0?year-1:year, month===0?11:month-1); };
+            nextBtn.onclick = ()=>{ renderCalendar(month===11?year+1:year, month===11?0:month+1); };
+        }
+        renderCalendar(selDate.getFullYear(), selDate.getMonth());
+        // --- HORA ---
+        const hourList = document.getElementById('custom-hour-list');
+        hourList.innerHTML = '';
+        for(let h=1; h<=12; h++) {
+            const div = document.createElement('div');
+            div.className = 'time-item' + (h===selHour?' selected':'');
+            div.textContent = h.toString().padStart(2,'0');
+            div.onclick = ()=>{
+                selHour = h;
+                document.querySelectorAll('#custom-hour-list .time-item').forEach(e=>e.classList.remove('selected'));
+                div.classList.add('selected');
+                updateAll();
+            };
+            hourList.appendChild(div);
+        }
+        // --- MINUTOS ---
+        const minList = document.getElementById('custom-min-list');
+        minList.innerHTML = '';
+        for(let m=0; m<60; m+=5) {
+            const div = document.createElement('div');
+            div.className = 'time-item' + (m===selMin?' selected':'');
+            div.textContent = m.toString().padStart(2,'0');
+            div.onclick = ()=>{
+                selMin = m;
+                document.querySelectorAll('#custom-min-list .time-item').forEach(e=>e.classList.remove('selected'));
+                div.classList.add('selected');
+                updateAll();
+            };
+            minList.appendChild(div);
+        }
+        // --- AM/PM ---
+        const amBtn = document.getElementById('ampm-am');
+        const pmBtn = document.getElementById('ampm-pm');
+        function updateAMPMBtns() {
+            amBtn.classList.toggle('selected', selAMPM==='AM');
+            pmBtn.classList.toggle('selected', selAMPM==='PM');
+        }
+        amBtn.onclick = ()=>{ selAMPM='AM'; updateAMPMBtns(); updateAll(); };
+        pmBtn.onclick = ()=>{ selAMPM='PM'; updateAMPMBtns(); updateAll(); };
+        updateAMPMBtns();
+        // --- Update preview e inputs ocultos ---
+        function updateAll() {
+            const yyyy = selDate.getFullYear();
+            const mm = (selDate.getMonth()+1).toString().padStart(2,'0');
+            const dd = selDate.getDate().toString().padStart(2,'0');
+            const fechaStr = `${yyyy}-${mm}-${dd}`;
+            let hour24 = selHour;
+            if(selAMPM==='PM' && hour24!==12) hour24+=12;
+            if(selAMPM==='AM' && hour24===12) hour24=0;
+            const horaStr = `${hour24.toString().padStart(2,'0')}:${selMin.toString().padStart(2,'0')}`;
+            inputFecha.value = fechaStr;
+            inputHora.value = horaStr;
+            preview.textContent = `${fechaStr} ${selHour.toString().padStart(2,'0')}:${selMin.toString().padStart(2,'0')} ${selAMPM}`;
+        }
+        updateAll();
+    })();
+
         const btn = document.getElementById('btn-fecha-hora-inicio');
         const inputFecha = document.getElementById('fecha-inicio-encuesta');
         const inputHora = document.getElementById('hora-inicio-encuesta');
