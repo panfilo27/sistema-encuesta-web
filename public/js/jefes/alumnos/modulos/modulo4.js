@@ -128,7 +128,7 @@ function inicializarVistaAdminModulo(datos) {
  */
 function cargarModeloModulo4() {
     const scriptModelo = document.createElement('script');
-    scriptModelo.src = '/public/models/modulos/modulo4.js';
+    scriptModelo.src = '../../../../models/modulos/modulo4.js';
     scriptModelo.onload = function() {
         console.log('Modelo Módulo 4 cargado correctamente');
         cargarDatosFormulario();

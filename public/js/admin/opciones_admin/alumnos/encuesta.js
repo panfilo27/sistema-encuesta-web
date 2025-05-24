@@ -36,7 +36,7 @@ function verificarAutenticacionAdmin() {
     const userSession = localStorage.getItem('userSession');
     
     if (!userSession) {
-        window.location.href = '/public/auth/login.html';
+        window.location.href = '../../../../../auth/login.html';
         return;
     }
     
@@ -45,11 +45,11 @@ function verificarAutenticacionAdmin() {
         
         if (userData.rolUser !== 'admin') {
             alert('No tienes permisos para acceder a esta página.');
-            window.location.href = '/public/auth/login.html';
+            window.location.href = '../../../../../auth/login.html';
         }
     } catch (error) {
         console.error('Error al verificar autenticación:', error);
-        window.location.href = '/public/auth/login.html';
+        window.location.href = '../../../../../auth/login.html';
     }
 }
 

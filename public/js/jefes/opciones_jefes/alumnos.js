@@ -730,7 +730,7 @@ function verDetalles(id) {
         } else if (contenedorHistorial) {
             // Si no está disponible la función, cargar el script
             const scriptHistorial = document.createElement('script');
-            scriptHistorial.src = '/public/js/jefes/opciones_jefes/alumnos/historial.js';
+            scriptHistorial.src = './historial.js';
             scriptHistorial.onload = function() {
                 if (typeof mostrarHistorialEncuestasAlumno === 'function') {
                     mostrarHistorialEncuestasAlumno(id, 'historial-encuestas-alumno');
@@ -856,13 +856,13 @@ function cargarContenidoEncuestas() {
     if (!document.querySelector('link[href*="encuesta.css"]')) {
         const linkEstilos = document.createElement('link');
         linkEstilos.rel = 'stylesheet';
-        linkEstilos.href = '/public/css/admin/opciones_admin/alumnos/encuesta.css';
+        linkEstilos.href = '../../../../css/admin/opciones_admin/alumnos/encuesta.css';
         document.head.appendChild(linkEstilos);
     }
     
     // Cargar el script (usar la versión para jefes de departamento)
     const scriptEncuestas = document.createElement('script');
-    scriptEncuestas.src = '/public/js/jefes/opciones_jefes/alumnos/encuesta.js';
+    scriptEncuestas.src = './encuesta.js';
     console.log('DEPURACIÓN - Cargando script de encuestas para jefes:', scriptEncuestas.src);
     scriptEncuestas.onload = function() {
         console.log('DEPURACIÓN - Script de encuestas cargado correctamente');

@@ -195,10 +195,10 @@ async function mostrarDetallesModulo(modulo, encuestaId, alumnoId) {
         console.log(`Mostrando detalles del módulo ${modulo} de la encuesta ${encuestaId} del alumno ${alumnoId}`);
         
         // Cargar los estilos si no están ya cargados
-        if (!document.querySelector('link[href*="/public/css/admin/alumnos/modulos/modal.css"]')) {
+        if (!document.querySelector('link[href*="../../../../../css/admin/alumnos/modulos/modal.css"]')) {
             const linkEstilos = document.createElement('link');
             linkEstilos.rel = 'stylesheet';
-            linkEstilos.href = '/public/css/admin/alumnos/modulos/modal.css';
+            linkEstilos.href = '../../../../../css/admin/alumnos/modulos/modal.css';
             document.head.appendChild(linkEstilos);
         }
         
@@ -248,7 +248,7 @@ async function mostrarDetallesModulo(modulo, encuestaId, alumnoId) {
         const datosModulo = await cargarDatosModulo(modulo, encuestaId, alumnoId);
         
         // Cargar la vista del módulo
-        const urlVistaModulo = `/public/admin/opciones_admin/alumnos/modulos/modulo${modulo}.html`;
+        const urlVistaModulo = `../../../../../admin/opciones_admin/alumnos/modulos/modulo${modulo}.html`;
         
         // Verificar si existe el módulo, si no, cargarlo dinámicamente
         await verificarCrearModulo(modulo);

@@ -24,7 +24,7 @@ function cerrarSesion() {
     .then(() => {
       console.log("Usuario ha cerrado sesión");
       // Redirigir a la página de inicio después de cerrar sesión
-      window.location.href = '/index.html';
+      window.location.href = '../index.html';
     })
     .catch((error) => {
       console.error("Error al cerrar sesión:", error);
@@ -93,14 +93,14 @@ function registrarUsuario(email, password, nombre, rol) {
 function redirigirSegunRol(rol) {
   switch(rol) {
     case 'admin':
-      window.location.href = '/admin/dashboard.html';
+      window.location.href = '../admin/dashboard.html';
       break;
     case 'jefedepartamento':
-      window.location.href = '/jefes/dashboard.html';
+      window.location.href = '../jefes/dashboard.html';
       break;
     case 'alumno':
     default:
-      window.location.href = '/alumnos/dashboard.html';
+      window.location.href = '../alumnos/dashboard.html';
       break;
   }
 }

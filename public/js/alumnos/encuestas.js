@@ -50,7 +50,7 @@ function inicializarGestorEncuestas() {
             // Si no hay usuario autenticado, mostrar mensaje
             mostrarNoEncuestas('Debes iniciar sesión para ver tus encuestas');
             setTimeout(() => {
-                window.location.href = '/public/auth/login.html';
+                window.location.href = '../../auth/login.html';
             }, 2000);
         }
     } catch (error) {
@@ -466,7 +466,7 @@ function continuarEncuesta(encuestaId, moduloId) {
     localStorage.setItem('encuestaActiva', encuestaId);
     
     // Redirigir al módulo correspondiente
-    window.location.href = `/public/alumnos/modulos/${moduloId}.html`;
+    window.location.href = `modulos/${moduloId}.html`;
 }
 
 /**
@@ -538,7 +538,7 @@ function verRespuestasModulo(encuestaId, moduloId) {
     localStorage.setItem('verModuloId', moduloId);
     
     // Redirigir a la página de respuestas (usaremos el mismo módulo pero en modo vista)
-    window.location.href = `/public/alumnos/modulos/${moduloId}.html?modo=vista`;
+    window.location.href = `modulos/${moduloId}.html?modo=vista`;
 }
 
 // Exportar funciones para uso global

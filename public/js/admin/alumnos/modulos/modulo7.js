@@ -60,7 +60,7 @@ function inicializarVistaAdminModulo(datos) {
  */
 function cargarModeloModulo7() {
     const scriptModelo = document.createElement('script');
-    scriptModelo.src = '/public/models/modulos/modulo7.js';
+    scriptModelo.src = '../../../../models/modulos/modulo7.js';
     scriptModelo.onload = function() {
         console.log('Modelo Módulo 7 cargado correctamente');
         cargarDatosFormulario();

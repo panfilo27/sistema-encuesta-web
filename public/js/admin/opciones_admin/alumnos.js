@@ -19,7 +19,7 @@ function verificarModeloUsuario() {
     // Si no está disponible, cargarlo dinámicamente
     console.log('Cargando modelo Usuario...');
     const scriptUsuario = document.createElement('script');
-    scriptUsuario.src = '/public/models/Usuario.js';
+    scriptUsuario.src = '../../../../models/Usuario.js';
     scriptUsuario.onload = function() {
         console.log('Modelo Usuario cargado correctamente');
         modeloCargado = true;
@@ -85,7 +85,7 @@ function verificarAutenticacion() {
     const userSession = localStorage.getItem('userSession');
     
     if (!userSession) {
-        window.location.href = '/public/auth/login.html';
+        window.location.href = '../../../../auth/login.html';
         return;
     }
     
@@ -94,11 +94,11 @@ function verificarAutenticacion() {
         
         if (userData.rolUser !== 'admin') {
             alert('No tienes permisos para acceder a esta página.');
-            window.location.href = '/public/auth/login.html';
+            window.location.href = '../../../../auth/login.html';
         }
     } catch (error) {
         console.error('Error al verificar autenticación:', error);
-        window.location.href = '/public/auth/login.html';
+        window.location.href = '../../../../auth/login.html';
     }
 }
 
@@ -614,7 +614,7 @@ function verDetalles(id) {
         } else if (contenedorHistorial) {
             // Si no está disponible la función, cargar el script
             const scriptHistorial = document.createElement('script');
-            scriptHistorial.src = '/public/js/admin/opciones_admin/alumnos/historial.js';
+            scriptHistorial.src = 'historial.js';
             scriptHistorial.onload = function() {
                 if (typeof mostrarHistorialEncuestasAlumno === 'function') {
                     mostrarHistorialEncuestasAlumno(id, 'historial-encuestas-alumno');
@@ -753,24 +753,24 @@ function cargarContenidoEncuestas() {
     }
     
     // Cargar estilos si no existen
-    if (!document.querySelector('link[href*="/public/css/admin/opciones_admin/alumnos/encuesta.css"]')) {
+    if (!document.querySelector('link[href*="../../../../css/admin/opciones_admin/alumnos/encuesta.css"]')) {
         const linkEstilos = document.createElement('link');
         linkEstilos.rel = 'stylesheet';
-        linkEstilos.href = '/public/css/admin/opciones_admin/alumnos/encuesta.css';
+        linkEstilos.href = '../../../../css/admin/opciones_admin/alumnos/encuesta.css';
         document.head.appendChild(linkEstilos);
     }
     
     // Cargar estilos para horas de encuestas
-    if (!document.querySelector('link[href*="/public/css/admin/opciones_admin/alumnos/hora_encuesta.css"]')) {
+    if (!document.querySelector('link[href*="../../../../css/admin/opciones_admin/alumnos/hora_encuesta.css"]')) {
         const linkHoraEstilos = document.createElement('link');
         linkHoraEstilos.rel = 'stylesheet';
-        linkHoraEstilos.href = '/public/css/admin/opciones_admin/alumnos/hora_encuesta.css';
+        linkHoraEstilos.href = '../../../../css/admin/opciones_admin/alumnos/hora_encuesta.css';
         document.head.appendChild(linkHoraEstilos);
     }
     
     // Cargar el script
     const scriptEncuestas = document.createElement('script');
-    scriptEncuestas.src = '/public/js/admin/opciones_admin/alumnos/encuesta.js';
+    scriptEncuestas.src = 'encuesta.js';
     scriptEncuestas.onload = function() {
         // Inicializar el gestor de encuestas si está disponible
         if (typeof inicializarGestorEncuestas === 'function') {

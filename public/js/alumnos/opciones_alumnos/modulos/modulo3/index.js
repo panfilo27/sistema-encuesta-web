@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Verificar que la sesión sea de un alumno
             if (userData.rolUser !== 'alumno') {
                 alert('No tienes permiso para acceder a esta sección.');
-                window.location.href = '/public/auth/login.html';
+                window.location.href = '../../../../../auth/login.html';
                 return;
             }
             
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Evento de cierre de sesión
             document.getElementById('btn-cerrar-sesion').addEventListener('click', () => {
                 localStorage.removeItem('userSession');
-                window.location.href = '/public/auth/login.html';
+                window.location.href = '../../../../../auth/login.html';
             });
             
             try {
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 if (!modulosAnterioresCompletados) {
                     alert('Debes completar los módulos anteriores antes de continuar. Serás redirigido.');
-                    window.location.href = '/public/alumnos/dashboard.html';
+                    window.location.href = '../../encuestas.html';
                     return;
                 }
                 
@@ -93,12 +93,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error al procesar la sesión:', error);
             localStorage.removeItem('userSession');
-            window.location.href = '/public/auth/login.html';
+            window.location.href = '../../../../../auth/login.html';
         }
     } else {
         // Usuario no autenticado, redirigir al login
         alert('Debes iniciar sesión para acceder a esta sección.');
-        window.location.href = '/public/auth/login.html';
+        window.location.href = '../../../../../auth/login.html';
     }
 });
 
@@ -311,7 +311,7 @@ function configurarEventos() {
     btnGuardar.addEventListener('click', async () => {
         // Si el módulo ya está completado, solo navegar al siguiente módulo
         if (moduloCompletado) {
-            window.location.href = '/public/alumnos/modulos/modulo4.html';
+            window.location.href = 'modulo4.html';
             return;
         }
         
@@ -337,7 +337,7 @@ function configurarEventos() {
             await guardarRespuestas(datosModulo3);
             
             // Redirigir al siguiente módulo
-            window.location.href = '/public/alumnos/modulos/modulo4.html';
+            window.location.href = 'modulo4.html';
         } catch (error) {
             console.error('Error al guardar el formulario:', error);
             mostrarError('Error al guardar la información. Por favor, intenta nuevamente.');
