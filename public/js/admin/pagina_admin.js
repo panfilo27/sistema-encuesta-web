@@ -111,66 +111,40 @@ Object.keys(rutas).forEach(id => {
                     break;
                     
                 case 'btn-crear-encuestas':
-                    // Cargar directamente el HTML de crear encuestas
-                    fetchFileContent.then(content => {
-                        // Reemplazar el contenido principal con el HTML cargado
-                        document.getElementById('main-content').innerHTML = content;
-                        
-                        console.log('Contenido de crear encuestas cargado');
-                        
-                        // Verificar si ya hay scripts cargados para evitar duplicaciones
-                        const scriptsLoaded = {
-                            firebase: document.querySelector('script[src*="firebase-app.js"]'),
-                            firestore: document.querySelector('script[src*="firebase-firestore.js"]'),
-                            config: document.querySelector('script[src*="firebase-config.js"]')
-                        };
-                        
-                        // Cargar Firebase si no está cargado
-                        if (!scriptsLoaded.firebase) {
-                            const firebaseScript = document.createElement('script');
-                            firebaseScript.src = "https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js";
-                            document.body.appendChild(firebaseScript);
-                            
-                            firebaseScript.onload = () => {
-                                if (!scriptsLoaded.firestore) {
-                                    const firestoreScript = document.createElement('script');
-                                    firestoreScript.src = "https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js";
-                                    document.body.appendChild(firestoreScript);
-                                    
-                                    firestoreScript.onload = () => {
-                                        if (!scriptsLoaded.config) {
-                                            const configScript = document.createElement('script');
-                                            configScript.src = "../js/firebase-config.js";
-                                            document.body.appendChild(configScript);
-                                        }
-                                    };
-                                }
-                            };
+                    // Solo es necesario cargar el script adicional porque el HTML ya se cargó
+                    // automáticamente en el código del event listener arriba
+                    
+                    // Configurar inicialización después de cargar la página
+                    setTimeout(() => {
+                        // Verificar e inicializar los gestores
+                        if (window.gestorEncuestas && typeof window.gestorEncuestas.inicializar === 'function') {
+                            window.gestorEncuestas.inicializar();
+                            console.log('Gestor de encuestas inicializado correctamente');
+                        } else {
+                            console.error('El gestor de encuestas no está disponible');
                         }
                         
-                        // Inicializar los gestores una vez que el DOM esté completamente cargado
-                        setTimeout(() => {
-                            if (window.gestorEncuestas && typeof window.gestorEncuestas.inicializar === 'function') {
-                                window.gestorEncuestas.inicializar();
-                                console.log('Gestor de encuestas inicializado correctamente');
-                            }
-                            
-                            if (window.gestorModulos && typeof window.gestorModulos.inicializar === 'function') {
-                                window.gestorModulos.inicializar();
-                                console.log('Gestor de módulos inicializado correctamente');
-                            }
-                            
-                            if (window.gestorPreguntas && typeof window.gestorPreguntas.inicializar === 'function') {
-                                window.gestorPreguntas.inicializar();
-                                console.log('Gestor de preguntas inicializado correctamente');
-                            }
-                            
-                            if (window.gestorPreguntasCondicionales && typeof window.gestorPreguntasCondicionales.inicializar === 'function') {
-                                window.gestorPreguntasCondicionales.inicializar();
-                                console.log('Gestor de preguntas condicionales inicializado correctamente');
-                            }
-                        }, 500);
-                    });
+                        if (window.gestorModulos && typeof window.gestorModulos.inicializar === 'function') {
+                            window.gestorModulos.inicializar();
+                            console.log('Gestor de módulos inicializado correctamente');
+                        } else {
+                            console.error('El gestor de módulos no está disponible');
+                        }
+                        
+                        if (window.gestorPreguntas && typeof window.gestorPreguntas.inicializar === 'function') {
+                            window.gestorPreguntas.inicializar();
+                            console.log('Gestor de preguntas inicializado correctamente');
+                        } else {
+                            console.error('El gestor de preguntas no está disponible');
+                        }
+                        
+                        if (window.gestorPreguntasCondicionales && typeof window.gestorPreguntasCondicionales.inicializar === 'function') {
+                            window.gestorPreguntasCondicionales.inicializar();
+                            console.log('Gestor de preguntas condicionales inicializado correctamente');
+                        } else {
+                            console.error('El gestor de preguntas condicionales no está disponible');
+                        }
+                    }, 500); // Dar tiempo suficiente para que se carguen todos los scripts
                     
                     return false; // Para evitar que se agregue el script principal abajo
                     break;
