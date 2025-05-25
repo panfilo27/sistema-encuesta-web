@@ -9,8 +9,7 @@ const rutas = {
     'btn-carreras': "opciones_admin/carreras.html",
     'btn-personal': "opciones_admin/personal.html",
     'btn-alumnos': "opciones_admin/alumnos.html",
-    'btn-avisos': "opciones_admin/avisos.html",
-    'btn-crear-encuestas': "opciones_admin/crear_encuestas/crear_encuestas.html"
+    'btn-avisos': "opciones_admin/avisos.html"
 };
 
 Object.keys(rutas).forEach(id => {
@@ -99,36 +98,6 @@ Object.keys(rutas).forEach(id => {
                         } else {
                             console.error('No se encontró la función inicializarGestionAvisos');
                         }
-                    };
-                    break;
-                    
-                case 'btn-crear-encuestas':
-                    // Cargar el CSS primero
-                    const linkCSS = document.createElement('link');
-                    linkCSS.rel = 'stylesheet';
-                    linkCSS.href = '../css/admin/crear_encuestas/estilos.css';
-                    document.head.appendChild(linkCSS);
-                    
-                    // Primero cargar el script de carreras fijo
-                    const scriptCarreras = document.createElement('script');
-                    scriptCarreras.src = "../js/admin/opciones_admin/crear_encuestas/cargar_carreras_fix.js";
-                    document.body.appendChild(scriptCarreras);
-                    
-                    // Luego cargar el JavaScript principal fijo
-                    scriptCarreras.onload = () => {
-                        console.log('Script de carga de carreras cargado (versión fija)');
-                        script.src = "../js/admin/opciones_admin/crear_encuestas/crear_encuestas_fixed.js";
-                        script.onload = () => {
-                            console.log('Script de creación de encuestas cargado (versión fija)');
-                            // Inicializar el creador de encuestas mediante la función global
-                            if (typeof inicializarCreadorEncuestas === 'function') {
-                                setTimeout(inicializarCreadorEncuestas, 100); // Pequeño retraso para asegurar que el DOM se cargue
-                            } else {
-                                console.error('No se encontró la función inicializarCreadorEncuestas');
-                            }
-                        };
-                        document.body.appendChild(script);
-                        return false; // Para evitar que se agregue el script principal abajo
                     };
                     break;
 
