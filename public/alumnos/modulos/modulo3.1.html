@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 3.1: Plan de Estudios - Química y Bioquímica</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="../../../css/alumnos/opciones_alumnos/modulos/modulo3.1.css">
+    <link rel="stylesheet" href="../../../css/alumnos/opciones_alumnos/modulos/common.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../../assets/img/favicon.png">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Barra de navegación -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <img src="../../../assets/img/logo-encuesta.png" alt="Logo" height="40">
+                    Encuesta de Química y Bioquímica
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <span class="nav-link">
+                                <i class="fas fa-user-circle me-1"></i>
+                                <span id="nombre-usuario">Usuario</span>
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <button id="btn-cerrar-sesion" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt me-1"></i>
+                                Cerrar sesión
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenido principal -->
+        <div class="content-wrapper">
+            <div class="container py-4">
+                <!-- Encabezado -->
+                <div class="header-container mb-4">
+                    <h1 class="mb-3">Módulo 3.1: Plan de Estudios</h1>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">3/5</div>
+                    </div>
+                    <p class="lead">Por favor valora el plan de estudios de tu carrera. Los campos marcados con <span class="text-danger">*</span> son obligatorios.</p>
+                </div>
+
+                <!-- Indicador de carga -->
+                <div id="loading-module" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando formulario, por favor espera...</p>
+                </div>
+
+                <!-- Contenedor de errores -->
+                <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+
+                <!-- Formulario -->
+                <form id="form-modulo3-1" class="needs-validation" style="display: none;">
+                    <fieldset class="mb-4 p-3 border rounded">
+                        <legend>Evaluación del Plan de Estudios</legend>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Utilidad de las competencias adquiridas durante tu formación <span class="text-danger">*</span></label>
+                            <div class="form-text mb-2">¿Qué tan útiles han sido las competencias que adquiriste durante tu carrera para tu desempeño profesional?</div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="utilidad_competencias" id="utilidad_muy_alta" value="muy_alta" required>
+                                <label class="form-check-label" for="utilidad_muy_alta">Muy alta</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="utilidad_competencias" id="utilidad_alta" value="alta">
+                                <label class="form-check-label" for="utilidad_alta">Alta</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="utilidad_competencias" id="utilidad_baja" value="baja">
+                                <label class="form-check-label" for="utilidad_baja">Baja</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="utilidad_competencias" id="utilidad_muy_baja" value="muy_baja">
+                                <label class="form-check-label" for="utilidad_muy_baja">Muy baja</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Grado de satisfacción con la carrera <span class="text-danger">*</span></label>
+                            <div class="form-text mb-2">¿Cuál es tu grado de satisfacción con la formación recibida en tu carrera?</div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="satisfaccion_carrera" id="satisfaccion_carrera_muy_alta" value="muy_alta" required>
+                                <label class="form-check-label" for="satisfaccion_carrera_muy_alta">Muy alta</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="satisfaccion_carrera" id="satisfaccion_carrera_alta" value="alta">
+                                <label class="form-check-label" for="satisfaccion_carrera_alta">Alta</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="satisfaccion_carrera" id="satisfaccion_carrera_baja" value="baja">
+                                <label class="form-check-label" for="satisfaccion_carrera_baja">Baja</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="satisfaccion_carrera" id="satisfaccion_carrera_muy_baja" value="muy_baja">
+                                <label class="form-check-label" for="satisfaccion_carrera_muy_baja">Muy baja</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">¿Qué aspectos consideras que deberían reforzarse o actualizarse en el plan de estudios? <span class="text-danger">*</span></label>
+                            <div class="form-text mb-2">Selecciona todas las opciones que consideres necesarias</div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input aspectos-check" type="checkbox" name="aspectos_reforzar" value="practica_laboratorio" id="aspecto_practica">
+                                        <label class="form-check-label" for="aspecto_practica">Prácticas de laboratorio</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input aspectos-check" type="checkbox" name="aspectos_reforzar" value="software_especializado" id="aspecto_software">
+                                        <label class="form-check-label" for="aspecto_software">Manejo de software especializado</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input aspectos-check" type="checkbox" name="aspectos_reforzar" value="vinculacion_empresas" id="aspecto_vinculacion">
+                                        <label class="form-check-label" for="aspecto_vinculacion">Vinculación con empresas</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input aspectos-check" type="checkbox" name="aspectos_reforzar" value="investigacion" id="aspecto_investigacion">
+                                        <label class="form-check-label" for="aspecto_investigacion">Investigación</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input aspectos-check" type="checkbox" name="aspectos_reforzar" value="idiomas" id="aspecto_idiomas">
+                                        <label class="form-check-label" for="aspecto_idiomas">Idiomas</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input aspectos-check" type="checkbox" name="aspectos_reforzar" value="metodos_analiticos" id="aspecto_metodos">
+                                        <label class="form-check-label" for="aspecto_metodos">Métodos analíticos modernos</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input aspectos-check" type="checkbox" name="aspectos_reforzar" value="gestion_calidad" id="aspecto_calidad">
+                                        <label class="form-check-label" for="aspecto_calidad">Gestión de calidad</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input aspectos-check" type="checkbox" name="aspectos_reforzar" value="normatividad" id="aspecto_normatividad">
+                                        <label class="form-check-label" for="aspecto_normatividad">Normatividad y legislación</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input aspectos-check" type="checkbox" name="aspectos_reforzar" value="emprendimiento" id="aspecto_emprendimiento">
+                                        <label class="form-check-label" for="aspecto_emprendimiento">Emprendimiento</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="otro_aspecto_check">
+                                        <label class="form-check-label" for="otro_aspecto_check">Otro (especifica):</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2" id="otro_aspecto_container" style="display: none;">
+                                <input type="text" class="form-control" id="otro_aspecto" name="otro_aspecto" placeholder="Especifica otro aspecto a reforzar">
+                            </div>
+                            
+                            <div class="invalid-feedback" id="aspectos-error" style="display: none;">
+                                Debes seleccionar al menos una opción
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Botones de navegación -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="modulo2.1.html" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Anterior
+                        </a>
+                        <button type="button" id="btn-guardar-modulo3-1" class="btn btn-primary">
+                            Guardar y continuar<i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Overlay de carga para operaciones -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="spinner-container">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="text-light mt-2">Guardando información...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle con Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <!-- Configuración Firebase -->
+    <script src="../../../js/firebase-config.js"></script>
+    <!-- Scripts del módulo -->
+    <script src="../../../js/alumnos/opciones_alumnos/modulos/modulo3.1/index.js"></script>
+</body>
+</html>

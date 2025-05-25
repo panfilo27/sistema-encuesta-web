@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 4.1: Institución - Química y Bioquímica</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="../../../css/alumnos/opciones_alumnos/modulos/modulo4.1.css">
+    <link rel="stylesheet" href="../../../css/alumnos/opciones_alumnos/modulos/common.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../../assets/img/favicon.png">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Barra de navegación -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <img src="../../../assets/img/logo-encuesta.png" alt="Logo" height="40">
+                    Encuesta de Química y Bioquímica
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <span class="nav-link">
+                                <i class="fas fa-user-circle me-1"></i>
+                                <span id="nombre-usuario">Usuario</span>
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <button id="btn-cerrar-sesion" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt me-1"></i>
+                                Cerrar sesión
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenido principal -->
+        <div class="content-wrapper">
+            <div class="container py-4">
+                <!-- Encabezado -->
+                <div class="header-container mb-4">
+                    <h1 class="mb-3">Módulo 4.1: Institución</h1>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100">4/5</div>
+                    </div>
+                    <p class="lead">Por favor completa la información sobre tu relación con la institución. Los campos marcados con <span class="text-danger">*</span> son obligatorios.</p>
+                </div>
+
+                <!-- Indicador de carga -->
+                <div id="loading-module" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando formulario, por favor espera...</p>
+                </div>
+
+                <!-- Contenedor de errores -->
+                <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+
+                <!-- Formulario -->
+                <form id="form-modulo4-1" class="needs-validation" style="display: none;">
+                    <fieldset class="mb-4 p-3 border rounded">
+                        <legend>Relación con la Institución</legend>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">¿La institución te ha contactado después de egresar? <span class="text-danger">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="contacto_institucion" id="contacto_si" value="si" required>
+                                <label class="form-check-label" for="contacto_si">Sí</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="contacto_institucion" id="contacto_no" value="no">
+                                <label class="form-check-label" for="contacto_no">No</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">¿Te gustaría participar con la institución en alguna actividad? <span class="text-danger">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="participacion_institucion" id="participacion_si" value="si" required>
+                                <label class="form-check-label" for="participacion_si">Sí</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="participacion_institucion" id="participacion_no" value="no">
+                                <label class="form-check-label" for="participacion_no">No</label>
+                            </div>
+                        </div>
+
+                        <!-- Campo condicional: Mostrar si quiere participar -->
+                        <div class="mb-4 campo-condicional" id="formas_participacion_container" style="display: none;">
+                            <label class="form-label">¿De qué forma te gustaría participar? <span class="text-danger">*</span></label>
+                            <div class="form-text mb-2">Selecciona todas las opciones que te interesen</div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input participacion-check" type="checkbox" name="formas_participacion" value="conferencias" id="part_conferencias">
+                                        <label class="form-check-label" for="part_conferencias">Conferencias</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input participacion-check" type="checkbox" name="formas_participacion" value="talleres" id="part_talleres">
+                                        <label class="form-check-label" for="part_talleres">Talleres</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input participacion-check" type="checkbox" name="formas_participacion" value="bolsa_trabajo" id="part_bolsa">
+                                        <label class="form-check-label" for="part_bolsa">Bolsa de trabajo</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input participacion-check" type="checkbox" name="formas_participacion" value="asesorias" id="part_asesorias">
+                                        <label class="form-check-label" for="part_asesorias">Asesorías</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input participacion-check" type="checkbox" name="formas_participacion" value="investigacion" id="part_investigacion">
+                                        <label class="form-check-label" for="part_investigacion">Investigación</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input participacion-check" type="checkbox" name="formas_participacion" value="docencia" id="part_docencia">
+                                        <label class="form-check-label" for="part_docencia">Docencia</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="invalid-feedback" id="participacion-error" style="display: none;">
+                                Debes seleccionar al menos una forma de participación
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Botones de navegación -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="modulo3.1.html" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Anterior
+                        </a>
+                        <button type="button" id="btn-guardar-modulo4-1" class="btn btn-primary">
+                            Guardar y continuar<i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Overlay de carga para operaciones -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="spinner-container">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="text-light mt-2">Guardando información...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle con Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <!-- Configuración Firebase -->
+    <script src="../../../js/firebase-config.js"></script>
+    <!-- Scripts del módulo -->
+    <script src="../../../js/alumnos/opciones_alumnos/modulos/modulo4.1/index.js"></script>
+</body>
+</html>

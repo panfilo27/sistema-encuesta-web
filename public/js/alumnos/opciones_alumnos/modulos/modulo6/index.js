@@ -61,46 +61,74 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const verificacionPrevia = await verificarModulosAnteriores();
                 
                 if (!verificacionPrevia.modulosCompletados) {
-                    // Obtener información sobre qué módulos faltan
-                    const historialEncuestaDoc = await firebase.firestore()
-                        .collection('usuario')
-                        .doc(currentUser.id)
-                        .collection('historial_encuestas')
-                        .doc(encuestaActual.id)
-                        .get();
-                    
-                    if (historialEncuestaDoc.exists) {
-                        const datosEncuesta = historialEncuestaDoc.data();
+                    // Redirigir según la situación
+                    if (verificacionPrevia.usuarioTrabaja) {
+                        // Si trabaja, debe completar todos los módulos anteriores
+                        // Obtener información sobre qué módulos faltan
+                        const historialEncuestaDoc = await firebase.firestore()
+                            .collection('usuario')
+                            .doc(currentUser.id)
+                            .collection('historial_encuestas')
+                            .doc(encuestaActual.id)
+                            .get();
                         
-                        // Verificar si el usuario completó el módulo 3
-                        if (datosEncuesta.modulo3 && datosEncuesta.modulo3.completado) {
-                            // Si completó el módulo 3 y debe completar 4 y 5 (porque trabaja)
-                            if (datosEncuesta.modulo3.datos && 
-                                (datosEncuesta.modulo3.datos.actividad_actual === 'trabaja' || 
-                                 datosEncuesta.modulo3.datos.actividad_actual === 'trabaja_estudia')) {
-                                
-                                // Redirigir al módulo 4 o 5 dependiendo de cuál falta
-                                if (!datosEncuesta.modulo4 || !datosEncuesta.modulo4.completado) {
-                                    alert('Debes completar el módulo 4 antes de continuar. Serás redirigido.');
-                                    window.location.href = 'modulo4.html';
-                                } else if (!datosEncuesta.modulo5 || !datosEncuesta.modulo5.completado) {
-                                    alert('Debes completar el módulo 5 antes de continuar. Serás redirigido.');
-                                    window.location.href = 'modulo5.html';
-                                }
-                            } else {
-                                // Si no trabaja pero falta completar alguno de los módulos obligatorios
-                                alert('Debes completar los módulos anteriores antes de continuar. Serás redirigido.');
+                        if (historialEncuestaDoc.exists) {
+                            const datosEncuesta = historialEncuestaDoc.data();
+                            
+                            // Verificar qué módulo falta completar
+                            if (!datosEncuesta.modulo1 || !datosEncuesta.modulo1.completado) {
+                                alert('Debes completar el módulo 1 antes de continuar. Serás redirigido.');
                                 window.location.href = '../../encuestas.html';
+                            } else if (!datosEncuesta.modulo2 || !datosEncuesta.modulo2.completado) {
+                                alert('Debes completar el módulo 2 antes de continuar. Serás redirigido.');
+                                window.location.href = '../../encuestas.html';
+                            } else if (!datosEncuesta.modulo3 || !datosEncuesta.modulo3.completado) {
+                                alert('Debes completar el módulo 3 antes de continuar. Serás redirigido.');
+                                window.location.href = '../../encuestas.html';
+                            } else if (!datosEncuesta.modulo4 || !datosEncuesta.modulo4.completado) {
+                                alert('Debes completar el módulo 4 antes de continuar. Serás redirigido.');
+                                window.location.href = 'modulo4.html';
+                            } else if (!datosEncuesta.modulo5 || !datosEncuesta.modulo5.completado) {
+                                alert('Debes completar el módulo 5 antes de continuar. Serás redirigido.');
+                                window.location.href = 'modulo5.html';
                             }
                         } else {
-                            // Si no ha completado el módulo 3 o anteriores
-                            alert('Debes completar los módulos anteriores antes de continuar. Serás redirigido.');
+                            alert('No se encontró historial de encuestas. Serás redirigido.');
                             window.location.href = '../../encuestas.html';
                         }
                     } else {
-                        // No existe el historial de encuesta
-                        alert('No se encontró historial de encuestas. Serás redirigido.');
-                        window.location.href = '../../encuestas.html';
+                        // Si no trabaja, verificar si completó al menos los módulos 1, 2 y 3
+                        const historialEncuestaDoc = await firebase.firestore()
+                            .collection('usuario')
+                            .doc(currentUser.id)
+                            .collection('historial_encuestas')
+                            .doc(encuestaActual.id)
+                            .get();
+                        
+                        if (historialEncuestaDoc.exists) {
+                            const datosEncuesta = historialEncuestaDoc.data();
+                            const modulo1Completado = datosEncuesta.modulo1 && datosEncuesta.modulo1.completado === true;
+                            const modulo2Completado = datosEncuesta.modulo2 && datosEncuesta.modulo2.completado === true;
+                            const modulo3Completado = datosEncuesta.modulo3 && datosEncuesta.modulo3.completado === true;
+                            
+                            // Verificar qué módulo falta completar
+                            if (!modulo1Completado) {
+                                alert('Debes completar el módulo 1 antes de continuar. Serás redirigido.');
+                                window.location.href = '../../encuestas.html';
+                            } else if (!modulo2Completado) {
+                                alert('Debes completar el módulo 2 antes de continuar. Serás redirigido.');
+                                window.location.href = '../../encuestas.html';
+                            } else if (!modulo3Completado) {
+                                alert('Debes completar el módulo 3 antes de continuar. Serás redirigido.');
+                                window.location.href = '../../encuestas.html';
+                            } else {
+                                // Esta condición no debería ocurrir porque verificacionPrevia.modulosCompletados sería true
+                                console.log('Estado inesperado: usuario no trabaja, módulos 1-3 completos, pero verificacionPrevia.modulosCompletados es false');
+                            }
+                        } else {
+                            alert('No se encontró historial de encuestas. Serás redirigido.');
+                            window.location.href = '../../encuestas.html';
+                        }
                     }
                     return;
                 }
@@ -151,7 +179,9 @@ async function verificarModulosAnteriores() {
         // 1. Obtener encuesta activa
         const fechaActual = new Date();
         
-        const encuestasSnapshot = await firebase.firestore().collection('encuestas').get();
+        const encuestasSnapshot = await firebase.firestore().collection('encuestas')
+            .where('activa', '==', true)
+            .get();
         
         const encuestasEnRango = encuestasSnapshot.docs
             .map(doc => {
@@ -180,13 +210,12 @@ async function verificarModulosAnteriores() {
         }
         
         encuestaActual = encuestasEnRango[0];
-        // El ID ya está incluido en el objeto encuesta
         
         console.log('Verificando si el usuario ha completado los módulos anteriores...');
         console.log('ID Usuario:', currentUser.id);
         console.log('ID Encuesta:', encuestaActual.id);
         
-        // 2. Verificar si el usuario completó los módulos anteriores usando la nueva estructura
+        // 2. Verificar si el usuario completó los módulos anteriores
         const historialEncuestaDoc = await firebase.firestore()
             .collection('usuario')
             .doc(currentUser.id)
@@ -198,46 +227,50 @@ async function verificarModulosAnteriores() {
         
         if (historialEncuestaDoc.exists) {
             const datosEncuesta = historialEncuestaDoc.data();
-            console.log('Datos de encuesta:', datosEncuesta);
             
-            // Verificar si existen los módulos 1, 2 y 3 y están completados
+            // Verificar si el usuario completó los módulos 1, 2, y 3
             const modulo1Completado = datosEncuesta.modulo1 && datosEncuesta.modulo1.completado === true;
             const modulo2Completado = datosEncuesta.modulo2 && datosEncuesta.modulo2.completado === true;
             const modulo3Completado = datosEncuesta.modulo3 && datosEncuesta.modulo3.completado === true;
             
+            // Verificar si el usuario trabaja (para determinar si módulos 4 y 5 son obligatorios)
+            const usuarioTrabaja = datosEncuesta.modulo3 && 
+                datosEncuesta.modulo3.datos && 
+                (datosEncuesta.modulo3.datos.actividad_actual === 'trabaja' || 
+                 datosEncuesta.modulo3.datos.actividad_actual === 'trabaja_estudia');
+            
+            console.log('Estado de módulos:');
             console.log('Módulo 1 completado:', modulo1Completado);
             console.log('Módulo 2 completado:', modulo2Completado);
             console.log('Módulo 3 completado:', modulo3Completado);
+            console.log('Usuario trabaja:', usuarioTrabaja);
             
-            // Si el usuario trabaja, debemos verificar si también completó los módulos 4 y 5
-            if (modulo3Completado && datosEncuesta.modulo3.datos) {
-                const actividadActual = datosEncuesta.modulo3.datos.actividad_actual;
-                const trabajaOEstudiaTrabaja = actividadActual === 'trabaja' || actividadActual === 'trabaja_estudia';
+            // Si el usuario trabaja, verificar también módulos 4 y 5
+            if (usuarioTrabaja) {
+                const modulo4Completado = datosEncuesta.modulo4 && datosEncuesta.modulo4.completado === true;
+                const modulo5Completado = datosEncuesta.modulo5 && datosEncuesta.modulo5.completado === true;
                 
-                if (trabajaOEstudiaTrabaja) {
-                    const modulo4Completado = datosEncuesta.modulo4 && datosEncuesta.modulo4.completado === true;
-                    const modulo5Completado = datosEncuesta.modulo5 && datosEncuesta.modulo5.completado === true;
-                    
-                    console.log('El usuario trabaja o estudia y trabaja');
-                    console.log('Módulo 4 completado:', modulo4Completado);
-                    console.log('Módulo 5 completado:', modulo5Completado);
-                    
-                    return {
-                        modulosCompletados: modulo1Completado && modulo2Completado && modulo3Completado && 
-                                         modulo4Completado && modulo5Completado
-                    };
-                }
+                console.log('Módulo 4 completado:', modulo4Completado);
+                console.log('Módulo 5 completado:', modulo5Completado);
+                
+                return {
+                    modulosCompletados: modulo1Completado && modulo2Completado && modulo3Completado && 
+                                        modulo4Completado && modulo5Completado,
+                    usuarioTrabaja: usuarioTrabaja
+                };
+            } else {
+                // Si el usuario NO trabaja, solo verificar módulos 1, 2 y 3
+                return {
+                    modulosCompletados: modulo1Completado && modulo2Completado && modulo3Completado,
+                    usuarioTrabaja: usuarioTrabaja
+                };
             }
-            
-            // Si el usuario no trabaja, solo verificamos los módulos 1, 2 y 3
-            return {
-                modulosCompletados: modulo1Completado && modulo2Completado && modulo3Completado
-            };
         }
         
-        console.log('No se encontró historial de esta encuesta para el usuario');
+        // Si no existe historial, ningún módulo está completo
         return {
-            modulosCompletados: false
+            modulosCompletados: false,
+            usuarioTrabaja: false
         };
     } catch (error) {
         console.error('Error al verificar módulos anteriores:', error);

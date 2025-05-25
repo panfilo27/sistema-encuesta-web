@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 2.1: Situación Laboral - Química y Bioquímica</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="../../../css/alumnos/opciones_alumnos/modulos/modulo2.1.css">
+    <link rel="stylesheet" href="../../../css/alumnos/opciones_alumnos/modulos/common.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../../assets/img/favicon.png">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Barra de navegación -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <img src="../../../assets/img/logo-encuesta.png" alt="Logo" height="40">
+                    Encuesta de Química y Bioquímica
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <span class="nav-link">
+                                <i class="fas fa-user-circle me-1"></i>
+                                <span id="nombre-usuario">Usuario</span>
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <button id="btn-cerrar-sesion" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt me-1"></i>
+                                Cerrar sesión
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenido principal -->
+        <div class="content-wrapper">
+            <div class="container py-4">
+                <!-- Encabezado -->
+                <div class="header-container mb-4">
+                    <h1 class="mb-3">Módulo 2.1: Situación Laboral</h1>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">2/5</div>
+                    </div>
+                    <p class="lead">Por favor completa la información sobre tu situación laboral actual. Los campos marcados con <span class="text-danger">*</span> son obligatorios.</p>
+                </div>
+
+                <!-- Indicador de carga -->
+                <div id="loading-module" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando formulario, por favor espera...</p>
+                </div>
+
+                <!-- Contenedor de errores -->
+                <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+
+                <!-- Formulario -->
+                <form id="form-modulo2-1" class="needs-validation" style="display: none;">
+                    <fieldset class="mb-4 p-3 border rounded">
+                        <legend>Situación Laboral Actual</legend>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">¿Trabajas actualmente? <span class="text-danger">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="trabaja_actualmente" id="trabaja_si" value="si" required>
+                                <label class="form-check-label" for="trabaja_si">Sí</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="trabaja_actualmente" id="trabaja_no" value="no">
+                                <label class="form-check-label" for="trabaja_no">No</label>
+                            </div>
+                        </div>
+
+                        <!-- Campo condicional: Mostrar si trabaja -->
+                        <div class="mb-3 campo-condicional" id="antiguedad_container" style="display: none;">
+                            <label for="antiguedad_empleo" class="form-label">Antigüedad en el empleo actual <span class="text-danger">*</span></label>
+                            <select class="form-select" id="antiguedad_empleo" name="antiguedad_empleo">
+                                <option value="">Selecciona una opción</option>
+                                <option value="menos_6_meses">Menos de 6 meses</option>
+                                <option value="6_meses_1_año">Entre 6 meses y 1 año</option>
+                                <option value="1_2_años">Entre 1 y 2 años</option>
+                                <option value="2_5_años">Entre 2 y 5 años</option>
+                                <option value="mas_5_años">Más de 5 años</option>
+                            </select>
+                        </div>
+
+                        <!-- Campo condicional: Mostrar si NO trabaja -->
+                        <div class="mb-3 campo-condicional" id="razon_no_trabajo_container" style="display: none;">
+                            <label for="razon_no_trabajo" class="form-label">Razón por la que no trabajas actualmente <span class="text-danger">*</span></label>
+                            <select class="form-select" id="razon_no_trabajo" name="razon_no_trabajo">
+                                <option value="">Selecciona una opción</option>
+                                <option value="seguir_estudiando">Decidí seguir estudiando</option>
+                                <option value="no_encontrado">No he encontrado trabajo</option>
+                                <option value="bajos_salarios">Los salarios ofrecidos son muy bajos</option>
+                                <option value="no_coincide">No hay trabajo en mi área de estudio</option>
+                                <option value="no_experiencia">Falta de experiencia laboral</option>
+                                <option value="motivos_personales">Motivos personales/familiares</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-4 p-3 border rounded">
+                        <legend>Primer Empleo y Trayectoria</legend>
+                        
+                        <div class="mb-3">
+                            <label for="tiempo_primer_empleo" class="form-label">¿Cuánto tiempo tardaste en conseguir tu primer empleo después de egresar? <span class="text-danger">*</span></label>
+                            <select class="form-select" id="tiempo_primer_empleo" name="tiempo_primer_empleo" required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="ya_trabajaba">Ya trabajaba antes de egresar</option>
+                                <option value="menos_3_meses">Menos de 3 meses</option>
+                                <option value="3_6_meses">Entre 3 y 6 meses</option>
+                                <option value="6_meses_1_año">Entre 6 meses y 1 año</option>
+                                <option value="mas_1_año">Más de 1 año</option>
+                                <option value="aun_no_consigo">Aún no lo consigo</option>
+                            </select>
+                        </div>
+
+                        <!-- Campo condicional: Mostrar si aún no ha conseguido empleo -->
+                        <div class="mb-3 campo-condicional" id="razon_no_conseguir_container" style="display: none;">
+                            <label for="razon_no_conseguir" class="form-label">¿Por qué crees que aún no has conseguido empleo? <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="razon_no_conseguir" name="razon_no_conseguir" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tipo_sector" class="form-label">¿En qué tipo de sector te desempeñas o te has desempeñado principalmente? <span class="text-danger">*</span></label>
+                            <select class="form-select" id="tipo_sector" name="tipo_sector" required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="publico">Sector público</option>
+                                <option value="privado">Sector privado</option>
+                                <option value="educativo">Sector educativo</option>
+                                <option value="investigacion">Sector de investigación</option>
+                                <option value="industria_quimica">Industria química</option>
+                                <option value="farmaceutica">Industria farmacéutica</option>
+                                <option value="salud">Sector salud</option>
+                                <option value="ninguno">Ninguno hasta ahora</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="rol_trabajo" class="form-label">¿Cuál es o ha sido tu rol principal en el trabajo? <span class="text-danger">*</span></label>
+                            <select class="form-select" id="rol_trabajo" name="rol_trabajo" required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="analista">Analista</option>
+                                <option value="investigador">Investigador</option>
+                                <option value="docente">Docente</option>
+                                <option value="supervisor">Supervisor</option>
+                                <option value="gerente">Gerente</option>
+                                <option value="consultor">Consultor</option>
+                                <option value="tecnico">Técnico</option>
+                                <option value="ninguno">Ninguno hasta ahora</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="area_desempeño" class="form-label">¿En qué área te desempeñas o te has desempeñado principalmente? <span class="text-danger">*</span></label>
+                            <select class="form-select" id="area_desempeño" name="area_desempeño" required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="laboratorio_analitico">Laboratorio analítico</option>
+                                <option value="control_calidad">Control de calidad</option>
+                                <option value="investigacion_desarrollo">Investigación y desarrollo</option>
+                                <option value="produccion">Producción</option>
+                                <option value="docencia">Docencia</option>
+                                <option value="administracion">Administración</option>
+                                <option value="ventas_marketing">Ventas/Marketing</option>
+                                <option value="servicios_ambientales">Servicios ambientales</option>
+                                <option value="ninguna">Ninguna hasta ahora</option>
+                                <option value="otra">Otra</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="medio_primer_empleo" class="form-label">¿A través de qué medio conseguiste tu primer empleo? <span class="text-danger">*</span></label>
+                            <select class="form-select" id="medio_primer_empleo" name="medio_primer_empleo" required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="bolsa_trabajo_institucion">Bolsa de trabajo de la institución</option>
+                                <option value="internet">Sitios de internet</option>
+                                <option value="redes_sociales">Redes sociales</option>
+                                <option value="contactos_personales">Contactos personales</option>
+                                <option value="practicas_profesionales">Prácticas profesionales</option>
+                                <option value="iniciativa_propia">Iniciativa propia (emprendimiento)</option>
+                                <option value="recomendacion">Recomendación de un profesor</option>
+                                <option value="ninguno">Ninguno hasta ahora</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Nivel de satisfacción en tu trabajo actual o último trabajo <span class="text-danger">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="satisfaccion_trabajo" id="satisfaccion_muy_alta" value="muy_alta" required>
+                                <label class="form-check-label" for="satisfaccion_muy_alta">Muy alta</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="satisfaccion_trabajo" id="satisfaccion_alta" value="alta">
+                                <label class="form-check-label" for="satisfaccion_alta">Alta</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="satisfaccion_trabajo" id="satisfaccion_baja" value="baja">
+                                <label class="form-check-label" for="satisfaccion_baja">Baja</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="satisfaccion_trabajo" id="satisfaccion_muy_baja" value="muy_baja">
+                                <label class="form-check-label" for="satisfaccion_muy_baja">Muy baja</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="satisfaccion_trabajo" id="satisfaccion_na" value="no_aplica">
+                                <label class="form-check-label" for="satisfaccion_na">No aplica (nunca he trabajado)</label>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Botones de navegación -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="modulo1.1.html" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Anterior
+                        </a>
+                        <button type="button" id="btn-guardar-modulo2-1" class="btn btn-primary">
+                            Guardar y continuar<i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Overlay de carga para operaciones -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="spinner-container">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="text-light mt-2">Guardando información...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle con Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <!-- Configuración Firebase -->
+    <script src="../../../js/firebase-config.js"></script>
+    <!-- Scripts del módulo -->
+    <script src="../../../js/alumnos/opciones_alumnos/modulos/modulo2.1/index.js"></script>
+</body>
+</html>

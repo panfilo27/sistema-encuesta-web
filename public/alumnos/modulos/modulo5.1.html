@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 5.1: Desempeño Laboral - Química y Bioquímica</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="../../../css/alumnos/opciones_alumnos/modulos/modulo5.1.css">
+    <link rel="stylesheet" href="../../../css/alumnos/opciones_alumnos/modulos/common.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../../assets/img/favicon.png">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Barra de navegación -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <img src="../../../assets/img/logo-encuesta.png" alt="Logo" height="40">
+                    Encuesta de Química y Bioquímica
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <span class="nav-link">
+                                <i class="fas fa-user-circle me-1"></i>
+                                <span id="nombre-usuario">Usuario</span>
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <button id="btn-cerrar-sesion" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt me-1"></i>
+                                Cerrar sesión
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenido principal -->
+        <div class="content-wrapper">
+            <div class="container py-4">
+                <!-- Encabezado -->
+                <div class="header-container mb-4">
+                    <h1 class="mb-3">Módulo 5.1: Desempeño Laboral</h1>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">5/5</div>
+                    </div>
+                    <p class="lead">Por favor completa la información sobre tu desempeño laboral. Los campos marcados con <span class="text-danger">*</span> son obligatorios.</p>
+                </div>
+
+                <!-- Indicador de carga -->
+                <div id="loading-module" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando formulario, por favor espera...</p>
+                </div>
+
+                <!-- Contenedor de errores -->
+                <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+
+                <!-- Formulario -->
+                <form id="form-modulo5-1" class="needs-validation" style="display: none;">
+                    <fieldset class="mb-4 p-3 border rounded">
+                        <legend>Herramientas y Desarrollo Profesional</legend>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">¿Qué herramientas utilizas o has utilizado en tu desempeño profesional? <span class="text-danger">*</span></label>
+                            <div class="form-text mb-2">Selecciona todas las opciones que apliquen</div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input herramientas-check" type="checkbox" name="herramientas" value="espectrofotometros" id="herr_espectrofotometros">
+                                        <label class="form-check-label" for="herr_espectrofotometros">Espectrofotómetros</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input herramientas-check" type="checkbox" name="herramientas" value="cromatografos" id="herr_cromatografos">
+                                        <label class="form-check-label" for="herr_cromatografos">Cromatógrafos</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input herramientas-check" type="checkbox" name="herramientas" value="microscopios" id="herr_microscopios">
+                                        <label class="form-check-label" for="herr_microscopios">Microscopios</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input herramientas-check" type="checkbox" name="herramientas" value="equipos_analisis_elemental" id="herr_analisis_elemental">
+                                        <label class="form-check-label" for="herr_analisis_elemental">Equipos de análisis elemental</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input herramientas-check" type="checkbox" name="herramientas" value="software_quimica_computacional" id="herr_software">
+                                        <label class="form-check-label" for="herr_software">Software de química computacional</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input herramientas-check" type="checkbox" name="herramientas" value="equipos_resonancia" id="herr_resonancia">
+                                        <label class="form-check-label" for="herr_resonancia">Equipos de resonancia</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input herramientas-check" type="checkbox" name="herramientas" value="sistemas_calidad" id="herr_calidad">
+                                        <label class="form-check-label" for="herr_calidad">Sistemas de gestión de calidad</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input herramientas-check" type="checkbox" name="herramientas" value="equipos_bioquimicos" id="herr_bioquimicos">
+                                        <label class="form-check-label" for="herr_bioquimicos">Equipos bioquímicos</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input herramientas-check" type="checkbox" name="herramientas" value="diseno_experimentos" id="herr_experimentos">
+                                        <label class="form-check-label" for="herr_experimentos">Diseño de experimentos</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input herramientas-check" type="checkbox" name="herramientas" value="ninguna" id="herr_ninguna">
+                                        <label class="form-check-label" for="herr_ninguna">Ninguna hasta ahora</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="invalid-feedback" id="herramientas-error" style="display: none;">
+                                Debes seleccionar al menos una opción
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">¿Colaboras en actividades de investigación y desarrollo? <span class="text-danger">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="colabora_investigacion" id="colabora_si" value="si" required>
+                                <label class="form-check-label" for="colabora_si">Sí</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="colabora_investigacion" id="colabora_no" value="no">
+                                <label class="form-check-label" for="colabora_no">No</label>
+                            </div>
+                        </div>
+
+                        <!-- Campo condicional: Mostrar si colabora en investigación -->
+                        <div class="mb-4 campo-condicional" id="tipo_investigacion_container" style="display: none;">
+                            <label class="form-label">¿Qué tipo de investigación o desarrollo realizas? <span class="text-danger">*</span></label>
+                            <div class="form-text mb-2">Selecciona todas las opciones que apliquen</div>
+                            
+                            <div class="form-check mb-2">
+                                <input class="form-check-input investigacion-check" type="checkbox" name="tipo_investigacion" value="investigacion_basica" id="inv_basica">
+                                <label class="form-check-label" for="inv_basica">Investigación básica</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input investigacion-check" type="checkbox" name="tipo_investigacion" value="investigacion_aplicada" id="inv_aplicada">
+                                <label class="form-check-label" for="inv_aplicada">Investigación aplicada</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input investigacion-check" type="checkbox" name="tipo_investigacion" value="desarrollo_producto" id="inv_producto">
+                                <label class="form-check-label" for="inv_producto">Desarrollo de producto</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input investigacion-check" type="checkbox" name="tipo_investigacion" value="desarrollo_metodos" id="inv_metodos">
+                                <label class="form-check-label" for="inv_metodos">Desarrollo de métodos analíticos</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input investigacion-check" type="checkbox" name="tipo_investigacion" value="optimizacion_procesos" id="inv_procesos">
+                                <label class="form-check-label" for="inv_procesos">Optimización de procesos</label>
+                            </div>
+                            
+                            <div class="invalid-feedback" id="investigacion-error" style="display: none;">
+                                Debes seleccionar al menos un tipo de investigación
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-4 p-3 border rounded">
+                        <legend>Redes y Certificaciones</legend>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">¿Participas en redes de colaboración profesional? <span class="text-danger">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="redes_colaboracion" id="redes_si" value="si" required>
+                                <label class="form-check-label" for="redes_si">Sí</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="redes_colaboracion" id="redes_no" value="no">
+                                <label class="form-check-label" for="redes_no">No</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">¿Tienes certificaciones vigentes relacionadas con tu profesión? <span class="text-danger">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="certificaciones" id="cert_si" value="si" required>
+                                <label class="form-check-label" for="cert_si">Sí</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="certificaciones" id="cert_no" value="no">
+                                <label class="form-check-label" for="cert_no">No</label>
+                            </div>
+                        </div>
+
+                        <!-- Campo condicional: Mostrar si tiene certificaciones -->
+                        <div class="mb-4 campo-condicional" id="detalle_certificaciones_container" style="display: none;">
+                            <label for="detalle_certificaciones" class="form-label">Menciona tus certificaciones vigentes <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="detalle_certificaciones" name="detalle_certificaciones" rows="3" placeholder="Describe las certificaciones que posees (nombre, institución que la otorga, año de obtención, etc.)"></textarea>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-4 p-3 border rounded">
+                        <legend>Servicios y Publicaciones</legend>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">¿Qué servicios ofreces o has ofrecido en tu desempeño profesional? <span class="text-danger">*</span></label>
+                            <div class="form-text mb-2">Selecciona todas las opciones que apliquen</div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input servicios-check" type="checkbox" name="servicios" value="analisis_quimicos" id="serv_analisis">
+                                        <label class="form-check-label" for="serv_analisis">Análisis químicos</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input servicios-check" type="checkbox" name="servicios" value="control_calidad" id="serv_calidad">
+                                        <label class="form-check-label" for="serv_calidad">Control de calidad</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input servicios-check" type="checkbox" name="servicios" value="asesoria_tecnica" id="serv_asesoria">
+                                        <label class="form-check-label" for="serv_asesoria">Asesoría técnica</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input servicios-check" type="checkbox" name="servicios" value="investigacion" id="serv_investigacion">
+                                        <label class="form-check-label" for="serv_investigacion">Investigación</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input servicios-check" type="checkbox" name="servicios" value="docencia" id="serv_docencia">
+                                        <label class="form-check-label" for="serv_docencia">Docencia</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input servicios-check" type="checkbox" name="servicios" value="ninguno" id="serv_ninguno">
+                                        <label class="form-check-label" for="serv_ninguno">Ninguno hasta ahora</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="invalid-feedback" id="servicios-error" style="display: none;">
+                                Debes seleccionar al menos una opción
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">¿Qué lenguas extranjeras utilizas en tu desempeño profesional? <span class="text-danger">*</span></label>
+                            <div class="form-text mb-2">Selecciona todas las opciones que apliquen</div>
+                            
+                            <div class="form-check mb-2">
+                                <input class="form-check-input lenguas-check" type="checkbox" name="lenguas" value="ingles" id="lengua_ingles">
+                                <label class="form-check-label" for="lengua_ingles">Inglés</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input lenguas-check" type="checkbox" name="lenguas" value="frances" id="lengua_frances">
+                                <label class="form-check-label" for="lengua_frances">Francés</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input lenguas-check" type="checkbox" name="lenguas" value="aleman" id="lengua_aleman">
+                                <label class="form-check-label" for="lengua_aleman">Alemán</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input lenguas-check" type="checkbox" name="lenguas" value="otro" id="lengua_otro">
+                                <label class="form-check-label" for="lengua_otro">Otro</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input lenguas-check" type="checkbox" name="lenguas" value="ninguno" id="lengua_ninguno">
+                                <label class="form-check-label" for="lengua_ninguno">Ninguna</label>
+                            </div>
+                            
+                            <div class="invalid-feedback" id="lenguas-error" style="display: none;">
+                                Debes seleccionar al menos una opción
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">¿Has publicado en revistas científicas o especializadas? <span class="text-danger">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="publicaciones" id="pub_si" value="si" required>
+                                <label class="form-check-label" for="pub_si">Sí</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="publicaciones" id="pub_no" value="no">
+                                <label class="form-check-label" for="pub_no">No</label>
+                            </div>
+                        </div>
+
+                        <!-- Campo condicional: Mostrar si ha publicado -->
+                        <div class="mb-4 campo-condicional" id="detalle_publicaciones_container" style="display: none;">
+                            <label for="detalle_publicaciones" class="form-label">Especifica tus publicaciones <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="detalle_publicaciones" name="detalle_publicaciones" rows="3" placeholder="Menciona las publicaciones más relevantes (título, revista, año, etc.)"></textarea>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-4 p-3 border rounded">
+                        <legend>Documentación y Asociaciones</legend>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">¿En qué tipo de documentos has participado en tu desempeño profesional? <span class="text-danger">*</span></label>
+                            <div class="form-text mb-2">Selecciona todas las opciones que apliquen</div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input documentos-check" type="checkbox" name="documentos" value="articulos_cientificos" id="doc_articulos">
+                                        <label class="form-check-label" for="doc_articulos">Artículos científicos</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input documentos-check" type="checkbox" name="documentos" value="manuales_procedimientos" id="doc_manuales">
+                                        <label class="form-check-label" for="doc_manuales">Manuales de procedimientos</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input documentos-check" type="checkbox" name="documentos" value="reportes_tecnicos" id="doc_reportes">
+                                        <label class="form-check-label" for="doc_reportes">Reportes técnicos</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input documentos-check" type="checkbox" name="documentos" value="patentes" id="doc_patentes">
+                                        <label class="form-check-label" for="doc_patentes">Patentes</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input documentos-check" type="checkbox" name="documentos" value="tesis" id="doc_tesis">
+                                        <label class="form-check-label" for="doc_tesis">Tesis</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input documentos-check" type="checkbox" name="documentos" value="ninguno" id="doc_ninguno">
+                                        <label class="form-check-label" for="doc_ninguno">Ninguno hasta ahora</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="invalid-feedback" id="documentos-error" style="display: none;">
+                                Debes seleccionar al menos una opción
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="sistema_gestion" class="form-label">¿Qué sistema de gestión de calidad aplicas en tu trabajo? <span class="text-danger">*</span></label>
+                            <select class="form-select" id="sistema_gestion" name="sistema_gestion" required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="iso_9001">ISO 9001</option>
+                                <option value="iso_17025">ISO 17025</option>
+                                <option value="buenas_practicas">Buenas Prácticas de Laboratorio (BPL/GLP)</option>
+                                <option value="buenas_practicas_manufactura">Buenas Prácticas de Manufactura (BPM/GMP)</option>
+                                <option value="otro">Otro</option>
+                                <option value="ninguno">Ninguno</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">¿Perteneces a alguna asociación profesional relacionada con tu carrera? <span class="text-danger">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="asociacion_profesional" id="asoc_si" value="si" required>
+                                <label class="form-check-label" for="asoc_si">Sí</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="asociacion_profesional" id="asoc_no" value="no">
+                                <label class="form-check-label" for="asoc_no">No</label>
+                            </div>
+                        </div>
+
+                        <!-- Campo condicional: Mostrar si pertenece a asociación -->
+                        <div class="mb-4 campo-condicional" id="nombre_asociacion_container" style="display: none;">
+                            <label for="nombre_asociacion" class="form-label">Especifica la asociación <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nombre_asociacion" name="nombre_asociacion" placeholder="Nombre de la asociación profesional">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="aporte_etica" class="form-label">¿Cómo consideras que la ética profesional aporta a tu trabajo? <span class="text-danger">*</span></label>
+                            <select class="form-select" id="aporte_etica" name="aporte_etica" required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="fundamental">Es fundamental para la toma de decisiones</option>
+                                <option value="importante">Es importante, pero no determinante</option>
+                                <option value="poco_relevante">Es poco relevante en mi área</option>
+                                <option value="no_aplica">No aplica en mi situación actual</option>
+                            </select>
+                        </div>
+                    </fieldset>
+
+                    <!-- Botones de navegación -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="modulo4.1.html" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Anterior
+                        </a>
+                        <button type="button" id="btn-guardar-modulo5-1" class="btn btn-primary">
+                            Finalizar encuesta<i class="fas fa-check ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Overlay de carga para operaciones -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="spinner-container">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="text-light mt-2">Guardando información...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle con Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <!-- Configuración Firebase -->
+    <script src="../../../js/firebase-config.js"></script>
+    <!-- Scripts del módulo -->
+    <script src="../../../js/alumnos/opciones_alumnos/modulos/modulo5.1/index.js"></script>
+</body>
+</html>

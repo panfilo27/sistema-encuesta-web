@@ -1,0 +1,55 @@
+/* Estilos específicos para el Módulo 4.1: Institución - Química y Bioquímica */
+
+.header-container {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border-left: 5px solid #fd7e14;
+}
+
+fieldset {
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+fieldset:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+legend {
+    color: #fd7e14;
+    font-weight: bold;
+    padding: 0 1rem;
+    width: auto;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+/* Estilos para las opciones de radio/checkbox */
+.form-check {
+    margin-bottom: 0.5rem;
+}
+
+.form-check-input:checked {
+    background-color: #fd7e14;
+    border-color: #fd7e14;
+}
+
+/* Animación de aparición para los contenedores condicionales */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.campo-condicional.visible {
+    display: block !important;
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Estilo para el checkbox seleccionado */
+.participacion-check:checked + label {
+    font-weight: 500;
+    color: #fd7e14;
+}
