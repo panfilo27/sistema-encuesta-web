@@ -111,34 +111,68 @@ Object.keys(rutas).forEach(id => {
                     break;
                     
                 case 'btn-crear-encuestas':
-                    // Cargar el CSS primero
-                    const linkCSS = document.createElement('link');
-                    linkCSS.rel = 'stylesheet';
-                    linkCSS.href = '../css/admin/crear_encuestas/estilos.css';
-                    document.head.appendChild(linkCSS);
+                    // Cargar los CSS necesarios primero
+                    const linkGeneralesCSS = document.createElement('link');
+                    linkGeneralesCSS.rel = 'stylesheet';
+                    linkGeneralesCSS.href = '../css/estilos-generales.css';
+                    document.head.appendChild(linkGeneralesCSS);
                     
-                    // Primero cargar el script de carreras fijo
-                    const scriptCarreras = document.createElement('script');
-                    scriptCarreras.src = "../js/admin/opciones_admin/crear_encuestas/cargar_carreras_fix.js";
-                    document.body.appendChild(scriptCarreras);
+                    const linkCrearEncuestasCSS = document.createElement('link');
+                    linkCrearEncuestasCSS.rel = 'stylesheet';
+                    linkCrearEncuestasCSS.href = '../css/admin/opciones_admin/crear_encuestas/crear_encuestas.css';
+                    document.head.appendChild(linkCrearEncuestasCSS);
                     
-                    // Luego cargar el JavaScript principal fijo
-                    scriptCarreras.onload = () => {
-                        console.log('Script de carga de carreras cargado (versión fija)');
-                        script.src = "../js/admin/opciones_admin/crear_encuestas/crear_encuestas_fixed.js";
-                        script.onload = () => {
-                            console.log('Script de creación de encuestas cargado (versión fija)');
-                            // Inicializar el creador de encuestas mediante la función global
-                            if (typeof inicializarCreadorEncuestas === 'function') {
-                                setTimeout(inicializarCreadorEncuestas, 100); // Pequeño retraso para asegurar que el DOM se cargue
-                            } else {
-                                console.error('No se encontró la función inicializarCreadorEncuestas');
-                            }
+                    // Cargar los scripts en orden correcto con dependencias
+                    const scriptGestorEncuestas = document.createElement('script');
+                    scriptGestorEncuestas.src = "../js/admin/opciones_admin/crear_encuestas/gestor_encuestas.js";
+                    document.body.appendChild(scriptGestorEncuestas);
+                    
+                    scriptGestorEncuestas.onload = () => {
+                        console.log('Script de gestor encuestas cargado');
+                        const scriptGestorModulos = document.createElement('script');
+                        scriptGestorModulos.src = "../js/admin/opciones_admin/crear_encuestas/gestor_modulos.js";
+                        document.body.appendChild(scriptGestorModulos);
+                        
+                        scriptGestorModulos.onload = () => {
+                            console.log('Script de gestor módulos cargado');
+                            const scriptGestorPreguntas = document.createElement('script');
+                            scriptGestorPreguntas.src = "../js/admin/opciones_admin/crear_encuestas/gestor_preguntas.js";
+                            document.body.appendChild(scriptGestorPreguntas);
+                            
+                            scriptGestorPreguntas.onload = () => {
+                                console.log('Script de gestor preguntas cargado');
+                                const scriptGestorPreguntasCondicionales = document.createElement('script');
+                                scriptGestorPreguntasCondicionales.src = "../js/admin/opciones_admin/crear_encuestas/gestor_preguntas_condicionales.js";
+                                document.body.appendChild(scriptGestorPreguntasCondicionales);
+                                
+                                scriptGestorPreguntasCondicionales.onload = () => {
+                                    console.log('Script de gestor preguntas condicionales cargado');
+                                    const scriptCarreras = document.createElement('script');
+                                    scriptCarreras.src = "../js/admin/opciones_admin/crear_encuestas/cargar_carreras.js";
+                                    document.body.appendChild(scriptCarreras);
+                                    
+                                    scriptCarreras.onload = () => {
+                                        console.log('Script de carga de carreras cargado');
+                                        script.src = "../js/admin/opciones_admin/crear_encuestas/crear_encuesta.js";
+                                        
+                                        script.onload = () => {
+                                            console.log('Script de creación de encuestas cargado');
+                                            // Inicializar el creador de encuestas
+                                            if (typeof inicializarCreadorEncuestas === 'function') {
+                                                setTimeout(inicializarCreadorEncuestas, 100);
+                                            } else {
+                                                console.error('No se encontró la función inicializarCreadorEncuestas');
+                                            }
+                                        };
+                                        
+                                        document.body.appendChild(script);
+                                    };
+                                };
+                            };
                         };
-                        document.body.appendChild(script);
-                        return false; // Para evitar que se agregue el script principal abajo
                     };
-                    break;
+                    
+                    return false; // Para evitar que se agregue el script principal abajo
 
                 default:
                     return;
