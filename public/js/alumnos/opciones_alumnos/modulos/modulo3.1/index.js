@@ -43,7 +43,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             
             // Verificar que el usuario sea de la carrera de Química o Bioquímica directamente desde la sesión
-            if (userData.carrera !== 'Química' && userData.carrera !== 'Bioquímica') {
+            // Normalizar texto de carrera (quitar acentos y convertir a minúsculas)
+            const carrera = userData.carrera ? userData.carrera.toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "") : '';
+            
+            // Verificar si contiene palabras clave de Química o Bioquímica
+            const esQuimicaOBioquimica = [
+                'ingenieria quimica',
+                'quimica', 
+                'ingenieria bioquimica',
+                'bioquimica'
+            ].some(keyword => carrera.includes(keyword));
+            
+            if (!esQuimicaOBioquimica) {
                 alert('Esta encuesta es exclusiva para estudiantes de Química y Bioquímica.');
                 window.location.href = '../../encuestas.html';
                 return;
