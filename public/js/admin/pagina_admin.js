@@ -117,27 +117,55 @@ Object.keys(rutas).forEach(id => {
                     linkCSS.href = '../css/admin/crear_encuestas/estilos.css';
                     document.head.appendChild(linkCSS);
                     
-                    // Primero cargar el script de carreras fijo
-                    const scriptCarreras = document.createElement('script');
-                    scriptCarreras.src = "../js/admin/opciones_admin/crear_encuestas/cargar_carreras_fix.js";
-                    document.body.appendChild(scriptCarreras);
-                    
-                    // Luego cargar el JavaScript principal fijo
-                    scriptCarreras.onload = () => {
-                        console.log('Script de carga de carreras cargado (versión fija)');
-                        script.src = "../js/admin/opciones_admin/crear_encuestas/crear_encuestas_fixed.js";
-                        script.onload = () => {
-                            console.log('Script de creación de encuestas cargado (versión fija)');
-                            // Inicializar el creador de encuestas mediante la función global
-                            if (typeof inicializarCreadorEncuestas === 'function') {
-                                setTimeout(inicializarCreadorEncuestas, 100); // Pequeño retraso para asegurar que el DOM se cargue
-                            } else {
-                                console.error('No se encontró la función inicializarCreadorEncuestas');
-                            }
+                    // Cargar los scripts de nuestra nueva implementación modular
+                    const cargarScripts = (index, scripts, callback) => {
+                        if (index >= scripts.length) {
+                            if (callback) callback();
+                            return;
+                        }
+                        
+                        const scriptInfo = scripts[index];
+                        const scriptElem = document.createElement('script');
+                        scriptElem.src = scriptInfo.src;
+                        
+                        scriptElem.onload = () => {
+                            console.log(`Script ${scriptInfo.name} cargado correctamente`);
+                            cargarScripts(index + 1, scripts, callback);
                         };
-                        document.body.appendChild(script);
-                        return false; // Para evitar que se agregue el script principal abajo
+                        
+                        scriptElem.onerror = (error) => {
+                            console.error(`Error al cargar el script ${scriptInfo.name}:`, error);
+                            cargarScripts(index + 1, scripts, callback);
+                        };
+                        
+                        document.body.appendChild(scriptElem);
                     };
+                    
+                    // Lista de scripts a cargar en orden
+                    const scriptsToLoad = [
+                        { name: 'cargar_carreras', src: '../js/admin/opciones_admin/crear_encuestas/cargar_carreras.js' },
+                        { name: 'gestor_encuestas', src: '../js/admin/opciones_admin/crear_encuestas/gestor_encuestas.js' },
+                        { name: 'gestor_modulos', src: '../js/admin/opciones_admin/crear_encuestas/gestor_modulos.js' },
+                        { name: 'gestor_preguntas', src: '../js/admin/opciones_admin/crear_encuestas/gestor_preguntas.js' },
+                        { name: 'gestor_preguntas_condicionales', src: '../js/admin/opciones_admin/crear_encuestas/gestor_preguntas_condicionales.js' }
+                    ];
+                    
+                    // Cargar scripts en secuencia
+                    cargarScripts(0, scriptsToLoad, () => {
+                        console.log('Todos los scripts de encuestas cargados correctamente');
+                        
+                        // Inicializar el gestor de encuestas
+                        setTimeout(() => {
+                            if (window.gestorEncuestas && typeof window.gestorEncuestas.inicializar === 'function') {
+                                window.gestorEncuestas.inicializar();
+                                console.log('Gestor de encuestas inicializado correctamente');
+                            } else {
+                                console.error('No se encontró la función gestorEncuestas.inicializar');
+                            }
+                        }, 200); // Pequeño retraso para asegurar que el DOM se cargue
+                    });
+                    
+                    return false; // Para evitar que se agregue el script principal abajo
                     break;
 
                 default:
