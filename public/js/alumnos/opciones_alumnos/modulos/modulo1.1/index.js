@@ -163,12 +163,24 @@ function generarOpcionesDeAnios() {
  */
 async function cargarDatos() {
     try {
-        // 1. Obtener encuesta activa para Química/Bioquímica
+        // 1. Obtener encuesta activa (general para todos los estudiantes)
         const fechaActual = new Date();
         
-        const encuestasSnapshot = await firebase.firestore().collection('encuestas')
-            .where('carrera', 'array-contains-any', ['Química', 'Bioquímica'])
-            .get();
+        // Recuperar la encuestaId del localStorage si está disponible
+        const encuestaIdFromLocalStorage = localStorage.getItem('encuestaActualId');
+        let encuestasSnapshot;
+        
+        if (encuestaIdFromLocalStorage) {
+            // Si hay una encuesta específica en localStorage, buscarla por ID
+            console.log('Buscando encuesta específica con ID:', encuestaIdFromLocalStorage);
+            encuestasSnapshot = await firebase.firestore().collection('encuestas')
+                .where(firebase.firestore.FieldPath.documentId(), '==', encuestaIdFromLocalStorage)
+                .get();
+        } else {
+            // Si no hay encuesta específica, buscar todas las encuestas activas
+            console.log('Buscando todas las encuestas activas');
+            encuestasSnapshot = await firebase.firestore().collection('encuestas').get();
+        }
         
         const encuestasEnRango = encuestasSnapshot.docs
             .map(doc => {
@@ -193,7 +205,7 @@ async function cargarDatos() {
             });
         
         if (encuestasEnRango.length === 0) {
-            throw new Error('No hay encuestas activas para Química/Bioquímica en este momento.');
+            throw new Error('No hay encuestas activas disponibles en este momento.');
         }
         
         encuestaActual = encuestasEnRango[0];
