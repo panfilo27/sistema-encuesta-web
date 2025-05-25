@@ -111,40 +111,85 @@ Object.keys(rutas).forEach(id => {
                     break;
                     
                 case 'btn-crear-encuestas':
-                    // Solo es necesario cargar el script adicional porque el HTML ya se cargó
-                    // automáticamente en el código del event listener arriba
+                    // Ya tenemos el HTML cargado, ahora cargar los scripts necesarios
+                    // Cargar scripts en secuencia para evitar problemas de dependencias
+                    const cargarScriptsSecuenciales = (scripts, index = 0) => {
+                        if (index >= scripts.length) {
+                            // Todos los scripts cargados, inicializar los gestores
+                            console.log('Todos los scripts cargados, inicializando gestores...');
+                            setTimeout(() => {
+                                // Inicializar en el orden correcto
+                                if (window.gestorEncuestas && typeof window.gestorEncuestas.inicializar === 'function') {
+                                    window.gestorEncuestas.inicializar();
+                                    console.log('Gestor de encuestas inicializado correctamente');
+                                } else {
+                                    console.error('El gestor de encuestas no está disponible después de cargar scripts');
+                                }
+                                
+                                if (window.gestorModulos && typeof window.gestorModulos.inicializar === 'function') {
+                                    window.gestorModulos.inicializar();
+                                    console.log('Gestor de módulos inicializado correctamente');
+                                } else {
+                                    console.error('El gestor de módulos no está disponible después de cargar scripts');
+                                }
+                                
+                                if (window.gestorPreguntas && typeof window.gestorPreguntas.inicializar === 'function') {
+                                    window.gestorPreguntas.inicializar();
+                                    console.log('Gestor de preguntas inicializado correctamente');
+                                } else {
+                                    console.error('El gestor de preguntas no está disponible después de cargar scripts');
+                                }
+                                
+                                if (window.gestorPreguntasCondicionales && typeof window.gestorPreguntasCondicionales.inicializar === 'function') {
+                                    window.gestorPreguntasCondicionales.inicializar();
+                                    console.log('Gestor de preguntas condicionales inicializado correctamente');
+                                } else {
+                                    console.error('El gestor de preguntas condicionales no está disponible después de cargar scripts');
+                                }
+                            }, 500);
+                            return;
+                        }
+                        
+                        const scriptInfo = scripts[index];
+                        console.log(`Cargando script: ${scriptInfo.nombre}`);
+                        
+                        // Verificar si el script ya existe
+                        const scriptExistente = document.querySelector(`script[src*="${scriptInfo.nombre}"]`);
+                        if (scriptExistente) {
+                            console.log(`Script ${scriptInfo.nombre} ya está cargado, continuando...`);
+                            cargarScriptsSecuenciales(scripts, index + 1);
+                            return;
+                        }
+                        
+                        // Crear y cargar el script
+                        const scriptElement = document.createElement('script');
+                        scriptElement.src = scriptInfo.ruta;
+                        scriptElement.onload = () => {
+                            console.log(`Script ${scriptInfo.nombre} cargado correctamente`);
+                            cargarScriptsSecuenciales(scripts, index + 1);
+                        };
+                        scriptElement.onerror = (error) => {
+                            console.error(`Error al cargar script ${scriptInfo.nombre}:`, error);
+                            cargarScriptsSecuenciales(scripts, index + 1);
+                        };
+                        
+                        document.body.appendChild(scriptElement);
+                    };
                     
-                    // Configurar inicialización después de cargar la página
-                    setTimeout(() => {
-                        // Verificar e inicializar los gestores
-                        if (window.gestorEncuestas && typeof window.gestorEncuestas.inicializar === 'function') {
-                            window.gestorEncuestas.inicializar();
-                            console.log('Gestor de encuestas inicializado correctamente');
-                        } else {
-                            console.error('El gestor de encuestas no está disponible');
-                        }
-                        
-                        if (window.gestorModulos && typeof window.gestorModulos.inicializar === 'function') {
-                            window.gestorModulos.inicializar();
-                            console.log('Gestor de módulos inicializado correctamente');
-                        } else {
-                            console.error('El gestor de módulos no está disponible');
-                        }
-                        
-                        if (window.gestorPreguntas && typeof window.gestorPreguntas.inicializar === 'function') {
-                            window.gestorPreguntas.inicializar();
-                            console.log('Gestor de preguntas inicializado correctamente');
-                        } else {
-                            console.error('El gestor de preguntas no está disponible');
-                        }
-                        
-                        if (window.gestorPreguntasCondicionales && typeof window.gestorPreguntasCondicionales.inicializar === 'function') {
-                            window.gestorPreguntasCondicionales.inicializar();
-                            console.log('Gestor de preguntas condicionales inicializado correctamente');
-                        } else {
-                            console.error('El gestor de preguntas condicionales no está disponible');
-                        }
-                    }, 500); // Dar tiempo suficiente para que se carguen todos los scripts
+                    // Definir scripts a cargar en orden
+                    const scriptsToLoad = [
+                        { nombre: 'firebase-app', ruta: 'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js' },
+                        { nombre: 'firebase-firestore', ruta: 'https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js' },
+                        { nombre: 'firebase-config', ruta: '../js/firebase-config.js' },
+                        { nombre: 'cargar_carreras', ruta: '../js/admin/opciones_admin/crear_encuestas/cargar_carreras.js' },
+                        { nombre: 'gestor_encuestas', ruta: '../js/admin/opciones_admin/crear_encuestas/gestor_encuestas.js' },
+                        { nombre: 'gestor_modulos', ruta: '../js/admin/opciones_admin/crear_encuestas/gestor_modulos.js' },
+                        { nombre: 'gestor_preguntas', ruta: '../js/admin/opciones_admin/crear_encuestas/gestor_preguntas.js' },
+                        { nombre: 'gestor_preguntas_condicionales', ruta: '../js/admin/opciones_admin/crear_encuestas/gestor_preguntas_condicionales.js' }
+                    ];
+                    
+                    // Iniciar la carga de scripts
+                    cargarScriptsSecuenciales(scriptsToLoad);
                     
                     return false; // Para evitar que se agregue el script principal abajo
                     break;
