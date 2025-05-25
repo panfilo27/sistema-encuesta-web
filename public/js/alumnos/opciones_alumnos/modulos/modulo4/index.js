@@ -63,10 +63,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 moduloEmpleoAplicable = verificacionPrevia.empleoAplicable;
                 
-                // Si no aplica el módulo de empleo, redirigir al dashboard
+                // Si no aplica el módulo de empleo, redirigir al módulo 6
                 if (!moduloEmpleoAplicable) {
                     alert('Este módulo solo aplica para egresados que trabajan. Serás redirigido al módulo 6.');
-                    window.location.href = '../../modulo6.html';
+                    window.location.href = 'modulo6.html';
                     return;
                 }
                 
