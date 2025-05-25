@@ -335,6 +335,9 @@ function mostrarEncuestas() {
  * @returns {Object} Objeto con el porcentaje y siguiente módulo
  */
 function calcularProgresoEncuesta(encuestaId) {
+    // Guardar el ID de la encuesta actual en localStorage para referencia futura
+    localStorage.setItem('encuestaActualId', encuestaId);
+    
     // Obtener la información de carrera especializada desde localStorage
     // Esta información se establece en alumnos.js cuando el usuario entra al dashboard
     const esQuimicaOBioquimicaStr = localStorage.getItem('esQuimicaOBioquimica');
@@ -397,9 +400,16 @@ function calcularProgresoEncuesta(encuestaId) {
     let siguienteModulo = modulos[0]; // Por defecto, el primer módulo
     let fechaCompletado = null;
     
+    // Verificación mejorada para módulos completados
+    console.log('Verificando módulos completados en respuesta:', respuesta);
+    
     // Recorrer todos los módulos posibles
     for (const moduloId of modulos) {
-        if (respuesta[moduloId] && respuesta[moduloId].completado) {
+        console.log(`Verificando si ${moduloId} está completado:`, respuesta[moduloId]);
+        
+        // Verificar si el módulo existe y está completado
+        if (respuesta[moduloId] && respuesta[moduloId].completado === true) {
+            console.log(`Módulo ${moduloId} COMPLETADO`);
             modulosCompletados.push(moduloId);
             
             // Actualizar fecha del último módulo completado
@@ -409,6 +419,13 @@ function calcularProgresoEncuesta(encuestaId) {
                     nuevaFecha = respuesta[moduloId].fechaCompletado.toDate();
                 } else if (respuesta[moduloId].fechaCompletado instanceof Date) {
                     nuevaFecha = respuesta[moduloId].fechaCompletado;
+                } else if (respuesta[moduloId].fechaCompletado) {
+                    // Intentar convertir desde timestamp
+                    try {
+                        nuevaFecha = new Date(respuesta[moduloId].fechaCompletado);
+                    } catch (e) {
+                        console.warn('No se pudo convertir la fecha:', e);
+                    }
                 }
                 
                 if (nuevaFecha && (!fechaCompletado || nuevaFecha > fechaCompletado)) {
@@ -417,13 +434,18 @@ function calcularProgresoEncuesta(encuestaId) {
             }
         } else {
             // Encontramos el primer módulo no completado
+            console.log(`Módulo ${moduloId} NO completado, será el siguiente`); 
             siguienteModulo = moduloId;
             break;
         }
     }
     
+    console.log('Módulos completados:', modulosCompletados);
+    console.log('Siguiente módulo:', siguienteModulo);
+    
     // Si todos los módulos están completados
     if (modulosCompletados.length === modulos.length) {
+        console.log('Todos los módulos completados (100%)');
         return {
             porcentaje: 100,
             siguienteModulo: null,
@@ -434,6 +456,7 @@ function calcularProgresoEncuesta(encuestaId) {
     
     // Calcular porcentaje de progreso
     const porcentaje = Math.round((modulosCompletados.length / modulos.length) * 100);
+    console.log(`Progreso calculado: ${porcentaje}% (${modulosCompletados.length}/${modulos.length} módulos)`);
     
     return {
         porcentaje,
