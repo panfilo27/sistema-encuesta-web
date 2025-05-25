@@ -24,6 +24,21 @@
     function inicializarGestorEncuestas() {
         console.log('Inicializando gestor de encuestas...');
         
+        // Cargar carreras en los selectores
+        if (typeof cargarCarrerasEnSelect === 'function') {
+            const selectCarrera = document.getElementById('carrera-encuesta');
+            if (selectCarrera) {
+                cargarCarrerasEnSelect(selectCarrera, true);
+            }
+            
+            // Cargar en el filtro también
+            if (selectFiltroCarrera) {
+                cargarCarrerasEnSelect(selectFiltroCarrera, true);
+            }
+        } else {
+            console.error('La función cargarCarrerasEnSelect no está disponible');
+        }
+        
         // Cargar encuestas existentes
         cargarEncuestasExistentes();
         
@@ -43,6 +58,33 @@
         if (selectFiltroCarrera) {
             selectFiltroCarrera.addEventListener('change', filtrarEncuestas);
         }
+        
+        // Inicializar los demás gestores
+        setTimeout(() => {
+            // Inicializar gestor de módulos
+            if (window.gestorModulos && typeof window.gestorModulos.inicializar === 'function') {
+                window.gestorModulos.inicializar();
+                console.log('Gestor de módulos inicializado');
+            } else {
+                console.error('El gestor de módulos no está disponible');
+            }
+            
+            // Inicializar gestor de preguntas
+            if (window.gestorPreguntas && typeof window.gestorPreguntas.inicializar === 'function') {
+                window.gestorPreguntas.inicializar();
+                console.log('Gestor de preguntas inicializado');
+            } else {
+                console.error('El gestor de preguntas no está disponible');
+            }
+            
+            // Inicializar gestor de preguntas condicionales
+            if (window.gestorPreguntasCondicionales && typeof window.gestorPreguntasCondicionales.inicializar === 'function') {
+                window.gestorPreguntasCondicionales.inicializar();
+                console.log('Gestor de preguntas condicionales inicializado');
+            } else {
+                console.error('El gestor de preguntas condicionales no está disponible');
+            }
+        }, 300); // Pequeño retraso para asegurar que los otros scripts estén cargados
         
         // Ocultar el indicador de carga
         ocultarCargando();

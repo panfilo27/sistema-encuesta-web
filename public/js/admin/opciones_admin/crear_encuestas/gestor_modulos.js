@@ -379,6 +379,11 @@
     }
     
     // Exportar funciones para uso en otros módulos
+    window.gestorModulos = {
+        inicializar: inicializarGestorModulos,
+        mostrarModalModulo: mostrarModalModulo,
+        eliminarModulo: eliminarModulo
+    };
     window.cargarModulosExistentes = cargarModulosExistentes;
     window.resetearModulos = resetearModulos;
     window.obtenerModulos = obtenerModulos;
