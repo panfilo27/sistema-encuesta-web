@@ -111,87 +111,33 @@ Object.keys(rutas).forEach(id => {
                     break;
                     
                 case 'btn-crear-encuestas':
-                    // Ya tenemos el HTML cargado, ahora cargar los scripts necesarios
-                    // Cargar scripts en secuencia para evitar problemas de dependencias
-                    const cargarScriptsSecuenciales = (scripts, index = 0) => {
-                        if (index >= scripts.length) {
-                            // Todos los scripts cargados, inicializar los gestores
-                            console.log('Todos los scripts cargados, inicializando gestores...');
-                            setTimeout(() => {
-                                // Inicializar en el orden correcto
-                                if (window.gestorEncuestas && typeof window.gestorEncuestas.inicializar === 'function') {
-                                    window.gestorEncuestas.inicializar();
-                                    console.log('Gestor de encuestas inicializado correctamente');
-                                } else {
-                                    console.error('El gestor de encuestas no está disponible después de cargar scripts');
-                                }
-                                
-                                if (window.gestorModulos && typeof window.gestorModulos.inicializar === 'function') {
-                                    window.gestorModulos.inicializar();
-                                    console.log('Gestor de módulos inicializado correctamente');
-                                } else {
-                                    console.error('El gestor de módulos no está disponible después de cargar scripts');
-                                }
-                                
-                                if (window.gestorPreguntas && typeof window.gestorPreguntas.inicializar === 'function') {
-                                    window.gestorPreguntas.inicializar();
-                                    console.log('Gestor de preguntas inicializado correctamente');
-                                } else {
-                                    console.error('El gestor de preguntas no está disponible después de cargar scripts');
-                                }
-                                
-                                if (window.gestorPreguntasCondicionales && typeof window.gestorPreguntasCondicionales.inicializar === 'function') {
-                                    window.gestorPreguntasCondicionales.inicializar();
-                                    console.log('Gestor de preguntas condicionales inicializado correctamente');
-                                } else {
-                                    console.error('El gestor de preguntas condicionales no está disponible después de cargar scripts');
-                                }
-                            }, 500);
-                            return;
-                        }
-                        
-                        const scriptInfo = scripts[index];
-                        console.log(`Cargando script: ${scriptInfo.nombre}`);
-                        
-                        // Verificar si el script ya existe
-                        const scriptExistente = document.querySelector(`script[src*="${scriptInfo.nombre}"]`);
-                        if (scriptExistente) {
-                            console.log(`Script ${scriptInfo.nombre} ya está cargado, continuando...`);
-                            cargarScriptsSecuenciales(scripts, index + 1);
-                            return;
-                        }
-                        
-                        // Crear y cargar el script
-                        const scriptElement = document.createElement('script');
-                        scriptElement.src = scriptInfo.ruta;
-                        scriptElement.onload = () => {
-                            console.log(`Script ${scriptInfo.nombre} cargado correctamente`);
-                            cargarScriptsSecuenciales(scripts, index + 1);
+                    // Cargar el CSS primero
+                    const linkCSS = document.createElement('link');
+                    linkCSS.rel = 'stylesheet';
+                    linkCSS.href = '../css/admin/crear_encuestas/estilos.css';
+                    document.head.appendChild(linkCSS);
+                    
+                    // Primero cargar el script de carreras fijo
+                    const scriptCarreras = document.createElement('script');
+                    scriptCarreras.src = "../js/admin/opciones_admin/crear_encuestas/cargar_carreras_fix.js";
+                    document.body.appendChild(scriptCarreras);
+                    
+                    // Luego cargar el JavaScript principal fijo
+                    scriptCarreras.onload = () => {
+                        console.log('Script de carga de carreras cargado (versión fija)');
+                        script.src = "../js/admin/opciones_admin/crear_encuestas/crear_encuestas_fixed.js";
+                        script.onload = () => {
+                            console.log('Script de creación de encuestas cargado (versión fija)');
+                            // Inicializar el creador de encuestas mediante la función global
+                            if (typeof inicializarCreadorEncuestas === 'function') {
+                                setTimeout(inicializarCreadorEncuestas, 100); // Pequeño retraso para asegurar que el DOM se cargue
+                            } else {
+                                console.error('No se encontró la función inicializarCreadorEncuestas');
+                            }
                         };
-                        scriptElement.onerror = (error) => {
-                            console.error(`Error al cargar script ${scriptInfo.nombre}:`, error);
-                            cargarScriptsSecuenciales(scripts, index + 1);
-                        };
-                        
-                        document.body.appendChild(scriptElement);
+                        document.body.appendChild(script);
+                        return false; // Para evitar que se agregue el script principal abajo
                     };
-                    
-                    // Definir scripts a cargar en orden
-                    const scriptsToLoad = [
-                        { nombre: 'firebase-app', ruta: 'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js' },
-                        { nombre: 'firebase-firestore', ruta: 'https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js' },
-                        { nombre: 'firebase-config', ruta: '../js/firebase-config.js' },
-                        { nombre: 'cargar_carreras', ruta: '../js/admin/opciones_admin/crear_encuestas/cargar_carreras.js' },
-                        { nombre: 'gestor_encuestas', ruta: '../js/admin/opciones_admin/crear_encuestas/gestor_encuestas.js' },
-                        { nombre: 'gestor_modulos', ruta: '../js/admin/opciones_admin/crear_encuestas/gestor_modulos.js' },
-                        { nombre: 'gestor_preguntas', ruta: '../js/admin/opciones_admin/crear_encuestas/gestor_preguntas.js' },
-                        { nombre: 'gestor_preguntas_condicionales', ruta: '../js/admin/opciones_admin/crear_encuestas/gestor_preguntas_condicionales.js' }
-                    ];
-                    
-                    // Iniciar la carga de scripts
-                    cargarScriptsSecuenciales(scriptsToLoad);
-                    
-                    return false; // Para evitar que se agregue el script principal abajo
                     break;
 
                 default:
