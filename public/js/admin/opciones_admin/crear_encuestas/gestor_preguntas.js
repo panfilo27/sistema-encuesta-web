@@ -1,475 +1,450 @@
 /**
- * Gestor de Preguntas - Sistema de Encuestas
- * 
- * Este archivo maneja la creación, edición y eliminación de preguntas en los módulos.
- * Las preguntas pueden ser de respuesta abierta o de opción múltiple.
+ * Gestor de Preguntas
+ * Gestiona la creación, edición y eliminación de preguntas para los módulos
  */
 
-// Variables globales
-let preguntasModulo = {};  // Objetos con key = moduloId, value = array de preguntas
-let opcionesPregunta = {}; // Objetos con key = preguntaId, value = array de opciones
-let preguntaActualId = null;
-let moduloActualId = null;
-
-/**
- * Inicializa el gestor de preguntas
- */
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Inicializando gestor de preguntas...');
+// Evitar redeclaraciones usando un patrón de módulo autoejecutable
+(function() {
+    // Variables globales
+    let preguntaActualId = null;
+    let modoEdicionPregunta = false;
+    let opcionesPregunta = {}; // Almacena las opciones de respuesta para preguntas de opción múltiple
     
-    // Configurar eventos para el modal de preguntas
-    const modalPregunta = document.getElementById('modal-pregunta');
-    if (modalPregunta) {
-        const cerrarModal = modalPregunta.querySelector('.cerrar-modal');
-        if (cerrarModal) {
-            cerrarModal.addEventListener('click', cerrarModalPregunta);
+    /**
+     * Inicializa el gestor de preguntas
+     */
+    function inicializarGestorPreguntas() {
+        console.log('Inicializando gestor de preguntas...');
+        
+        // Las funciones de inicialización se llamarán cuando se cargue el contenido del módulo
+        document.addEventListener('click', function(event) {
+            // Delegar eventos para botones que se crean dinámicamente
+            if (event.target.matches('#btn-agregar-pregunta') || event.target.closest('#btn-agregar-pregunta')) {
+                mostrarModalPregunta();
+            }
+        });
+    }
+    
+    /**
+     * Muestra el modal para crear/editar una pregunta
+     */
+    function mostrarModalPregunta(preguntaId = null) {
+        // Verificar si existe el modal, si no, crearlo
+        let modalPregunta = document.getElementById('modal-pregunta');
+        
+        if (!modalPregunta) {
+            // Crear el modal para preguntas
+            modalPregunta = document.createElement('div');
+            modalPregunta.id = 'modal-pregunta';
+            modalPregunta.className = 'modal';
+            
+            modalPregunta.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="titulo-modal-pregunta">Nueva pregunta</h3>
+                        <span class="cerrar-modal">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-pregunta">
+                            <div class="form-group">
+                                <label for="texto-pregunta">Texto de la pregunta:</label>
+                                <input type="text" id="texto-pregunta" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="tipo-pregunta">Tipo de pregunta:</label>
+                                <select id="tipo-pregunta" onchange="window.gestorPreguntas.toggleOpcionesPregunta()">
+                                    <option value="abierta">Abierta (texto)</option>
+                                    <option value="opcion_multiple">Opción múltiple</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="obligatoria-pregunta">Obligatoria:</label>
+                                <select id="obligatoria-pregunta">
+                                    <option value="true">Sí</option>
+                                    <option value="false">No</option>
+                                </select>
+                            </div>
+                            
+                            <div id="seccion-opciones" class="hidden">
+                                <h4>Opciones de respuesta</h4>
+                                <div id="lista-opciones"></div>
+                                <button type="button" class="btn-agregar-opcion" id="btn-agregar-opcion">
+                                    <i class="fas fa-plus"></i> Agregar opción
+                                </button>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" id="btn-cancelar-pregunta" class="btn-cancelar">Cancelar</button>
+                                <button type="submit" id="btn-guardar-pregunta" class="btn-guardar">Guardar pregunta</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modalPregunta);
+            
+            // Configurar eventos para el modal
+            const cerrarModal = modalPregunta.querySelector('.cerrar-modal');
+            const btnCancelarPregunta = modalPregunta.querySelector('#btn-cancelar-pregunta');
+            const formPregunta = modalPregunta.querySelector('#form-pregunta');
+            const btnAgregarOpcion = modalPregunta.querySelector('#btn-agregar-opcion');
+            
+            if (cerrarModal) {
+                cerrarModal.addEventListener('click', cerrarModalPregunta);
+            }
+            
+            if (btnCancelarPregunta) {
+                btnCancelarPregunta.addEventListener('click', cerrarModalPregunta);
+            }
+            
+            if (formPregunta) {
+                formPregunta.addEventListener('submit', guardarPregunta);
+            }
+            
+            if (btnAgregarOpcion) {
+                btnAgregarOpcion.addEventListener('click', agregarOpcionRespuesta);
+            }
         }
         
-        const btnCancelarPregunta = document.getElementById('btn-cancelar-pregunta');
-        if (btnCancelarPregunta) {
-            btnCancelarPregunta.addEventListener('click', cerrarModalPregunta);
-        }
-        
+        // Resetear formulario
         const formPregunta = document.getElementById('form-pregunta');
+        const tituloModal = document.getElementById('titulo-modal-pregunta');
+        
         if (formPregunta) {
-            formPregunta.addEventListener('submit', function(e) {
-                e.preventDefault();
-                guardarPregunta();
-            });
+            formPregunta.reset();
         }
         
-        // Evento para cambiar tipo de pregunta
-        const tipoPregunta = document.getElementById('tipo-pregunta');
-        if (tipoPregunta) {
-            tipoPregunta.addEventListener('change', toggleOpcionesPregunta);
+        // Limpiar lista de opciones
+        const listaOpciones = document.getElementById('lista-opciones');
+        if (listaOpciones) {
+            listaOpciones.innerHTML = '';
         }
         
-        // Evento para agregar opción
-        const btnAgregarOpcion = document.getElementById('btn-agregar-opcion');
-        if (btnAgregarOpcion) {
-            btnAgregarOpcion.addEventListener('click', agregarOpcionRespuesta);
+        // Ocultar sección de opciones inicialmente
+        const seccionOpciones = document.getElementById('seccion-opciones');
+        if (seccionOpciones) {
+            seccionOpciones.classList.add('hidden');
+        }
+        
+        // Configurar modo edición o creación
+        if (preguntaId) {
+            // Modo edición
+            modoEdicionPregunta = true;
+            preguntaActualId = preguntaId;
+            
+            // En una implementación real, aquí cargaríamos los datos de la pregunta
+            // Por ahora, dejamos el título en "Editar pregunta"
+            if (tituloModal) {
+                tituloModal.textContent = 'Editar pregunta';
+            }
+        } else {
+            // Modo creación
+            modoEdicionPregunta = false;
+            preguntaActualId = 'pregunta_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            // Inicializar array de opciones
+            opcionesPregunta[preguntaActualId] = [];
+            
+            if (tituloModal) {
+                tituloModal.textContent = 'Nueva pregunta';
+            }
+        }
+        
+        // Mostrar modal
+        modalPregunta.style.display = 'flex';
+    }
+    
+    /**
+     * Cierra el modal de pregunta
+     */
+    function cerrarModalPregunta() {
+        const modalPregunta = document.getElementById('modal-pregunta');
+        if (modalPregunta) {
+            modalPregunta.style.display = 'none';
+        }
+        
+        // Limpiar estado
+        modoEdicionPregunta = false;
+        
+        // No limpiamos preguntaActualId aquí para que pueda ser accedido por otras funciones
+    }
+    
+    /**
+     * Alterna la visibilidad de la sección de opciones según el tipo de pregunta
+     */
+    function toggleOpcionesPregunta() {
+        const tipoPregunta = document.getElementById('tipo-pregunta').value;
+        const seccionOpciones = document.getElementById('seccion-opciones');
+        
+        if (seccionOpciones) {
+            if (tipoPregunta === 'opcion_multiple') {
+                seccionOpciones.classList.remove('hidden');
+            } else {
+                seccionOpciones.classList.add('hidden');
+            }
         }
     }
-});
-
-/**
- * Muestra el modal para crear o editar una pregunta
- * @param {string} moduloId - ID del módulo al que pertenece la pregunta
- * @param {string} preguntaId - ID de la pregunta a editar (null si es nueva)
- */
-function mostrarModalPregunta(moduloId, preguntaId = null) {
-    console.log(`Mostrando modal de pregunta para módulo ${moduloId}, pregunta ${preguntaId}`);
     
-    // Guardar referencias
-    moduloActualId = moduloId;
-    preguntaActualId = preguntaId;
-    
-    // Limpiar el formulario
-    const formPregunta = document.getElementById('form-pregunta');
-    if (formPregunta) {
-        formPregunta.reset();
+    /**
+     * Agrega una opción de respuesta para pregunta de opción múltiple
+     */
+    function agregarOpcionRespuesta() {
+        const listaOpciones = document.getElementById('lista-opciones');
+        if (!listaOpciones) return;
+        
+        // Verificar límite de opciones
+        if (listaOpciones.children.length >= 5) {
+            if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                window.gestorEncuestas.mostrarAlerta('No se pueden agregar más de 5 opciones', 'error');
+            } else {
+                alert('No se pueden agregar más de 5 opciones');
+            }
+            return;
+        }
+        
+        // Crear nueva opción
+        const nuevaOpcion = `Opción ${listaOpciones.children.length + 1}`;
+        agregarOpcionRespuestaUI(nuevaOpcion);
     }
     
-    // Limpiar opciones
-    const listaOpciones = document.getElementById('lista-opciones');
-    if (listaOpciones) {
-        listaOpciones.innerHTML = '';
+    /**
+     * Agrega una opción de respuesta a la interfaz
+     */
+    function agregarOpcionRespuestaUI(textoOpcion) {
+        const listaOpciones = document.getElementById('lista-opciones');
+        if (!listaOpciones) return;
+        
+        const indice = listaOpciones.children.length;
+        
+        // Crear elemento de opción
+        const opcionElement = document.createElement('div');
+        opcionElement.className = 'opcion-respuesta';
+        opcionElement.dataset.indice = indice;
+        
+        opcionElement.innerHTML = `
+            <input type="text" value="${textoOpcion}" placeholder="Texto de la opción">
+            <button type="button" class="btn-condicional-opcion" title="Agregar pregunta condicional">
+                <i class="fas fa-question-circle"></i> Subpregunta
+            </button>
+            <button type="button" class="btn-eliminar-opcion">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        
+        // Configurar evento de cambio de texto
+        opcionElement.querySelector('input').addEventListener('input', (event) => {
+            const indice = parseInt(opcionElement.dataset.indice);
+            const valor = event.target.value.trim();
+            
+            // Actualizar el valor en el array de opciones
+            if (indice < opcionesPregunta[preguntaActualId].length) {
+                opcionesPregunta[preguntaActualId][indice] = valor;
+            } else {
+                opcionesPregunta[preguntaActualId].push(valor);
+            }
+        });
+        
+        // Configurar evento para agregar pregunta condicional
+        opcionElement.querySelector('.btn-condicional-opcion').addEventListener('click', () => {
+            const indice = parseInt(opcionElement.dataset.indice);
+            
+            // Llamar a la función del gestor de preguntas condicionales
+            if (window.gestorPreguntasCondicionales && window.gestorPreguntasCondicionales.mostrarModalPreguntaCondicional) {
+                window.gestorPreguntasCondicionales.mostrarModalPreguntaCondicional(preguntaActualId, indice);
+            } else {
+                console.error('El gestor de preguntas condicionales no está disponible');
+                if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                    window.gestorEncuestas.mostrarAlerta('La funcionalidad de preguntas condicionales no está disponible', 'error');
+                }
+            }
+        });
+        
+        // Configurar evento de eliminación
+        opcionElement.querySelector('.btn-eliminar-opcion').addEventListener('click', () => {
+            eliminarOpcionRespuesta(opcionElement);
+        });
+        
+        // Agregar al DOM
+        listaOpciones.appendChild(opcionElement);
+        
+        // Agregar al array de opciones
+        opcionesPregunta[preguntaActualId].push(textoOpcion);
     }
     
-    // Inicializar array de opciones si no existe
-    if (!opcionesPregunta[preguntaActualId]) {
-        opcionesPregunta[preguntaActualId] = [];
+    /**
+     * Elimina una opción de respuesta
+     */
+    function eliminarOpcionRespuesta(opcionElement) {
+        const listaOpciones = document.getElementById('lista-opciones');
+        if (!listaOpciones) return;
+        
+        // Verificar que haya al menos dos opciones
+        if (listaOpciones.children.length <= 2) {
+            if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                window.gestorEncuestas.mostrarAlerta('Debe haber al menos 2 opciones de respuesta', 'error');
+            } else {
+                alert('Debe haber al menos 2 opciones de respuesta');
+            }
+            return;
+        }
+        
+        // Obtener índice
+        const indice = parseInt(opcionElement.dataset.indice);
+        
+        // Eliminar del array
+        if (opcionesPregunta[preguntaActualId] && indice < opcionesPregunta[preguntaActualId].length) {
+            opcionesPregunta[preguntaActualId].splice(indice, 1);
+        }
+        
+        // Eliminar del DOM
+        opcionElement.remove();
+        
+        // Actualizar índices
+        Array.from(listaOpciones.children).forEach((elem, i) => {
+            elem.dataset.indice = i;
+        });
     }
     
-    // Si estamos editando una pregunta existente, cargar sus datos
-    if (preguntaId) {
-        const modulo = window.modulosEncuesta.find(m => m.id === moduloId);
-        if (modulo && modulo.preguntas) {
-            const pregunta = modulo.preguntas.find(p => p.id === preguntaId);
-            if (pregunta) {
-                document.getElementById('texto-pregunta').value = pregunta.texto || '';
-                document.getElementById('tipo-pregunta').value = pregunta.tipo || 'abierta';
-                document.getElementById('obligatoria').value = pregunta.obligatoria ? 'true' : 'false';
-                
-                // Si es de opción múltiple, cargar opciones
-                if (pregunta.tipo === 'opcion_multiple' && pregunta.opciones) {
-                    // Mostrar sección de opciones
-                    document.getElementById('seccion-opciones').classList.remove('hidden');
-                    
-                    // Cargar opciones existentes
-                    opcionesPregunta[preguntaActualId] = [...pregunta.opciones];
-                    pregunta.opciones.forEach(opcion => {
-                        agregarOpcionRespuestaUI(opcion);
-                    });
+    /**
+     * Guarda la pregunta
+     */
+    function guardarPregunta(event) {
+        event.preventDefault();
+        
+        // Obtener el módulo actual
+        const moduloActualId = window.obtenerModuloActualId ? window.obtenerModuloActualId() : null;
+        
+        if (!moduloActualId) {
+            if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                window.gestorEncuestas.mostrarAlerta('No se ha seleccionado ningún módulo', 'error');
+            } else {
+                alert('No se ha seleccionado ningún módulo');
+            }
+            return;
+        }
+        
+        // Obtener datos del formulario
+        const textoPregunta = document.getElementById('texto-pregunta').value.trim();
+        const tipoPregunta = document.getElementById('tipo-pregunta').value;
+        const obligatoria = document.getElementById('obligatoria-pregunta').value === 'true';
+        
+        // Validar
+        if (!textoPregunta) {
+            if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                window.gestorEncuestas.mostrarAlerta('El texto de la pregunta es obligatorio', 'error');
+            } else {
+                alert('El texto de la pregunta es obligatorio');
+            }
+            return;
+        }
+        
+        // Validar opciones para preguntas de opción múltiple
+        if (tipoPregunta === 'opcion_multiple') {
+            const listaOpciones = document.getElementById('lista-opciones');
+            
+            if (!listaOpciones || listaOpciones.children.length < 2) {
+                if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                    window.gestorEncuestas.mostrarAlerta('Las preguntas de opción múltiple deben tener al menos 2 opciones', 'error');
+                } else {
+                    alert('Las preguntas de opción múltiple deben tener al menos 2 opciones');
+                }
+                return;
+            }
+        }
+        
+        // Crear objeto de pregunta
+        const pregunta = {
+            id: preguntaActualId,
+            texto: textoPregunta,
+            tipo: tipoPregunta,
+            obligatoria: obligatoria
+        };
+        
+        // Agregar opciones si es pregunta de opción múltiple
+        if (tipoPregunta === 'opcion_multiple') {
+            pregunta.opciones = opcionesPregunta[preguntaActualId];
+            
+            // Agregar preguntas condicionales si existen
+            if (window.gestorPreguntasCondicionales && window.gestorPreguntasCondicionales.obtenerPreguntasCondicionales) {
+                const preguntasCondicionalesData = window.gestorPreguntasCondicionales.obtenerPreguntasCondicionales(preguntaActualId);
+                if (preguntasCondicionalesData) {
+                    pregunta.preguntasCondicionales = preguntasCondicionalesData;
                 }
             }
         }
-    }
-    
-    // Asegurar que la sección de opciones esté visible/oculta según corresponda
-    toggleOpcionesPregunta();
-    
-    // Mostrar el modal
-    const modal = document.getElementById('modal-pregunta');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
-}
-
-/**
- * Cierra el modal de pregunta
- */
-function cerrarModalPregunta() {
-    const modal = document.getElementById('modal-pregunta');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    moduloActualId = null;
-    preguntaActualId = null;
-}
-
-/**
- * Alterna la visibilidad de la sección de opciones según el tipo de pregunta
- */
-function toggleOpcionesPregunta() {
-    const tipoPregunta = document.getElementById('tipo-pregunta').value;
-    const seccionOpciones = document.getElementById('seccion-opciones');
-    
-    if (tipoPregunta === 'opcion_multiple') {
-        seccionOpciones.classList.remove('hidden');
-    } else {
-        seccionOpciones.classList.add('hidden');
-    }
-}
-
-/**
- * Agrega una nueva opción de respuesta
- */
-function agregarOpcionRespuesta() {
-    const listaOpciones = document.getElementById('lista-opciones');
-    if (!listaOpciones) return;
-    
-    // Verificar si ya se alcanzó el límite de opciones
-    if (listaOpciones.children.length >= 5) {
-        window.mostrarAlerta('No se pueden agregar más de 5 opciones', 'error');
-        return;
-    }
-    
-    // Crear nueva opción
-    const nuevaOpcion = `Opción ${listaOpciones.children.length + 1}`;
-    
-    // Agregar a la UI
-    agregarOpcionRespuestaUI(nuevaOpcion);
-}
-
-/**
- * Agrega una opción de respuesta a la interfaz
- * @param {string} textoOpcion - Texto de la opción
- */
-function agregarOpcionRespuestaUI(textoOpcion) {
-    const listaOpciones = document.getElementById('lista-opciones');
-    if (!listaOpciones) return;
-    
-    const numOpciones = listaOpciones.children.length;
-    
-    // Crear elemento de opción
-    const opcionElement = document.createElement('div');
-    opcionElement.className = 'opcion-respuesta';
-    opcionElement.dataset.indice = numOpciones;
-    
-    opcionElement.innerHTML = `
-        <input type="text" value="${textoOpcion}" placeholder="Texto de la opción">
-        <button type="button" class="btn-condicional-opcion" title="Agregar pregunta condicional">
-            <i class="fas fa-question-circle"></i> Subpregunta
-        </button>
-        <button type="button" class="btn-eliminar-opcion">
-            <i class="fas fa-trash"></i>
-        </button>
-    `;
-    
-    // Configurar evento para cambios en el texto
-    opcionElement.querySelector('input').addEventListener('input', function(event) {
-        const indice = parseInt(opcionElement.dataset.indice);
-        const valor = event.target.value.trim();
         
-        // Actualizar el valor en el array de opciones
-        if (indice < opcionesPregunta[preguntaActualId].length) {
-            opcionesPregunta[preguntaActualId][indice] = valor;
-        } else {
-            opcionesPregunta[preguntaActualId].push(valor);
-        }
-    });
-    
-    // Configurar evento para botón de subpregunta
-    opcionElement.querySelector('.btn-condicional-opcion').addEventListener('click', function() {
-        const indice = parseInt(opcionElement.dataset.indice);
+        // Obtener módulos
+        const modulos = window.obtenerModulos ? window.obtenerModulos() : [];
         
-        // Esta función se implementará en gestor_preguntas_condicionales.js
-        if (typeof mostrarModalPreguntaCondicional === 'function') {
-            mostrarModalPreguntaCondicional(preguntaActualId, indice);
-        } else {
-            console.warn('Función mostrarModalPreguntaCondicional no disponible');
-            window.mostrarAlerta('La funcionalidad de subpreguntas está en desarrollo', 'info');
-        }
-    });
-    
-    // Configurar evento para botón de eliminar
-    opcionElement.querySelector('.btn-eliminar-opcion').addEventListener('click', function() {
-        eliminarOpcionRespuesta(opcionElement);
-    });
-    
-    // Agregar al DOM
-    listaOpciones.appendChild(opcionElement);
-    
-    // Agregar al array de opciones
-    if (numOpciones >= opcionesPregunta[preguntaActualId].length) {
-        opcionesPregunta[preguntaActualId].push(textoOpcion);
-    }
-}
-
-/**
- * Elimina una opción de respuesta
- * @param {HTMLElement} opcionElement - Elemento DOM de la opción
- */
-function eliminarOpcionRespuesta(opcionElement) {
-    const listaOpciones = document.getElementById('lista-opciones');
-    if (!listaOpciones) return;
-    
-    // Verificar que queden al menos dos opciones
-    if (listaOpciones.children.length <= 2) {
-        window.mostrarAlerta('Debe haber al menos 2 opciones', 'error');
-        return;
-    }
-    
-    // Obtener índice
-    const indice = parseInt(opcionElement.dataset.indice);
-    
-    // Eliminar del array de opciones
-    if (opcionesPregunta[preguntaActualId] && indice < opcionesPregunta[preguntaActualId].length) {
-        opcionesPregunta[preguntaActualId].splice(indice, 1);
-    }
-    
-    // Eliminar del DOM
-    opcionElement.remove();
-    
-    // Reindexar las opciones restantes
-    Array.from(listaOpciones.children).forEach((elem, idx) => {
-        elem.dataset.indice = idx;
-    });
-}
-
-/**
- * Guarda la pregunta actual
- */
-function guardarPregunta() {
-    // Verificar que tenemos un módulo actual
-    if (!moduloActualId) {
-        window.mostrarAlerta('No se ha seleccionado un módulo', 'error');
-        return;
-    }
-    
-    // Obtener datos del formulario
-    const textoPregunta = document.getElementById('texto-pregunta').value.trim();
-    const tipoPregunta = document.getElementById('tipo-pregunta').value;
-    const obligatoria = document.getElementById('obligatoria').value === 'true';
-    
-    // Validaciones básicas
-    if (!textoPregunta) {
-        window.mostrarAlerta('El texto de la pregunta es obligatorio', 'error');
-        return;
-    }
-    
-    // Si es de opción múltiple, validar opciones
-    if (tipoPregunta === 'opcion_multiple') {
-        const listaOpciones = document.getElementById('lista-opciones');
+        // Encontrar el módulo actual
+        const moduloIndex = modulos.findIndex(m => m.id === moduloActualId);
         
-        // Verificar que haya al menos 2 opciones
-        if (!listaOpciones || listaOpciones.children.length < 2) {
-            window.mostrarAlerta('Las preguntas de opción múltiple deben tener al menos 2 opciones', 'error');
-            return;
-        }
-        
-        // Verificar que todas tengan texto
-        let opcionesValidas = true;
-        opcionesPregunta[preguntaActualId].forEach(opcion => {
-            if (!opcion || opcion.trim() === '') {
-                opcionesValidas = false;
-            }
-        });
-        
-        if (!opcionesValidas) {
-            window.mostrarAlerta('Todas las opciones deben tener texto', 'error');
-            return;
-        }
-    }
-    
-    // Crear o actualizar la pregunta
-    const pregunta = {
-        id: preguntaActualId || generarId(),
-        texto: textoPregunta,
-        tipo: tipoPregunta,
-        obligatoria: obligatoria
-    };
-    
-    // Si es de opción múltiple, agregar las opciones
-    if (tipoPregunta === 'opcion_multiple') {
-        pregunta.opciones = [...opcionesPregunta[preguntaActualId]];
-    }
-    
-    // Buscar el módulo correspondiente
-    const moduloIndex = window.modulosEncuesta.findIndex(m => m.id === moduloActualId);
-    if (moduloIndex === -1) {
-        window.mostrarAlerta('No se encontró el módulo seleccionado', 'error');
-        return;
-    }
-    
-    // Agregar o actualizar la pregunta en el módulo
-    if (preguntaActualId) {
-        // Actualizar pregunta existente
-        const preguntaIndex = window.modulosEncuesta[moduloIndex].preguntas.findIndex(p => p.id === preguntaActualId);
-        if (preguntaIndex !== -1) {
-            window.modulosEncuesta[moduloIndex].preguntas[preguntaIndex] = pregunta;
-        }
-    } else {
-        // Agregar nueva pregunta
-        if (!window.modulosEncuesta[moduloIndex].preguntas) {
-            window.modulosEncuesta[moduloIndex].preguntas = [];
-        }
-        window.modulosEncuesta[moduloIndex].preguntas.push(pregunta);
-    }
-    
-    // Actualizar la interfaz
-    actualizarPreguntasEnUI(moduloActualId);
-    
-    // Cerrar el modal
-    cerrarModalPregunta();
-    
-    // Mostrar mensaje de éxito
-    window.mostrarAlerta('Pregunta guardada correctamente', 'success');
-}
-
-/**
- * Actualiza la lista de preguntas en la UI para un módulo específico
- * @param {string} moduloId - ID del módulo
- */
-function actualizarPreguntasEnUI(moduloId) {
-    const modulo = window.modulosEncuesta.find(m => m.id === moduloId);
-    if (!modulo) return;
-    
-    // Generar HTML para las preguntas
-    const preguntasHTML = generarHTMLPreguntas(modulo.preguntas || []);
-    
-    // Actualizar en el DOM
-    const listaPreguntas = document.getElementById(`lista-preguntas-${moduloId}`);
-    if (listaPreguntas) {
-        listaPreguntas.innerHTML = preguntasHTML;
-        
-        // Configurar eventos para los botones de las preguntas
-        listaPreguntas.querySelectorAll('.pregunta').forEach(preguntaElement => {
-            const preguntaId = preguntaElement.dataset.preguntaId;
-            
-            // Botón de editar
-            const btnEditar = preguntaElement.querySelector('.btn-editar-pregunta');
-            if (btnEditar) {
-                btnEditar.addEventListener('click', function() {
-                    mostrarModalPregunta(moduloId, preguntaId);
-                });
+        if (moduloIndex !== -1) {
+            // Inicializar array de preguntas si no existe
+            if (!modulos[moduloIndex].preguntas) {
+                modulos[moduloIndex].preguntas = [];
             }
             
-            // Botón de eliminar
-            const btnEliminar = preguntaElement.querySelector('.btn-eliminar-pregunta');
-            if (btnEliminar) {
-                btnEliminar.addEventListener('click', function() {
-                    eliminarPregunta(moduloId, preguntaId);
-                });
+            if (modoEdicionPregunta) {
+                // Actualizar pregunta existente
+                const preguntaIndex = modulos[moduloIndex].preguntas.findIndex(p => p.id === preguntaActualId);
+                
+                if (preguntaIndex !== -1) {
+                    modulos[moduloIndex].preguntas[preguntaIndex] = pregunta;
+                } else {
+                    // La pregunta no existe, agregarla
+                    modulos[moduloIndex].preguntas.push(pregunta);
+                }
+            } else {
+                // Agregar nueva pregunta
+                modulos[moduloIndex].preguntas.push(pregunta);
             }
-        });
-    }
-    
-    // Actualizar contador de preguntas en el módulo
-    const moduloElement = document.querySelector(`.modulo-encuesta[data-modulo-id="${moduloId}"]`);
-    if (moduloElement) {
-        const contadorPreguntas = moduloElement.querySelector('.contador-preguntas');
-        if (contadorPreguntas) {
-            contadorPreguntas.innerHTML = `
-                <i class="fas fa-question-circle"></i> 
-                ${modulo.preguntas ? modulo.preguntas.length : 0} preguntas
-            `;
+            
+            // En una implementación real, aquí actualizaríamos la visualización de las preguntas
+            
+            // Cerrar modal
+            cerrarModalPregunta();
+            
+            // Mostrar mensaje de éxito
+            if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                window.gestorEncuestas.mostrarAlerta(
+                    modoEdicionPregunta ? 'Pregunta actualizada correctamente' : 'Pregunta creada correctamente',
+                    'success'
+                );
+            } else {
+                alert(modoEdicionPregunta ? 'Pregunta actualizada correctamente' : 'Pregunta creada correctamente');
+            }
+            
+            // Actualizar contenido del módulo para mostrar la nueva pregunta
+            if (window.mostrarContenidoModulo) {
+                const modulo = modulos[moduloIndex];
+                window.mostrarContenidoModulo(modulo);
+            }
+        } else {
+            if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                window.gestorEncuestas.mostrarAlerta('No se encontró el módulo seleccionado', 'error');
+            } else {
+                alert('No se encontró el módulo seleccionado');
+            }
         }
     }
-}
-
-/**
- * Elimina una pregunta de un módulo
- * @param {string} moduloId - ID del módulo
- * @param {string} preguntaId - ID de la pregunta
- */
-function eliminarPregunta(moduloId, preguntaId) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta pregunta?')) {
-        // Buscar el módulo
-        const moduloIndex = window.modulosEncuesta.findIndex(m => m.id === moduloId);
-        if (moduloIndex === -1) return;
-        
-        // Eliminar la pregunta
-        window.modulosEncuesta[moduloIndex].preguntas = 
-            window.modulosEncuesta[moduloIndex].preguntas.filter(p => p.id !== preguntaId);
-        
-        // Limpiar opciones
-        delete opcionesPregunta[preguntaId];
-        
-        // Actualizar interfaz
-        actualizarPreguntasEnUI(moduloId);
-        
-        // Mostrar mensaje
-        window.mostrarAlerta('Pregunta eliminada correctamente', 'success');
-    }
-}
-
-/**
- * Genera el HTML para las preguntas
- * @param {Array} preguntas - Lista de preguntas
- * @returns {string} HTML generado
- */
-function generarHTMLPreguntas(preguntas) {
-    if (!preguntas || preguntas.length === 0) {
-        return '<p class="sin-preguntas">No hay preguntas en este módulo</p>';
-    }
     
-    return preguntas.map((pregunta, index) => `
-        <div class="pregunta" data-pregunta-id="${pregunta.id}">
-            <div class="info-pregunta">
-                <span class="numero-pregunta">${index + 1}</span>
-                <span class="texto-pregunta">${pregunta.texto}</span>
-                <span class="tipo-pregunta">${obtenerTipoPreguntaTexto(pregunta.tipo)}</span>
-            </div>
-            <div class="acciones-pregunta">
-                <button type="button" class="btn-editar-pregunta" title="Editar Pregunta">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button type="button" class="btn-eliminar-pregunta" title="Eliminar Pregunta">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-/**
- * Obtiene el texto descriptivo para un tipo de pregunta
- * @param {string} tipo - Tipo de pregunta
- * @returns {string} Texto descriptivo
- */
-function obtenerTipoPreguntaTexto(tipo) {
-    const tipos = {
-        'abierta': 'Respuesta abierta',
-        'opcion_multiple': 'Opción múltiple'
+    // Exportar funciones para uso en otros módulos
+    window.gestorPreguntas = {
+        inicializar: inicializarGestorPreguntas,
+        mostrarModalPregunta: mostrarModalPregunta,
+        cerrarModalPregunta: cerrarModalPregunta,
+        toggleOpcionesPregunta: toggleOpcionesPregunta,
+        agregarOpcionRespuesta: agregarOpcionRespuesta,
+        obtenerPreguntaActualId: function() { return preguntaActualId; },
+        obtenerOpcionesPregunta: function() { return opcionesPregunta; }
     };
     
-    return tipos[tipo] || 'Desconocido';
-}
-
-// Exportar funciones que se usarán en otros módulos
-window.mostrarModalPregunta = mostrarModalPregunta;
-window.cerrarModalPregunta = cerrarModalPregunta;
-window.preguntasModulo = preguntasModulo;
-window.opcionesPregunta = opcionesPregunta;
+    // Exponer variables para su uso en otros módulos
+    window.preguntaActualId = preguntaActualId;
+    window.opcionesPregunta = opcionesPregunta;
+    
+    // Inicializar cuando el DOM esté cargado
+    document.addEventListener('DOMContentLoaded', inicializarGestorPreguntas);
+})();

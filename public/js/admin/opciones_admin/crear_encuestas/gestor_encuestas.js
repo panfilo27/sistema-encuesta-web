@@ -1,409 +1,386 @@
 /**
- * Gestor de Encuestas - Módulo principal
- * 
- * Este archivo maneja la interfaz y lógica general del sistema de creación de encuestas.
- * Se encarga de la inicialización, carga de encuestas existentes y coordinación entre módulos.
+ * Gestor de Encuestas
+ * Archivo principal para gestionar la creación y edición de encuestas
  */
 
-// Variables globales
-let encuestasActivas = [];
-let carrerasDisponibles = [];
-let carrerasSeleccionadas = [];
-
-// Función de inicialización principal
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Inicializando sistema de gestión de encuestas...');
+// Evitar redeclaraciones usando un patrón de módulo autoejecutable
+(function() {
+    // Variables globales
+    let encuestaActual = null;
+    let modoEdicion = false;
     
-    // Inicializar selectores y eventos
-    inicializarEventos();
-    
-    // Cargar datos iniciales (carreras y encuestas existentes)
-    cargarDatosIniciales();
-});
-
-/**
- * Inicializa todos los eventos de la interfaz
- */
-function inicializarEventos() {
-    // Evento para el botón de agregar carrera
-    const btnAgregarCarrera = document.getElementById('btn-agregar-carrera');
-    if (btnAgregarCarrera) {
-        btnAgregarCarrera.addEventListener('click', agregarCarreraSeleccionada);
-    }
-    
-    // Evento para el botón de filtrar encuestas
-    const btnFiltrar = document.getElementById('btn-filtrar');
-    if (btnFiltrar) {
-        btnFiltrar.addEventListener('click', filtrarEncuestas);
-    }
-    
-    // Eventos para los botones principales
-    const btnAgregarModulo = document.getElementById('btn-agregar-modulo');
-    if (btnAgregarModulo) {
-        btnAgregarModulo.addEventListener('click', function() {
-            // Esta función se implementará en gestor_modulos.js
-            if (typeof mostrarModalModulo === 'function') {
-                mostrarModalModulo();
-            } else {
-                console.error('La función mostrarModalModulo no está disponible');
-            }
-        });
-    }
-    
-    // Eventos para el formulario de encuesta
+    // Referencias a elementos del DOM
     const formEncuesta = document.getElementById('form-encuesta');
-    if (formEncuesta) {
-        formEncuesta.addEventListener('submit', function(e) {
-            e.preventDefault();
-            guardarEncuesta();
-        });
-    }
+    const btnCancelarEncuesta = document.getElementById('btn-cancelar-encuesta');
+    const btnGuardarEncuesta = document.getElementById('btn-guardar-encuesta');
+    const tablaEncuestas = document.getElementById('tabla-encuestas');
+    const listaEncuestas = document.getElementById('lista-encuestas');
+    const inputBuscarEncuesta = document.getElementById('buscar-encuesta');
+    const selectFiltroCarrera = document.getElementById('filtro-carrera');
     
-    // Evento para el botón de cancelar
-    const btnCancelar = document.getElementById('btn-cancelar');
-    if (btnCancelar) {
-        btnCancelar.addEventListener('click', cancelarCreacionEncuesta);
-    }
-}
-
-/**
- * Carga las carreras y encuestas existentes
- */
-function cargarDatosIniciales() {
-    // Simulación de carga de carreras (esto se conectará con Firebase)
-    setTimeout(() => {
-        carrerasDisponibles = [
-            { id: 'ing_sistemas', nombre: 'Ingeniería en Sistemas Computacionales' },
-            { id: 'ing_industrial', nombre: 'Ingeniería Industrial' },
-            { id: 'ing_electronica', nombre: 'Ingeniería Electrónica' },
-            { id: 'ing_gestion', nombre: 'Ingeniería en Gestión Empresarial' },
-            { id: 'ing_mecatronica', nombre: 'Ingeniería Mecatrónica' }
-        ];
+    /**
+     * Inicializa el gestor de encuestas
+     */
+    function inicializarGestorEncuestas() {
+        console.log('Inicializando gestor de encuestas...');
         
-        // Cargar las carreras en el selector
-        cargarCarrerasEnSelector();
-        
-        // Simular carga de encuestas existentes
+        // Cargar encuestas existentes
         cargarEncuestasExistentes();
-    }, 500);
-}
-
-/**
- * Carga las carreras en el selector desplegable
- */
-function cargarCarrerasEnSelector() {
-    const selectorCarrera = document.getElementById('selector-carrera');
-    if (!selectorCarrera) return;
-    
-    // Limpiar opciones existentes (excepto la primera)
-    while (selectorCarrera.options.length > 1) {
-        selectorCarrera.remove(1);
-    }
-    
-    // Agregar las carreras disponibles
-    carrerasDisponibles.forEach(carrera => {
-        const option = document.createElement('option');
-        option.value = carrera.id;
-        option.textContent = carrera.nombre;
-        selectorCarrera.appendChild(option);
-    });
-}
-
-/**
- * Agrega una carrera seleccionada a la lista de carreras
- */
-function agregarCarreraSeleccionada() {
-    const selectorCarrera = document.getElementById('selector-carrera');
-    const carrerasSeleccionadasContainer = document.getElementById('carreras-seleccionadas');
-    const inputCarreras = document.getElementById('carreras-encuesta');
-    
-    if (!selectorCarrera || !carrerasSeleccionadasContainer || !inputCarreras) return;
-    
-    const carreraId = selectorCarrera.value;
-    const carreraNombre = selectorCarrera.options[selectorCarrera.selectedIndex].text;
-    
-    // Validar selección
-    if (!carreraId) {
-        mostrarAlerta('Por favor, selecciona una carrera', 'error');
-        return;
-    }
-    
-    // Verificar que no esté duplicada
-    if (carrerasSeleccionadas.some(c => c.id === carreraId)) {
-        mostrarAlerta('Esta carrera ya ha sido seleccionada', 'error');
-        return;
-    }
-    
-    // Agregar a la lista de seleccionadas
-    carrerasSeleccionadas.push({ id: carreraId, nombre: carreraNombre });
-    
-    // Actualizar el DOM
-    actualizarCarrerasSeleccionadasUI();
-    
-    // Resetear el selector
-    selectorCarrera.value = '';
-}
-
-/**
- * Actualiza la UI con las carreras seleccionadas
- */
-function actualizarCarrerasSeleccionadasUI() {
-    const carrerasSeleccionadasContainer = document.getElementById('carreras-seleccionadas');
-    const inputCarreras = document.getElementById('carreras-encuesta');
-    
-    if (!carrerasSeleccionadasContainer || !inputCarreras) return;
-    
-    // Limpiar el contenedor
-    carrerasSeleccionadasContainer.innerHTML = '';
-    
-    // Agregar cada carrera como un "tag"
-    carrerasSeleccionadas.forEach((carrera, index) => {
-        const carreraTag = document.createElement('div');
-        carreraTag.className = 'carrera-tag';
-        carreraTag.innerHTML = `
-            ${carrera.nombre}
-            <span class="eliminar" data-id="${carrera.id}"><i class="fas fa-times"></i></span>
-        `;
         
-        // Configurar evento para eliminar carrera
-        carreraTag.querySelector('.eliminar').addEventListener('click', function() {
-            eliminarCarreraSeleccionada(carrera.id);
-        });
-        
-        carrerasSeleccionadasContainer.appendChild(carreraTag);
-    });
-    
-    // Actualizar el campo oculto con los IDs de las carreras
-    inputCarreras.value = carrerasSeleccionadas.map(c => c.id).join(',');
-}
-
-/**
- * Elimina una carrera de la lista de seleccionadas
- */
-function eliminarCarreraSeleccionada(carreraId) {
-    // Filtrar la carrera seleccionada
-    carrerasSeleccionadas = carrerasSeleccionadas.filter(c => c.id !== carreraId);
-    
-    // Actualizar la UI
-    actualizarCarrerasSeleccionadasUI();
-}
-
-/**
- * Carga las encuestas existentes desde Firestore (simulado por ahora)
- */
-function cargarEncuestasExistentes() {
-    // Simulación de datos de encuestas para la interfaz
-    const encuestasSimuladas = [
-        {
-            id: 'enc1',
-            nombre: 'Encuesta de Satisfacción Estudiantil',
-            carreraId: 'ing_sistemas',
-            carreraNombre: 'Ingeniería en Sistemas Computacionales',
-            fechaCreacion: new Date('2023-09-15'),
-            modulos: 3,
-            preguntas: 15
-        },
-        {
-            id: 'enc2',
-            nombre: 'Evaluación Docente 2023',
-            carreraId: 'ing_industrial',
-            carreraNombre: 'Ingeniería Industrial',
-            fechaCreacion: new Date('2023-10-05'),
-            modulos: 5,
-            preguntas: 25
-        },
-        {
-            id: 'enc3',
-            nombre: 'Encuesta sobre Infraestructura',
-            carreraId: 'todas',
-            carreraNombre: 'Todas las carreras',
-            fechaCreacion: new Date('2023-11-20'),
-            modulos: 2,
-            preguntas: 10
+        // Configurar eventos
+        if (formEncuesta) {
+            formEncuesta.addEventListener('submit', guardarEncuesta);
         }
-    ];
-    
-    // Mostrar las encuestas en la tabla
-    mostrarEncuestasEnTabla(encuestasSimuladas);
-}
-
-/**
- * Muestra las encuestas en la tabla
- */
-function mostrarEncuestasEnTabla(encuestas) {
-    const tablaEncuestas = document.getElementById('cuerpo-tabla-encuestas');
-    if (!tablaEncuestas) return;
-    
-    // Limpiar la tabla
-    tablaEncuestas.innerHTML = '';
-    
-    if (encuestas.length === 0) {
-        const fila = document.createElement('tr');
-        fila.innerHTML = `<td colspan="6" class="texto-centrado">No hay encuestas disponibles</td>`;
-        tablaEncuestas.appendChild(fila);
-        return;
+        
+        if (btnCancelarEncuesta) {
+            btnCancelarEncuesta.addEventListener('click', cancelarCreacionEncuesta);
+        }
+        
+        if (inputBuscarEncuesta) {
+            inputBuscarEncuesta.addEventListener('input', filtrarEncuestas);
+        }
+        
+        if (selectFiltroCarrera) {
+            selectFiltroCarrera.addEventListener('change', filtrarEncuestas);
+        }
+        
+        // Ocultar el indicador de carga
+        ocultarCargando();
     }
     
-    // Agregar cada encuesta a la tabla
-    encuestas.forEach(encuesta => {
-        const fechaFormateada = encuesta.fechaCreacion.toLocaleDateString();
+    /**
+     * Carga las encuestas existentes desde Firestore
+     */
+    function cargarEncuestasExistentes() {
+        mostrarCargando();
         
-        const fila = document.createElement('tr');
-        fila.innerHTML = `
-            <td>${encuesta.nombre}</td>
-            <td>${encuesta.carreraNombre}</td>
-            <td>${fechaFormateada}</td>
-            <td>${encuesta.modulos}</td>
-            <td>${encuesta.preguntas}</td>
-            <td>
-                <button class="btn-accion btn-editar" data-id="${encuesta.id}"><i class="fas fa-edit"></i> Editar</button>
-                <button class="btn-accion btn-eliminar" data-id="${encuesta.id}"><i class="fas fa-trash"></i> Eliminar</button>
-                <button class="btn-accion btn-ver" data-id="${encuesta.id}"><i class="fas fa-eye"></i> Ver</button>
-            </td>
-        `;
+        // Limpiar la lista de encuestas
+        if (listaEncuestas) {
+            listaEncuestas.innerHTML = '';
+        }
         
-        // Configurar eventos para los botones
-        fila.querySelector('.btn-editar').addEventListener('click', function() {
-            editarEncuesta(encuesta.id);
+        // Referencia a la colección de encuestas en Firestore
+        const encuestasRef = firebase.firestore().collection('encuestascreadas');
+        
+        // Obtener todas las encuestas
+        encuestasRef.get()
+            .then((snapshot) => {
+                if (snapshot.empty) {
+                    listaEncuestas.innerHTML = '<tr><td colspan="4">No hay encuestas disponibles</td></tr>';
+                    ocultarCargando();
+                    return;
+                }
+                
+                // Cargar carreras para mostrar nombres en lugar de IDs
+                const carrerasRef = firebase.firestore().collection('carreras');
+                carrerasRef.get()
+                    .then((carrerasSnapshot) => {
+                        const mapeoCarreras = {};
+                        carrerasSnapshot.forEach((doc) => {
+                            const carrera = doc.data();
+                            mapeoCarreras[doc.id] = carrera.nombre;
+                        });
+                        
+                        // Mostrar encuestas en la tabla
+                        mostrarEncuestasEnTabla(snapshot, mapeoCarreras);
+                        ocultarCargando();
+                    })
+                    .catch((error) => {
+                        console.error('Error al obtener carreras:', error);
+                        mostrarAlerta('Error al cargar las carreras', 'error');
+                        ocultarCargando();
+                    });
+            })
+            .catch((error) => {
+                console.error('Error al obtener encuestas:', error);
+                mostrarAlerta('Error al cargar las encuestas', 'error');
+                ocultarCargando();
+            });
+    }
+    
+    /**
+     * Muestra las encuestas en la tabla
+     */
+    function mostrarEncuestasEnTabla(snapshot, mapeoCarreras) {
+        listaEncuestas.innerHTML = '';
+        
+        snapshot.forEach((doc) => {
+            const encuesta = doc.data();
+            encuesta.id = doc.id;
+            
+            // Crear fila para la encuesta
+            const tr = document.createElement('tr');
+            
+            // Formatear fecha
+            const fecha = encuesta.fechaCreacion ? new Date(encuesta.fechaCreacion.seconds * 1000) : new Date();
+            const fechaFormateada = fecha.toLocaleDateString('es-MX');
+            
+            // Nombre de la carrera
+            const nombreCarrera = mapeoCarreras[encuesta.carreraId] || 'Carrera no especificada';
+            
+            tr.innerHTML = `
+                <td>${encuesta.nombre}</td>
+                <td>${nombreCarrera}</td>
+                <td>${fechaFormateada}</td>
+                <td>
+                    <div class="acciones-encuesta">
+                        <button type="button" class="btn-accion btn-editar" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn-accion btn-eliminar" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            // Configurar eventos para los botones
+            const btnEditar = tr.querySelector('.btn-editar');
+            const btnEliminar = tr.querySelector('.btn-eliminar');
+            
+            if (btnEditar) {
+                btnEditar.addEventListener('click', () => editarEncuesta(encuesta.id));
+            }
+            
+            if (btnEliminar) {
+                btnEliminar.addEventListener('click', () => eliminarEncuesta(encuesta.id));
+            }
+            
+            listaEncuestas.appendChild(tr);
         });
+    }
+    
+    /**
+     * Filtra las encuestas según los criterios de búsqueda
+     */
+    function filtrarEncuestas() {
+        const textoBusqueda = inputBuscarEncuesta.value.toLowerCase();
+        const carreraFiltro = selectFiltroCarrera.value;
         
-        fila.querySelector('.btn-eliminar').addEventListener('click', function() {
-            eliminarEncuesta(encuesta.id);
+        const filas = listaEncuestas.querySelectorAll('tr');
+        
+        filas.forEach((fila) => {
+            const nombre = fila.cells[0].textContent.toLowerCase();
+            const carrera = fila.cells[1].textContent.toLowerCase();
+            
+            const coincideTexto = nombre.includes(textoBusqueda);
+            const coincideCarrera = !carreraFiltro || carrera === carreraFiltro.toLowerCase();
+            
+            fila.style.display = (coincideTexto && coincideCarrera) ? '' : 'none';
         });
-        
-        fila.querySelector('.btn-ver').addEventListener('click', function() {
-            verEncuesta(encuesta.id);
-        });
-        
-        tablaEncuestas.appendChild(fila);
-    });
-}
-
-/**
- * Filtra las encuestas según los criterios seleccionados
- */
-function filtrarEncuestas() {
-    const filtroTexto = document.getElementById('filtro-texto').value.toLowerCase();
-    const filtroCarrera = document.getElementById('filtro-carrera').value;
-    
-    // Filtrar encuestas (simulación)
-    const encuestasFiltradas = encuestasActivas.filter(encuesta => {
-        // Filtrar por texto
-        const coincideTexto = !filtroTexto || 
-            encuesta.nombre.toLowerCase().includes(filtroTexto);
-        
-        // Filtrar por carrera
-        const coincideCarrera = !filtroCarrera || 
-            encuesta.carreraId === filtroCarrera;
-        
-        return coincideTexto && coincideCarrera;
-    });
-    
-    // Actualizar la tabla con los resultados filtrados
-    mostrarEncuestasEnTabla(encuestasFiltradas);
-}
-
-/**
- * Editar una encuesta existente
- */
-function editarEncuesta(encuestaId) {
-    console.log(`Editando encuesta ${encuestaId}`);
-    
-    // Por ahora solo mostraremos un mensaje
-    mostrarAlerta('Función de edición en desarrollo', 'info');
-}
-
-/**
- * Eliminar una encuesta
- */
-function eliminarEncuesta(encuestaId) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta encuesta?')) {
-        console.log(`Eliminando encuesta ${encuestaId}`);
-        
-        // Simular eliminación
-        mostrarAlerta('Encuesta eliminada correctamente', 'success');
-        
-        // Recargar tabla
-        cargarEncuestasExistentes();
-    }
-}
-
-/**
- * Ver detalles de una encuesta
- */
-function verEncuesta(encuestaId) {
-    console.log(`Viendo encuesta ${encuestaId}`);
-    
-    // Por ahora solo mostraremos un mensaje
-    mostrarAlerta('Función de visualización en desarrollo', 'info');
-}
-
-/**
- * Guardar una nueva encuesta
- */
-function guardarEncuesta() {
-    // Obtener datos del formulario
-    const nombreEncuesta = document.getElementById('nombre-encuesta').value.trim();
-    const descripcionEncuesta = document.getElementById('descripcion-encuesta').value.trim();
-    
-    // Validaciones básicas
-    if (!nombreEncuesta) {
-        mostrarAlerta('El nombre de la encuesta es obligatorio', 'error');
-        return;
     }
     
-    if (carrerasSeleccionadas.length === 0) {
-        mostrarAlerta('Debes seleccionar al menos una carrera', 'error');
-        return;
+    /**
+     * Guarda la encuesta en Firestore
+     */
+    function guardarEncuesta(event) {
+        event.preventDefault();
+        
+        // Validar formulario
+        const nombreEncuesta = document.getElementById('nombre-encuesta').value.trim();
+        const descripcionEncuesta = document.getElementById('descripcion-encuesta').value.trim();
+        const carreraEncuesta = document.getElementById('carrera-encuesta').value;
+        
+        if (!nombreEncuesta) {
+            mostrarAlerta('Debes ingresar un nombre para la encuesta', 'error');
+            return;
+        }
+        
+        if (!carreraEncuesta) {
+            mostrarAlerta('Debes seleccionar una carrera', 'error');
+            return;
+        }
+        
+        // Verificar que haya al menos un módulo
+        if (!window.obtenerModulos || window.obtenerModulos().length === 0) {
+            mostrarAlerta('Debes crear al menos un módulo para la encuesta', 'error');
+            return;
+        }
+        
+        // Mostrar indicador de carga
+        mostrarCargando();
+        
+        // Crear objeto de encuesta
+        const encuesta = {
+            nombre: nombreEncuesta,
+            descripcion: descripcionEncuesta,
+            carreraId: carreraEncuesta,
+            fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
+            modulos: window.obtenerModulos()
+        };
+        
+        // Guardar en Firestore
+        const encuestasRef = firebase.firestore().collection('encuestascreadas');
+        
+        if (modoEdicion && encuestaActual) {
+            // Actualizar encuesta existente
+            encuestasRef.doc(encuestaActual).update(encuesta)
+                .then(() => {
+                    mostrarAlerta('Encuesta actualizada correctamente', 'success');
+                    resetearFormulario();
+                    cargarEncuestasExistentes();
+                })
+                .catch((error) => {
+                    console.error('Error al actualizar la encuesta:', error);
+                    mostrarAlerta('Error al actualizar la encuesta', 'error');
+                })
+                .finally(() => {
+                    ocultarCargando();
+                });
+        } else {
+            // Crear nueva encuesta
+            encuestasRef.add(encuesta)
+                .then(() => {
+                    mostrarAlerta('Encuesta creada correctamente', 'success');
+                    resetearFormulario();
+                    cargarEncuestasExistentes();
+                })
+                .catch((error) => {
+                    console.error('Error al crear la encuesta:', error);
+                    mostrarAlerta('Error al crear la encuesta', 'error');
+                })
+                .finally(() => {
+                    ocultarCargando();
+                });
+        }
     }
     
-    // Simulación de guardado
-    console.log('Guardando encuesta:', {
-        nombre: nombreEncuesta,
-        descripcion: descripcionEncuesta,
-        carreras: carrerasSeleccionadas
-    });
-    
-    // Por ahora solo mostraremos un mensaje de éxito
-    mostrarAlerta('Encuesta guardada correctamente', 'success');
-    
-    // Resetear formulario
-    resetearFormulario();
-    
-    // Recargar encuestas
-    cargarEncuestasExistentes();
-}
-
-/**
- * Cancela la creación de encuesta y resetea el formulario
- */
-function cancelarCreacionEncuesta() {
-    if (confirm('¿Estás seguro de que deseas cancelar? Se perderán todos los datos no guardados.')) {
-        resetearFormulario();
+    /**
+     * Edita una encuesta existente
+     */
+    function editarEncuesta(encuestaId) {
+        mostrarCargando();
+        
+        // Obtener datos de la encuesta
+        firebase.firestore().collection('encuestascreadas').doc(encuestaId)
+            .get()
+            .then((doc) => {
+                if (doc.exists) {
+                    const encuesta = doc.data();
+                    encuestaActual = encuestaId;
+                    modoEdicion = true;
+                    
+                    // Llenar formulario
+                    document.getElementById('nombre-encuesta').value = encuesta.nombre || '';
+                    document.getElementById('descripcion-encuesta').value = encuesta.descripcion || '';
+                    document.getElementById('carrera-encuesta').value = encuesta.carreraId || '';
+                    
+                    // Cargar módulos
+                    if (window.cargarModulosExistentes) {
+                        window.cargarModulosExistentes(encuesta.modulos || []);
+                    }
+                    
+                    // Cambiar texto del botón
+                    btnGuardarEncuesta.textContent = 'Actualizar encuesta';
+                    
+                    // Hacer scroll al formulario
+                    document.querySelector('.seccion-crear-encuesta').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    mostrarAlerta('No se encontró la encuesta', 'error');
+                }
+            })
+            .catch((error) => {
+                console.error('Error al obtener la encuesta:', error);
+                mostrarAlerta('Error al cargar la encuesta', 'error');
+            })
+            .finally(() => {
+                ocultarCargando();
+            });
     }
-}
-
-/**
- * Resetea el formulario de creación de encuesta
- */
-function resetearFormulario() {
-    document.getElementById('form-encuesta').reset();
-    carrerasSeleccionadas = [];
-    actualizarCarrerasSeleccionadasUI();
     
-    // Limpiar módulos (esto se implementará completamente en el gestor de módulos)
-    document.getElementById('lista-modulos').innerHTML = '';
-}
-
-/**
- * Muestra una alerta al usuario
- */
-function mostrarAlerta(mensaje, tipo = 'info') {
-    // Por ahora usaremos alert básico
-    alert(`${tipo.toUpperCase()}: ${mensaje}`);
-}
-
-// Exportar funciones que necesitan ser accesibles desde otros módulos
-window.carrerasDisponibles = carrerasDisponibles;
-window.carrerasSeleccionadas = carrerasSeleccionadas;
-window.mostrarAlerta = mostrarAlerta;
+    /**
+     * Elimina una encuesta
+     */
+    function eliminarEncuesta(encuestaId) {
+        if (confirm('¿Estás seguro de que deseas eliminar esta encuesta?')) {
+            mostrarCargando();
+            
+            firebase.firestore().collection('encuestascreadas').doc(encuestaId)
+                .delete()
+                .then(() => {
+                    mostrarAlerta('Encuesta eliminada correctamente', 'success');
+                    cargarEncuestasExistentes();
+                })
+                .catch((error) => {
+                    console.error('Error al eliminar la encuesta:', error);
+                    mostrarAlerta('Error al eliminar la encuesta', 'error');
+                })
+                .finally(() => {
+                    ocultarCargando();
+                });
+        }
+    }
+    
+    /**
+     * Cancela la creación/edición de la encuesta
+     */
+    function cancelarCreacionEncuesta() {
+        if (confirm('¿Estás seguro de que deseas cancelar? Los cambios no guardados se perderán.')) {
+            resetearFormulario();
+        }
+    }
+    
+    /**
+     * Resetea el formulario de encuesta
+     */
+    function resetearFormulario() {
+        formEncuesta.reset();
+        encuestaActual = null;
+        modoEdicion = false;
+        btnGuardarEncuesta.textContent = 'Guardar encuesta';
+        
+        // Resetear módulos
+        if (window.resetearModulos) {
+            window.resetearModulos();
+        }
+    }
+    
+    /**
+     * Muestra el indicador de carga
+     */
+    function mostrarCargando() {
+        const cargando = document.getElementById('cargando');
+        if (cargando) {
+            cargando.style.display = 'flex';
+        }
+    }
+    
+    /**
+     * Oculta el indicador de carga
+     */
+    function ocultarCargando() {
+        const cargando = document.getElementById('cargando');
+        if (cargando) {
+            cargando.style.display = 'none';
+        }
+    }
+    
+    /**
+     * Muestra una alerta al usuario
+     */
+    function mostrarAlerta(mensaje, tipo = 'info') {
+        // Crear elemento de alerta
+        const alerta = document.createElement('div');
+        alerta.className = `alerta alerta-${tipo}`;
+        alerta.textContent = mensaje;
+        
+        // Agregar al DOM
+        document.body.appendChild(alerta);
+        
+        // Eliminar después de 3 segundos
+        setTimeout(() => {
+            alerta.remove();
+        }, 3000);
+    }
+    
+    // Exportar funciones para uso en otros módulos
+    window.gestorEncuestas = {
+        inicializar: inicializarGestorEncuestas,
+        mostrarCargando: mostrarCargando,
+        ocultarCargando: ocultarCargando,
+        mostrarAlerta: mostrarAlerta
+    };
+    
+    // Inicializar cuando el DOM esté cargado
+    document.addEventListener('DOMContentLoaded', inicializarGestorEncuestas);
+})();

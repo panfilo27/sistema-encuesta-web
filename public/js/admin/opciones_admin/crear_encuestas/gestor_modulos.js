@@ -1,304 +1,389 @@
 /**
- * Gestor de Módulos - Sistema de Encuestas
- * 
- * Este archivo maneja la creación, edición y eliminación de módulos en encuestas.
- * Un módulo es un grupo temático de preguntas dentro de una encuesta.
+ * Gestor de Módulos
+ * Gestiona la creación, edición y eliminación de módulos para las encuestas
  */
 
-// Variables globales
-let modulosEncuesta = [];
-let moduloEnEdicion = null;
-
-/**
- * Inicializa el gestor de módulos
- */
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Inicializando gestor de módulos...');
+// Evitar redeclaraciones usando un patrón de módulo autoejecutable
+(function() {
+    // Variables globales
+    let modulos = [];
+    let moduloActualId = null;
+    let modoEdicionModulo = false;
     
-    // Configurar eventos para el modal de módulos
+    // Referencias a elementos del DOM
+    const tabsModulos = document.getElementById('tabs-modulos');
+    const btnAgregarModulo = document.getElementById('btn-agregar-modulo');
+    const contenidoModulo = document.getElementById('contenido-modulo');
     const modalModulo = document.getElementById('modal-modulo');
-    if (modalModulo) {
+    const formModulo = document.getElementById('form-modulo');
+    const btnCancelarModulo = document.getElementById('btn-cancelar-modulo');
+    const btnGuardarModulo = document.getElementById('btn-guardar-modulo');
+    
+    /**
+     * Inicializa el gestor de módulos
+     */
+    function inicializarGestorModulos() {
+        console.log('Inicializando gestor de módulos...');
+        
+        // Configurar eventos
+        if (btnAgregarModulo) {
+            btnAgregarModulo.addEventListener('click', mostrarModalModulo);
+        }
+        
+        if (formModulo) {
+            formModulo.addEventListener('submit', guardarModulo);
+        }
+        
+        if (btnCancelarModulo) {
+            btnCancelarModulo.addEventListener('click', cerrarModalModulo);
+        }
+        
+        // Configurar eventos para cerrar el modal
         const cerrarModal = modalModulo.querySelector('.cerrar-modal');
         if (cerrarModal) {
             cerrarModal.addEventListener('click', cerrarModalModulo);
         }
         
-        const btnCancelarModulo = document.getElementById('btn-cancelar-modulo');
-        if (btnCancelarModulo) {
-            btnCancelarModulo.addEventListener('click', cerrarModalModulo);
+        // Ajustar max-height para la lista de tabs si hay muchos módulos
+        window.addEventListener('resize', ajustarAlturaTabsModulos);
+    }
+    
+    /**
+     * Muestra el modal para crear/editar un módulo
+     */
+    function mostrarModalModulo(moduloId = null) {
+        // Resetear formulario
+        formModulo.reset();
+        
+        // Cambiar título del modal
+        const tituloModal = document.getElementById('titulo-modal-modulo');
+        
+        if (moduloId) {
+            // Modo edición
+            modoEdicionModulo = true;
+            moduloActualId = moduloId;
+            
+            // Buscar el módulo
+            const modulo = modulos.find(m => m.id === moduloId);
+            
+            if (modulo) {
+                // Llenar formulario
+                document.getElementById('nombre-modulo').value = modulo.nombre || '';
+                document.getElementById('descripcion-modulo').value = modulo.descripcion || '';
+                
+                // Actualizar título
+                if (tituloModal) {
+                    tituloModal.textContent = 'Editar módulo';
+                }
+            }
+        } else {
+            // Modo creación
+            modoEdicionModulo = false;
+            moduloActualId = null;
+            
+            // Actualizar título
+            if (tituloModal) {
+                tituloModal.textContent = 'Nuevo módulo';
+            }
         }
         
-        const formModulo = document.getElementById('form-modulo');
-        if (formModulo) {
-            formModulo.addEventListener('submit', function(e) {
-                e.preventDefault();
-                guardarModulo();
-            });
+        // Mostrar modal
+        modalModulo.style.display = 'flex';
+    }
+    
+    /**
+     * Cierra el modal de módulo
+     */
+    function cerrarModalModulo() {
+        modalModulo.style.display = 'none';
+        modoEdicionModulo = false;
+        moduloActualId = null;
+    }
+    
+    /**
+     * Guarda el módulo
+     */
+    function guardarModulo(event) {
+        event.preventDefault();
+        
+        // Obtener datos del formulario
+        const nombreModulo = document.getElementById('nombre-modulo').value.trim();
+        const descripcionModulo = document.getElementById('descripcion-modulo').value.trim();
+        
+        // Validar
+        if (!nombreModulo) {
+            if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                window.gestorEncuestas.mostrarAlerta('El nombre del módulo es obligatorio', 'error');
+            }
+            return;
         }
-    }
-});
-
-/**
- * Muestra el modal para crear o editar un módulo
- * @param {string} moduloId - ID del módulo a editar (null si es nuevo)
- */
-function mostrarModalModulo(moduloId = null) {
-    console.log('Mostrando modal de módulo:', moduloId);
-    
-    // Limpiar el formulario
-    const formModulo = document.getElementById('form-modulo');
-    if (formModulo) {
-        formModulo.reset();
-    }
-    
-    // Si estamos editando un módulo existente, cargar sus datos
-    if (moduloId) {
-        moduloEnEdicion = moduloId;
-        const modulo = modulosEncuesta.find(m => m.id === moduloId);
-        if (modulo) {
-            document.getElementById('nombre-modulo').value = modulo.nombre || '';
-            document.getElementById('descripcion-modulo').value = modulo.descripcion || '';
-        }
-    } else {
-        moduloEnEdicion = null;
-    }
-    
-    // Mostrar el modal
-    const modal = document.getElementById('modal-modulo');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
-}
-
-/**
- * Cierra el modal de módulo
- */
-function cerrarModalModulo() {
-    const modal = document.getElementById('modal-modulo');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    moduloEnEdicion = null;
-}
-
-/**
- * Guarda el módulo actual
- */
-function guardarModulo() {
-    // Obtener datos del formulario
-    const nombre = document.getElementById('nombre-modulo').value.trim();
-    const descripcion = document.getElementById('descripcion-modulo').value.trim();
-    
-    // Validaciones básicas
-    if (!nombre) {
-        window.mostrarAlerta('El nombre del módulo es obligatorio', 'error');
-        return;
-    }
-    
-    // Crear o actualizar el módulo
-    if (moduloEnEdicion) {
-        // Actualizar módulo existente
-        const indice = modulosEncuesta.findIndex(m => m.id === moduloEnEdicion);
-        if (indice !== -1) {
-            modulosEncuesta[indice].nombre = nombre;
-            modulosEncuesta[indice].descripcion = descripcion;
-            
-            // Actualizar en la interfaz
-            actualizarModuloEnUI(modulosEncuesta[indice]);
-        }
-    } else {
-        // Crear nuevo módulo
-        const nuevoModulo = {
-            id: generarId(),
-            nombre: nombre,
-            descripcion: descripcion,
-            preguntas: [],
-            orden: modulosEncuesta.length + 1
+        
+        // Crear objeto del módulo
+        const modulo = {
+            nombre: nombreModulo,
+            descripcion: descripcionModulo,
+            preguntas: []
         };
         
-        modulosEncuesta.push(nuevoModulo);
-        
-        // Agregar a la interfaz
-        renderizarModulo(nuevoModulo);
-    }
-    
-    // Cerrar modal
-    cerrarModalModulo();
-    
-    // Mostrar mensaje
-    window.mostrarAlerta('Módulo guardado correctamente', 'success');
-}
-
-/**
- * Renderiza un módulo en la interfaz
- * @param {Object} modulo - Datos del módulo a renderizar
- */
-function renderizarModulo(modulo) {
-    const listaModulos = document.getElementById('lista-modulos');
-    if (!listaModulos) return;
-    
-    // Verificar si ya existe el elemento para este módulo
-    let moduloElement = document.querySelector(`.modulo-encuesta[data-modulo-id="${modulo.id}"]`);
-    
-    // Si no existe, crear nuevo elemento
-    if (!moduloElement) {
-        moduloElement = document.createElement('div');
-        moduloElement.className = 'modulo-encuesta';
-        moduloElement.dataset.moduloId = modulo.id;
-        listaModulos.appendChild(moduloElement);
-    }
-    
-    // Actualizar contenido
-    moduloElement.innerHTML = `
-        <div class="encabezado-modulo">
-            <h4>${modulo.nombre}</h4>
-            <div class="acciones-modulo">
-                <button type="button" class="btn-agregar-pregunta" title="Agregar Pregunta">
-                    <i class="fas fa-plus"></i> Pregunta
-                </button>
-                <button type="button" class="btn-editar-modulo" title="Editar Módulo">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button type="button" class="btn-eliminar-modulo" title="Eliminar Módulo">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-        <div class="detalles-modulo">
-            <p>${modulo.descripcion || 'Sin descripción'}</p>
-            <p class="contador-preguntas">
-                <i class="fas fa-question-circle"></i> 
-                ${modulo.preguntas.length} preguntas
-            </p>
-        </div>
-        <div class="lista-preguntas" id="lista-preguntas-${modulo.id}">
-            ${generarHTMLPreguntas(modulo.preguntas)}
-        </div>
-    `;
-    
-    // Configurar eventos para los botones
-    configurarBotonesModulo(moduloElement, modulo.id);
-}
-
-/**
- * Actualiza un módulo existente en la interfaz
- * @param {Object} modulo - Datos del módulo actualizado
- */
-function actualizarModuloEnUI(modulo) {
-    // Simplemente volver a renderizar
-    renderizarModulo(modulo);
-}
-
-/**
- * Configura los eventos para los botones de un módulo
- * @param {HTMLElement} moduloElement - Elemento del módulo
- * @param {string} moduloId - ID del módulo
- */
-function configurarBotonesModulo(moduloElement, moduloId) {
-    // Botón de agregar pregunta
-    const btnAgregarPregunta = moduloElement.querySelector('.btn-agregar-pregunta');
-    if (btnAgregarPregunta) {
-        btnAgregarPregunta.addEventListener('click', function() {
-            // Esta función se implementará en gestor_preguntas.js
-            if (typeof mostrarModalPregunta === 'function') {
-                mostrarModalPregunta(moduloId);
-            } else {
-                console.warn('Función mostrarModalPregunta no disponible');
+        // Asignar ID si es nuevo módulo, o usar el existente si es edición
+        if (modoEdicionModulo && moduloActualId) {
+            modulo.id = moduloActualId;
+            
+            // Actualizar el módulo existente
+            const indice = modulos.findIndex(m => m.id === moduloActualId);
+            if (indice !== -1) {
+                // Preservar las preguntas existentes
+                modulo.preguntas = modulos[indice].preguntas || [];
+                modulos[indice] = modulo;
             }
-        });
-    }
-    
-    // Botón de editar módulo
-    const btnEditarModulo = moduloElement.querySelector('.btn-editar-modulo');
-    if (btnEditarModulo) {
-        btnEditarModulo.addEventListener('click', function() {
-            mostrarModalModulo(moduloId);
-        });
-    }
-    
-    // Botón de eliminar módulo
-    const btnEliminarModulo = moduloElement.querySelector('.btn-eliminar-modulo');
-    if (btnEliminarModulo) {
-        btnEliminarModulo.addEventListener('click', function() {
-            eliminarModulo(moduloId);
-        });
-    }
-}
-
-/**
- * Elimina un módulo
- * @param {string} moduloId - ID del módulo a eliminar
- */
-function eliminarModulo(moduloId) {
-    if (confirm('¿Estás seguro de que deseas eliminar este módulo y todas sus preguntas?')) {
-        // Eliminar el módulo del array
-        modulosEncuesta = modulosEncuesta.filter(m => m.id !== moduloId);
-        
-        // Eliminar de la interfaz
-        const moduloElement = document.querySelector(`.modulo-encuesta[data-modulo-id="${moduloId}"]`);
-        if (moduloElement) {
-            moduloElement.remove();
+        } else {
+            // Generar ID único para el nuevo módulo
+            modulo.id = 'modulo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            // Verificar límite de módulos
+            if (modulos.length >= 10) {
+                if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                    window.gestorEncuestas.mostrarAlerta('No se pueden agregar más de 10 módulos', 'error');
+                }
+                return;
+            }
+            
+            // Agregar a la lista de módulos
+            modulos.push(modulo);
         }
         
-        // Mostrar mensaje
-        window.mostrarAlerta('Módulo eliminado correctamente', 'success');
-    }
-}
-
-/**
- * Genera el HTML para las preguntas de un módulo
- * @param {Array} preguntas - Lista de preguntas del módulo
- * @returns {string} HTML generado
- */
-function generarHTMLPreguntas(preguntas) {
-    if (!preguntas || preguntas.length === 0) {
-        return '<p class="sin-preguntas">No hay preguntas en este módulo</p>';
+        // Actualizar la interfaz
+        actualizarTabsModulos();
+        
+        // Seleccionar el módulo recién creado/editado
+        seleccionarModulo(modulo.id);
+        
+        // Cerrar el modal
+        cerrarModalModulo();
+        
+        // Mostrar mensaje de éxito
+        if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+            window.gestorEncuestas.mostrarAlerta(
+                modoEdicionModulo ? 'Módulo actualizado correctamente' : 'Módulo creado correctamente',
+                'success'
+            );
+        }
     }
     
-    return preguntas.map((pregunta, index) => `
-        <div class="pregunta" data-pregunta-id="${pregunta.id}">
-            <div class="info-pregunta">
-                <span class="numero-pregunta">${index + 1}</span>
-                <span class="texto-pregunta">${pregunta.texto}</span>
-                <span class="tipo-pregunta">${obtenerTipoPreguntaTexto(pregunta.tipo)}</span>
-            </div>
-            <div class="acciones-pregunta">
-                <button type="button" class="btn-editar-pregunta" title="Editar Pregunta">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button type="button" class="btn-eliminar-pregunta" title="Eliminar Pregunta">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-/**
- * Obtiene el texto descriptivo para un tipo de pregunta
- * @param {string} tipo - Tipo de pregunta (abierta, opcion_multiple, etc)
- * @returns {string} Texto descriptivo
- */
-function obtenerTipoPreguntaTexto(tipo) {
-    const tipos = {
-        'abierta': 'Respuesta abierta',
-        'opcion_multiple': 'Opción múltiple'
-    };
+    /**
+     * Actualiza la visualización de los tabs de módulos
+     */
+    function actualizarTabsModulos() {
+        if (!tabsModulos) return;
+        
+        // Limpiar tabs existentes
+        tabsModulos.innerHTML = '';
+        
+        // Crear tabs para cada módulo
+        modulos.forEach((modulo) => {
+            const tab = document.createElement('div');
+            tab.className = 'tab-modulo';
+            tab.dataset.moduloId = modulo.id;
+            tab.textContent = modulo.nombre;
+            
+            // Agregar evento de clic
+            tab.addEventListener('click', () => seleccionarModulo(modulo.id));
+            
+            tabsModulos.appendChild(tab);
+        });
+        
+        // Ajustar altura de los tabs
+        ajustarAlturaTabsModulos();
+        
+        // Si no hay tabs activos pero hay módulos, seleccionar el primero
+        if (modulos.length > 0 && !document.querySelector('.tab-modulo.activo')) {
+            seleccionarModulo(modulos[0].id);
+        }
+        
+        // Actualizar visibilidad del botón de agregar módulo
+        if (btnAgregarModulo) {
+            btnAgregarModulo.style.display = modulos.length >= 10 ? 'none' : 'flex';
+        }
+    }
     
-    return tipos[tipo] || 'Desconocido';
-}
-
-/**
- * Genera un ID único para un nuevo elemento
- * @returns {string} ID generado
- */
-function generarId() {
-    return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
-// Exportar funciones que se usarán en otros módulos
-window.mostrarModalModulo = mostrarModalModulo;
-window.cerrarModalModulo = cerrarModalModulo;
-window.modulosEncuesta = modulosEncuesta;
-window.renderizarModulo = renderizarModulo;
-window.generarId = generarId;
+    /**
+     * Selecciona un módulo y muestra su contenido
+     */
+    function seleccionarModulo(moduloId) {
+        if (!tabsModulos || !contenidoModulo) return;
+        
+        // Desactivar todos los tabs
+        tabsModulos.querySelectorAll('.tab-modulo').forEach(tab => {
+            tab.classList.remove('activo');
+        });
+        
+        // Activar el tab seleccionado
+        const tabSeleccionado = tabsModulos.querySelector(`.tab-modulo[data-modulo-id="${moduloId}"]`);
+        if (tabSeleccionado) {
+            tabSeleccionado.classList.add('activo');
+        }
+        
+        // Mostrar contenido del módulo
+        const modulo = modulos.find(m => m.id === moduloId);
+        if (modulo) {
+            moduloActualId = moduloId;
+            
+            // Mostrar contenido del módulo (nombre, descripción y preguntas)
+            mostrarContenidoModulo(modulo);
+        }
+    }
+    
+    /**
+     * Muestra el contenido de un módulo
+     */
+    function mostrarContenidoModulo(modulo) {
+        if (!contenidoModulo) return;
+        
+        // Crear contenido HTML para el módulo
+        let html = `
+            <div class="cabecera-modulo">
+                <h3>${modulo.nombre}</h3>
+                <div class="acciones-modulo">
+                    <button type="button" class="btn-editar-modulo" title="Editar módulo">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn-eliminar-modulo" title="Eliminar módulo">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="descripcion-modulo">${modulo.descripcion || 'Sin descripción'}</p>
+            
+            <div class="seccion-preguntas">
+                <h4>Preguntas del módulo</h4>
+                <p class="placeholder-preguntas">En desarrollo: Aquí se mostrarán las preguntas del módulo</p>
+                <div class="lista-preguntas" id="lista-preguntas">
+                    <!-- Aquí se cargarán las preguntas -->
+                </div>
+                <button type="button" class="btn-agregar-pregunta" id="btn-agregar-pregunta">
+                    <i class="fas fa-plus"></i> Agregar pregunta
+                </button>
+            </div>
+        `;
+        
+        contenidoModulo.innerHTML = html;
+        
+        // Configurar eventos para los botones
+        const btnEditarModulo = contenidoModulo.querySelector('.btn-editar-modulo');
+        const btnEliminarModulo = contenidoModulo.querySelector('.btn-eliminar-modulo');
+        const btnAgregarPregunta = contenidoModulo.querySelector('#btn-agregar-pregunta');
+        
+        if (btnEditarModulo) {
+            btnEditarModulo.addEventListener('click', () => mostrarModalModulo(modulo.id));
+        }
+        
+        if (btnEliminarModulo) {
+            btnEliminarModulo.addEventListener('click', () => eliminarModulo(modulo.id));
+        }
+        
+        if (btnAgregarPregunta && window.gestorPreguntas && window.gestorPreguntas.mostrarModalPregunta) {
+            btnAgregarPregunta.addEventListener('click', () => window.gestorPreguntas.mostrarModalPregunta());
+        }
+    }
+    
+    /**
+     * Elimina un módulo
+     */
+    function eliminarModulo(moduloId) {
+        if (confirm('¿Estás seguro de que deseas eliminar este módulo? Se eliminarán todas las preguntas asociadas.')) {
+            // Filtrar el módulo de la lista
+            modulos = modulos.filter(m => m.id !== moduloId);
+            
+            // Actualizar interfaz
+            actualizarTabsModulos();
+            
+            // Si no hay módulos, mostrar contenido vacío
+            if (modulos.length === 0) {
+                contenidoModulo.innerHTML = `
+                    <div class="placeholder-modulo">
+                        <p>Selecciona o crea un módulo para comenzar</p>
+                    </div>
+                `;
+                moduloActualId = null;
+            } else {
+                // Seleccionar el primer módulo
+                seleccionarModulo(modulos[0].id);
+            }
+            
+            // Mostrar mensaje de éxito
+            if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                window.gestorEncuestas.mostrarAlerta('Módulo eliminado correctamente', 'success');
+            }
+        }
+    }
+    
+    /**
+     * Ajusta la altura de los tabs de módulos
+     */
+    function ajustarAlturaTabsModulos() {
+        if (!tabsModulos) return;
+        
+        // Asegurarse de que los tabs sean scrollables si hay muchos
+        if (tabsModulos.scrollWidth > tabsModulos.clientWidth) {
+            tabsModulos.style.overflowX = 'auto';
+        } else {
+            tabsModulos.style.overflowX = 'hidden';
+        }
+    }
+    
+    /**
+     * Carga módulos existentes
+     */
+    function cargarModulosExistentes(modulosData) {
+        modulos = modulosData;
+        actualizarTabsModulos();
+        
+        // Seleccionar el primer módulo si existe
+        if (modulos.length > 0) {
+            seleccionarModulo(modulos[0].id);
+        }
+    }
+    
+    /**
+     * Resetea los módulos
+     */
+    function resetearModulos() {
+        modulos = [];
+        moduloActualId = null;
+        modoEdicionModulo = false;
+        
+        actualizarTabsModulos();
+        
+        // Mostrar contenido vacío
+        if (contenidoModulo) {
+            contenidoModulo.innerHTML = `
+                <div class="placeholder-modulo">
+                    <p>Selecciona o crea un módulo para comenzar</p>
+                </div>
+            `;
+        }
+    }
+    
+    /**
+     * Retorna la lista de módulos
+     */
+    function obtenerModulos() {
+        return modulos;
+    }
+    
+    /**
+     * Retorna el ID del módulo actual
+     */
+    function obtenerModuloActualId() {
+        return moduloActualId;
+    }
+    
+    // Exportar funciones para uso en otros módulos
+    window.cargarModulosExistentes = cargarModulosExistentes;
+    window.resetearModulos = resetearModulos;
+    window.obtenerModulos = obtenerModulos;
+    window.obtenerModuloActualId = obtenerModuloActualId;
+    
+    // Inicializar cuando el DOM esté cargado
+    document.addEventListener('DOMContentLoaded', inicializarGestorModulos);
+})();

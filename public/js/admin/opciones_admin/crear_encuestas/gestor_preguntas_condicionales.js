@@ -1,346 +1,398 @@
 /**
- * Gestor de Preguntas Condicionales - Sistema de Encuestas
- * 
- * Este archivo maneja la creación y gestión de preguntas condicionales (subpreguntas)
- * que aparecen dependiendo de la respuesta seleccionada en una pregunta de opción múltiple.
+ * Gestor de Preguntas Condicionales
+ * Gestiona la creación, edición y eliminación de preguntas condicionales que dependen de opciones específicas
  */
 
-// Variables globales
-let preguntasCondicionales = {};  // Estructura: { 'preguntaId_opcionIndice': { datos de pregunta } }
-let preguntaParentId = null;      // ID de la pregunta principal
-let opcionParentIndex = null;     // Índice de la opción en la pregunta principal
-
-/**
- * Inicializa el gestor de preguntas condicionales
- */
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Inicializando gestor de preguntas condicionales...');
+// Evitar redeclaraciones usando un patrón de módulo autoejecutable
+(function() {
+    // Variables globales
+    let preguntasCondicionales = {}; // Formato: {preguntaId_opcionIndice: {datos de la pregunta}}
+    let preguntaParentId = null;
+    let opcionParentIndex = null;
     
-    // Configurar eventos para el modal de preguntas condicionales
-    const modalPreguntaCondicional = document.getElementById('modal-pregunta-condicional');
-    if (modalPreguntaCondicional) {
-        // Cerrar modal
-        const cerrarModal = modalPreguntaCondicional.querySelector('.cerrar-modal');
-        if (cerrarModal) {
-            cerrarModal.addEventListener('click', cerrarModalPreguntaCondicional);
-        }
+    /**
+     * Inicializa el gestor de preguntas condicionales
+     */
+    function inicializarGestorPreguntasCondicionales() {
+        console.log('Inicializando gestor de preguntas condicionales...');
         
-        // Botón cancelar
-        const btnCancelar = document.getElementById('btn-cancelar-pregunta-condicional');
-        if (btnCancelar) {
-            btnCancelar.addEventListener('click', cerrarModalPreguntaCondicional);
-        }
+        // Verificar si existe el modal, si no, crearlo
+        let modalPreguntaCondicional = document.getElementById('modal-pregunta-condicional');
         
-        // Formulario
-        const formPreguntaCondicional = document.getElementById('form-pregunta-condicional');
-        if (formPreguntaCondicional) {
-            formPreguntaCondicional.addEventListener('submit', function(e) {
-                e.preventDefault();
-                guardarPreguntaCondicional();
-            });
-        }
-        
-        // Cambio de tipo de pregunta
-        const tipoPreguntaCondicional = document.getElementById('tipo-pregunta-condicional');
-        if (tipoPreguntaCondicional) {
-            tipoPreguntaCondicional.addEventListener('change', toggleOpcionesCondicional);
-        }
-        
-        // Botón para agregar opción
-        const btnAgregarOpcionCondicional = document.getElementById('btn-agregar-opcion-condicional');
-        if (btnAgregarOpcionCondicional) {
-            btnAgregarOpcionCondicional.addEventListener('click', agregarOpcionRespuestaCondicional);
-        }
-    }
-});
-
-/**
- * Muestra el modal para configurar una pregunta condicional
- * @param {string} preguntaId - ID de la pregunta principal
- * @param {number} opcionIndice - Índice de la opción seleccionada
- */
-function mostrarModalPreguntaCondicional(preguntaId, opcionIndice) {
-    console.log(`Mostrando modal para pregunta ${preguntaId}, opción ${opcionIndice}`);
-    
-    // Guardar referencias
-    preguntaParentId = preguntaId;
-    opcionParentIndex = opcionIndice;
-    
-    // Obtener el texto de la opción para mostrar en el título
-    const opcionTexto = window.opcionesPregunta[preguntaId][opcionIndice];
-    const tituloModal = document.getElementById('titulo-pregunta-condicional');
-    if (tituloModal && opcionTexto) {
-        tituloModal.textContent = `Pregunta condicional para: "${opcionTexto}"`;
-    }
-    
-    // Limpiar formulario
-    const formPreguntaCondicional = document.getElementById('form-pregunta-condicional');
-    if (formPreguntaCondicional) {
-        formPreguntaCondicional.reset();
-    }
-    
-    // Limpiar opciones
-    const listaOpcionesCondicional = document.getElementById('lista-opciones-condicional');
-    if (listaOpcionesCondicional) {
-        listaOpcionesCondicional.innerHTML = '';
-    }
-    
-    // Ocultar sección de opciones inicialmente
-    const seccionOpcionesCondicional = document.getElementById('seccion-opciones-condicional');
-    if (seccionOpcionesCondicional) {
-        seccionOpcionesCondicional.classList.add('hidden');
-    }
-    
-    // Verificar si ya existe una pregunta condicional para esta opción
-    const preguntaCondicionalKey = `${preguntaId}_${opcionIndice}`;
-    if (preguntasCondicionales[preguntaCondicionalKey]) {
-        const preguntaCondicional = preguntasCondicionales[preguntaCondicionalKey];
-        
-        // Cargar datos en el formulario
-        document.getElementById('texto-pregunta-condicional').value = preguntaCondicional.texto || '';
-        document.getElementById('tipo-pregunta-condicional').value = preguntaCondicional.tipo || 'abierta';
-        document.getElementById('obligatoria-pregunta-condicional').value = 
-            preguntaCondicional.obligatoria ? 'true' : 'false';
-        
-        // Si es de opción múltiple, cargar las opciones
-        if (preguntaCondicional.tipo === 'opcion_multiple' && preguntaCondicional.opciones) {
-            seccionOpcionesCondicional.classList.remove('hidden');
+        if (!modalPreguntaCondicional) {
+            // Crear el modal para preguntas condicionales
+            modalPreguntaCondicional = document.createElement('div');
+            modalPreguntaCondicional.id = 'modal-pregunta-condicional';
+            modalPreguntaCondicional.className = 'modal';
             
-            // Cargar cada opción
-            preguntaCondicional.opciones.forEach(opcion => {
-                agregarOpcionRespuestaCondicionalUI(opcion);
-            });
+            modalPreguntaCondicional.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="titulo-pregunta-condicional">Pregunta condicional</h3>
+                        <span class="cerrar-modal">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-pregunta-condicional">
+                            <div class="form-group">
+                                <label for="texto-pregunta-condicional">Texto de la pregunta:</label>
+                                <input type="text" id="texto-pregunta-condicional" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="tipo-pregunta-condicional">Tipo de pregunta:</label>
+                                <select id="tipo-pregunta-condicional" onchange="window.gestorPreguntasCondicionales.toggleOpcionesCondicional()">
+                                    <option value="abierta">Abierta (texto)</option>
+                                    <option value="opcion_multiple">Opción múltiple</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="obligatoria-pregunta-condicional">Obligatoria:</label>
+                                <select id="obligatoria-pregunta-condicional">
+                                    <option value="true">Sí</option>
+                                    <option value="false">No</option>
+                                </select>
+                            </div>
+                            
+                            <div id="seccion-opciones-condicional" class="hidden">
+                                <h4>Opciones de respuesta</h4>
+                                <div id="lista-opciones-condicional"></div>
+                                <button type="button" class="btn-agregar-opcion" id="btn-agregar-opcion-condicional">
+                                    <i class="fas fa-plus"></i> Agregar opción
+                                </button>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" id="btn-cancelar-pregunta-condicional" class="btn-cancelar">Cancelar</button>
+                                <button type="submit" id="btn-guardar-pregunta-condicional" class="btn-guardar">Guardar pregunta</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modalPreguntaCondicional);
+            
+            // Configurar eventos para el modal
+            const cerrarModal = modalPreguntaCondicional.querySelector('.cerrar-modal');
+            const btnCancelarPregunta = modalPreguntaCondicional.querySelector('#btn-cancelar-pregunta-condicional');
+            const formPregunta = modalPreguntaCondicional.querySelector('#form-pregunta-condicional');
+            const btnAgregarOpcion = modalPreguntaCondicional.querySelector('#btn-agregar-opcion-condicional');
+            
+            if (cerrarModal) {
+                cerrarModal.addEventListener('click', cerrarModalPreguntaCondicional);
+            }
+            
+            if (btnCancelarPregunta) {
+                btnCancelarPregunta.addEventListener('click', cerrarModalPreguntaCondicional);
+            }
+            
+            if (formPregunta) {
+                formPregunta.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    guardarPreguntaCondicional();
+                });
+            }
+            
+            if (btnAgregarOpcion) {
+                btnAgregarOpcion.addEventListener('click', agregarOpcionRespuestaCondicional);
+            }
         }
     }
     
-    // Mostrar modal
-    const modalPreguntaCondicional = document.getElementById('modal-pregunta-condicional');
-    if (modalPreguntaCondicional) {
-        modalPreguntaCondicional.style.display = 'flex';
-    }
-}
-
-/**
- * Cierra el modal de pregunta condicional
- */
-function cerrarModalPreguntaCondicional() {
-    const modal = document.getElementById('modal-pregunta-condicional');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    
-    preguntaParentId = null;
-    opcionParentIndex = null;
-}
-
-/**
- * Alterna la visibilidad de la sección de opciones según el tipo de pregunta
- */
-function toggleOpcionesCondicional() {
-    const tipoPregunta = document.getElementById('tipo-pregunta-condicional').value;
-    const seccionOpciones = document.getElementById('seccion-opciones-condicional');
-    
-    if (tipoPregunta === 'opcion_multiple') {
-        seccionOpciones.classList.remove('hidden');
-    } else {
-        seccionOpciones.classList.add('hidden');
-    }
-}
-
-/**
- * Agrega una opción de respuesta para pregunta condicional
- */
-function agregarOpcionRespuestaCondicional() {
-    const listaOpciones = document.getElementById('lista-opciones-condicional');
-    if (!listaOpciones) return;
-    
-    // Verificar límite de opciones
-    if (listaOpciones.children.length >= 5) {
-        window.mostrarAlerta('No se pueden agregar más de 5 opciones', 'error');
-        return;
-    }
-    
-    // Generar nueva opción
-    const nuevaOpcion = `Opción ${listaOpciones.children.length + 1}`;
-    agregarOpcionRespuestaCondicionalUI(nuevaOpcion);
-}
-
-/**
- * Agrega una opción de respuesta a la interfaz de pregunta condicional
- * @param {string} textoOpcion - Texto de la opción
- */
-function agregarOpcionRespuestaCondicionalUI(textoOpcion) {
-    const listaOpciones = document.getElementById('lista-opciones-condicional');
-    if (!listaOpciones) return;
-    
-    // Crear elemento de opción
-    const opcionElement = document.createElement('div');
-    opcionElement.className = 'opcion-respuesta';
-    opcionElement.dataset.indice = listaOpciones.children.length;
-    
-    opcionElement.innerHTML = `
-        <input type="text" value="${textoOpcion}" placeholder="Texto de la opción">
-        <button type="button" class="btn-eliminar-opcion-condicional">
-            <i class="fas fa-trash"></i>
-        </button>
-    `;
-    
-    // Configurar evento de eliminación
-    opcionElement.querySelector('.btn-eliminar-opcion-condicional').addEventListener('click', function() {
-        eliminarOpcionRespuestaCondicional(opcionElement);
-    });
-    
-    // Agregar al DOM
-    listaOpciones.appendChild(opcionElement);
-}
-
-/**
- * Elimina una opción de respuesta condicional
- * @param {HTMLElement} opcionElement - Elemento DOM de la opción
- */
-function eliminarOpcionRespuestaCondicional(opcionElement) {
-    const listaOpciones = document.getElementById('lista-opciones-condicional');
-    if (!listaOpciones) return;
-    
-    // Verificar que haya al menos dos opciones
-    if (listaOpciones.children.length <= 2) {
-        window.mostrarAlerta('Debe haber al menos 2 opciones', 'error');
-        return;
-    }
-    
-    // Eliminar el elemento
-    opcionElement.remove();
-    
-    // Actualizar los índices de las opciones restantes
-    Array.from(listaOpciones.children).forEach((elem, idx) => {
-        elem.dataset.indice = idx;
-    });
-}
-
-/**
- * Guarda la pregunta condicional
- */
-function guardarPreguntaCondicional() {
-    // Verificar que tenemos una pregunta y opción seleccionadas
-    if (!preguntaParentId || opcionParentIndex === null) {
-        window.mostrarAlerta('Error de configuración: No se ha identificado correctamente la pregunta principal', 'error');
-        return;
-    }
-    
-    // Obtener datos del formulario
-    const textoPregunta = document.getElementById('texto-pregunta-condicional').value.trim();
-    const tipoPregunta = document.getElementById('tipo-pregunta-condicional').value;
-    const obligatoria = document.getElementById('obligatoria-pregunta-condicional').value === 'true';
-    
-    // Validaciones básicas
-    if (!textoPregunta) {
-        window.mostrarAlerta('El texto de la pregunta es obligatorio', 'error');
-        return;
-    }
-    
-    // Crear objeto de pregunta condicional
-    const preguntaCondicional = {
-        texto: textoPregunta,
-        tipo: tipoPregunta,
-        obligatoria: obligatoria
-    };
-    
-    // Si es de opción múltiple, recopilar opciones
-    if (tipoPregunta === 'opcion_multiple') {
-        const listaOpciones = document.getElementById('lista-opciones-condicional');
+    /**
+     * Muestra el modal para configurar una pregunta condicional
+     * @param {string} preguntaId - ID de la pregunta principal
+     * @param {number} opcionIndice - Índice de la opción a la que se asociará la pregunta condicional
+     */
+    function mostrarModalPreguntaCondicional(preguntaId, opcionIndice) {
+        console.log(`Mostrando modal para pregunta ${preguntaId}, opción ${opcionIndice}`);
         
-        // Verificar que haya al menos 2 opciones
-        if (!listaOpciones || listaOpciones.children.length < 2) {
-            window.mostrarAlerta('Las preguntas de opción múltiple deben tener al menos 2 opciones', 'error');
+        // Guardar referencia a la pregunta y opción padre
+        preguntaParentId = preguntaId;
+        opcionParentIndex = opcionIndice;
+        
+        // Obtener texto de la opción para mostrar en el título
+        const opcionesParent = window.opcionesPregunta || {};
+        const opcionTexto = opcionesParent[preguntaId] && opcionesParent[preguntaId][opcionIndice] 
+            ? opcionesParent[preguntaId][opcionIndice] 
+            : `Opción ${opcionIndice + 1}`;
+            
+        const tituloModal = document.getElementById('titulo-pregunta-condicional');
+        if (tituloModal) {
+            tituloModal.textContent = `Pregunta condicional para: "${opcionTexto}"`;
+        }
+        
+        // Resetear formulario
+        const form = document.getElementById('form-pregunta-condicional');
+        if (form) form.reset();
+        
+        // Limpiar opciones condicionales si existen
+        const listaOpcionesCondicional = document.getElementById('lista-opciones-condicional');
+        if (listaOpcionesCondicional) {
+            listaOpcionesCondicional.innerHTML = '';
+        }
+        
+        // Ocultar sección de opciones inicialmente
+        const seccionOpcionesCondicional = document.getElementById('seccion-opciones-condicional');
+        if (seccionOpcionesCondicional) {
+            seccionOpcionesCondicional.classList.add('hidden');
+        }
+        
+        // Cargar pregunta condicional si ya existe
+        const preguntaCondicionalKey = `${preguntaId}_${opcionIndice}`;
+        if (preguntasCondicionales[preguntaCondicionalKey]) {
+            const preguntaCondicional = preguntasCondicionales[preguntaCondicionalKey];
+            
+            // Llenar campos
+            document.getElementById('texto-pregunta-condicional').value = preguntaCondicional.texto || '';
+            document.getElementById('tipo-pregunta-condicional').value = preguntaCondicional.tipo || 'abierta';
+            document.getElementById('obligatoria-pregunta-condicional').value = preguntaCondicional.obligatoria ? 'true' : 'false';
+            
+            // Mostrar opciones si es de tipo opción múltiple
+            if (preguntaCondicional.tipo === 'opcion_multiple') {
+                seccionOpcionesCondicional.classList.remove('hidden');
+                
+                // Cargar opciones
+                if (preguntaCondicional.opciones && preguntaCondicional.opciones.length > 0) {
+                    preguntaCondicional.opciones.forEach(opcion => {
+                        agregarOpcionRespuestaCondicionalUI(opcion);
+                    });
+                }
+            }
+        }
+        
+        // Mostrar modal
+        document.getElementById('modal-pregunta-condicional').style.display = 'flex';
+    }
+    
+    /**
+     * Cierra el modal de pregunta condicional
+     */
+    function cerrarModalPreguntaCondicional() {
+        document.getElementById('modal-pregunta-condicional').style.display = 'none';
+        
+        // Limpiar variables
+        preguntaParentId = null;
+        opcionParentIndex = null;
+    }
+    
+    /**
+     * Alterna la visibilidad de la sección de opciones múltiples según el tipo de pregunta seleccionado
+     */
+    function toggleOpcionesCondicional() {
+        const tipoPregunta = document.getElementById('tipo-pregunta-condicional').value;
+        const seccionOpciones = document.getElementById('seccion-opciones-condicional');
+        
+        if (seccionOpciones) {
+            if (tipoPregunta === 'opcion_multiple') {
+                seccionOpciones.classList.remove('hidden');
+            } else {
+                seccionOpciones.classList.add('hidden');
+            }
+        }
+    }
+    
+    /**
+     * Agrega una opción de respuesta para la pregunta condicional
+     */
+    function agregarOpcionRespuestaCondicional() {
+        const listaOpciones = document.getElementById('lista-opciones-condicional');
+        if (!listaOpciones) return;
+        
+        // Verificar límite de opciones
+        if (listaOpciones.children.length >= 5) {
+            if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                window.gestorEncuestas.mostrarAlerta('No se pueden agregar más de 5 opciones', 'error');
+            } else {
+                alert('No se pueden agregar más de 5 opciones');
+            }
             return;
         }
         
-        // Recopilar opciones
-        const opciones = [];
-        let todasValidas = true;
+        // Crear nueva opción
+        const nuevaOpcion = `Opción ${listaOpciones.children.length + 1}`;
+        agregarOpcionRespuestaCondicionalUI(nuevaOpcion);
+    }
+    
+    /**
+     * Agrega una opción de respuesta a la interfaz de la pregunta condicional
+     * @param {string} textoOpcion - Texto de la opción
+     */
+    function agregarOpcionRespuestaCondicionalUI(textoOpcion) {
+        const listaOpciones = document.getElementById('lista-opciones-condicional');
+        if (!listaOpciones) return;
         
-        Array.from(listaOpciones.children).forEach(opcionElement => {
-            const textoOpcion = opcionElement.querySelector('input').value.trim();
-            if (!textoOpcion) {
-                todasValidas = false;
+        const indice = listaOpciones.children.length;
+        
+        // Crear elemento de opción
+        const opcionElement = document.createElement('div');
+        opcionElement.className = 'opcion-respuesta-condicional';
+        opcionElement.dataset.indice = indice;
+        
+        opcionElement.innerHTML = `
+            <input type="text" value="${textoOpcion}" placeholder="Texto de la opción">
+            <button type="button" class="btn-eliminar-opcion-condicional">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        
+        // Configurar evento de eliminación
+        opcionElement.querySelector('.btn-eliminar-opcion-condicional').addEventListener('click', function() {
+            opcionElement.remove();
+            
+            // Reordenar índices
+            actualizarIndicesOpcionesCondicionales();
+        });
+        
+        // Agregar al DOM
+        listaOpciones.appendChild(opcionElement);
+    }
+    
+    /**
+     * Actualiza los índices de las opciones condicionales después de eliminar una
+     */
+    function actualizarIndicesOpcionesCondicionales() {
+        const listaOpciones = document.getElementById('lista-opciones-condicional');
+        if (!listaOpciones) return;
+        
+        Array.from(listaOpciones.children).forEach((opcion, indice) => {
+            opcion.dataset.indice = indice;
+        });
+    }
+    
+    /**
+     * Guarda la pregunta condicional configurada
+     */
+    function guardarPreguntaCondicional() {
+        if (!preguntaParentId || opcionParentIndex === null) {
+            console.error('No se ha configurado correctamente la pregunta o la opción padre');
+            if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                window.gestorEncuestas.mostrarAlerta('Error al configurar la pregunta condicional', 'error');
+            }
+            return false;
+        }
+        
+        // Obtener datos del formulario
+        const textoPregunta = document.getElementById('texto-pregunta-condicional').value.trim();
+        const tipoPregunta = document.getElementById('tipo-pregunta-condicional').value;
+        const obligatoria = document.getElementById('obligatoria-pregunta-condicional').value === 'true';
+        
+        // Validar
+        if (!textoPregunta) {
+            if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                window.gestorEncuestas.mostrarAlerta('El texto de la pregunta es obligatorio', 'error');
             } else {
-                opciones.push(textoOpcion);
+                alert('El texto de la pregunta es obligatorio');
+            }
+            return false;
+        }
+        
+        // Crear objeto de pregunta condicional
+        const preguntaCondicional = {
+            texto: textoPregunta,
+            tipo: tipoPregunta,
+            obligatoria: obligatoria
+        };
+        
+        // Agregar opciones si es pregunta de opción múltiple
+        if (tipoPregunta === 'opcion_multiple') {
+            const listaOpciones = document.getElementById('lista-opciones-condicional');
+            const opciones = [];
+            
+            // Verificar que haya al menos 2 opciones
+            if (listaOpciones.children.length < 2) {
+                if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+                    window.gestorEncuestas.mostrarAlerta('Las preguntas de opción múltiple deben tener al menos 2 opciones', 'error');
+                } else {
+                    alert('Las preguntas de opción múltiple deben tener al menos 2 opciones');
+                }
+                return false;
+            }
+            
+            // Recopilar opciones
+            Array.from(listaOpciones.children).forEach(opcionElement => {
+                const textoOpcion = opcionElement.querySelector('input').value.trim();
+                if (textoOpcion) {
+                    opciones.push(textoOpcion);
+                }
+            });
+            
+            preguntaCondicional.opciones = opciones;
+        }
+        
+        // Guardar pregunta condicional
+        const preguntaCondicionalKey = `${preguntaParentId}_${opcionParentIndex}`;
+        preguntasCondicionales[preguntaCondicionalKey] = preguntaCondicional;
+        
+        // Actualizar indicador visual para mostrar que la opción tiene pregunta condicional
+        actualizarIndicadorPreguntaCondicional(preguntaParentId, opcionParentIndex, true);
+        
+        // Cerrar modal
+        cerrarModalPreguntaCondicional();
+        
+        // Mostrar mensaje de éxito
+        if (window.gestorEncuestas && window.gestorEncuestas.mostrarAlerta) {
+            window.gestorEncuestas.mostrarAlerta('Pregunta condicional guardada correctamente', 'success');
+        } else {
+            alert('Pregunta condicional guardada correctamente');
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Actualiza el indicador visual de pregunta condicional en una opción
+     * @param {string} preguntaId - ID de la pregunta padre
+     * @param {number} opcionIndice - Índice de la opción
+     * @param {boolean} tieneCondicional - Indica si la opción tiene pregunta condicional
+     */
+    function actualizarIndicadorPreguntaCondicional(preguntaId, opcionIndice, tieneCondicional) {
+        // Esta función se llamaría desde el contexto donde se están mostrando las opciones
+        // de la pregunta principal. Aquí solo definimos la lógica.
+        
+        // Para implementación futura, podríamos agregar un indicador visual
+        // por ejemplo, cambiar el color del botón de subpregunta
+        const btnSubpreguntas = document.querySelectorAll('.opcion-respuesta');
+        if (btnSubpreguntas && btnSubpreguntas[opcionIndice]) {
+            const btnCondicional = btnSubpreguntas[opcionIndice].querySelector('.btn-condicional-opcion');
+            if (btnCondicional) {
+                if (tieneCondicional) {
+                    btnCondicional.classList.add('btn-condicional-activo');
+                } else {
+                    btnCondicional.classList.remove('btn-condicional-activo');
+                }
+            }
+        }
+    }
+    
+    /**
+     * Obtiene las preguntas condicionales para una pregunta
+     * @param {string} preguntaId - ID de la pregunta
+     * @returns {Object} Objeto con las preguntas condicionales por opción
+     */
+    function obtenerPreguntasCondicionales(preguntaId) {
+        const preguntasDeEstaPregunta = {};
+        
+        // Filtrar preguntas condicionales que pertenecen a esta pregunta
+        Object.keys(preguntasCondicionales).forEach(key => {
+            if (key.startsWith(`${preguntaId}_`)) {
+                const opcionIndice = parseInt(key.split('_')[1]);
+                preguntasDeEstaPregunta[opcionIndice] = preguntasCondicionales[key];
             }
         });
         
-        if (!todasValidas) {
-            window.mostrarAlerta('Todas las opciones deben tener texto', 'error');
-            return;
-        }
-        
-        // Agregar opciones al objeto de pregunta
-        preguntaCondicional.opciones = opciones;
+        return Object.keys(preguntasDeEstaPregunta).length > 0 ? preguntasDeEstaPregunta : null;
     }
     
-    // Guardar la pregunta condicional
-    const preguntaCondicionalKey = `${preguntaParentId}_${opcionParentIndex}`;
-    preguntasCondicionales[preguntaCondicionalKey] = preguntaCondicional;
+    // Exportar funciones para uso en otros módulos
+    window.gestorPreguntasCondicionales = {
+        inicializar: inicializarGestorPreguntasCondicionales,
+        mostrarModalPreguntaCondicional: mostrarModalPreguntaCondicional,
+        cerrarModalPreguntaCondicional: cerrarModalPreguntaCondicional,
+        toggleOpcionesCondicional: toggleOpcionesCondicional,
+        agregarOpcionRespuestaCondicional: agregarOpcionRespuestaCondicional,
+        obtenerPreguntasCondicionales: obtenerPreguntasCondicionales
+    };
     
-    // Marcar visualmente la opción como que tiene pregunta condicional
-    actualizarIndicadorPreguntaCondicional(preguntaParentId, opcionParentIndex, true);
-    
-    // Cerrar modal
-    cerrarModalPreguntaCondicional();
-    
-    // Mostrar mensaje de éxito
-    window.mostrarAlerta('Pregunta condicional guardada correctamente', 'success');
-}
-
-/**
- * Actualiza el indicador visual de que una opción tiene pregunta condicional
- * @param {string} preguntaId - ID de la pregunta principal
- * @param {number} opcionIndice - Índice de la opción
- * @param {boolean} tieneCondicional - Indica si tiene pregunta condicional
- */
-function actualizarIndicadorPreguntaCondicional(preguntaId, opcionIndice, tieneCondicional) {
-    // Esta función se usa cuando estamos en el modal de edición de una pregunta principal
-    const listaOpciones = document.getElementById('lista-opciones');
-    if (!listaOpciones) return;
-    
-    const opcionElement = listaOpciones.children[opcionIndice];
-    if (!opcionElement) return;
-    
-    const btnCondicional = opcionElement.querySelector('.btn-condicional-opcion');
-    if (btnCondicional) {
-        if (tieneCondicional) {
-            btnCondicional.classList.add('btn-condicional-activo');
-            btnCondicional.title = "Esta opción ya tiene una subpregunta configurada";
-        } else {
-            btnCondicional.classList.remove('btn-condicional-activo');
-            btnCondicional.title = "Agregar pregunta condicional";
-        }
-    }
-}
-
-/**
- * Obtiene las preguntas condicionales asociadas a una pregunta principal
- * @param {string} preguntaId - ID de la pregunta principal
- * @returns {Object|null} Objeto con las preguntas condicionales o null si no hay ninguna
- */
-function obtenerPreguntasCondicionales(preguntaId) {
-    // Filtrar las preguntas condicionales para esta pregunta
-    const preguntasDeEstaPregunta = {};
-    let hayPreguntas = false;
-    
-    Object.keys(preguntasCondicionales).forEach(key => {
-        if (key.startsWith(`${preguntaId}_`)) {
-            // Extraer índice de opción
-            const opcionIndice = parseInt(key.split('_')[1]);
-            preguntasDeEstaPregunta[opcionIndice] = preguntasCondicionales[key];
-            hayPreguntas = true;
-        }
-    });
-    
-    return hayPreguntas ? preguntasDeEstaPregunta : null;
-}
-
-// Exportar funciones para uso en otros módulos
-window.mostrarModalPreguntaCondicional = mostrarModalPreguntaCondicional;
-window.cerrarModalPreguntaCondicional = cerrarModalPreguntaCondicional;
-window.obtenerPreguntasCondicionales = obtenerPreguntasCondicionales;
-window.preguntasCondicionales = preguntasCondicionales;
+    // Inicializar cuando el DOM esté cargado
+    document.addEventListener('DOMContentLoaded', inicializarGestorPreguntasCondicionales);
+})();
