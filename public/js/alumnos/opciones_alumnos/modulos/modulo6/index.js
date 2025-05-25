@@ -228,16 +228,36 @@ async function verificarModulosAnteriores() {
         if (historialEncuestaDoc.exists) {
             const datosEncuesta = historialEncuestaDoc.data();
             
+            // DEPURACIÓN: Mostrar todos los datos
+            console.log('DATOS COMPLETOS DE LA ENCUESTA:', JSON.stringify(datosEncuesta, null, 2));
+            
             // Verificar si el usuario completó los módulos 1, 2, y 3
             const modulo1Completado = datosEncuesta.modulo1 && datosEncuesta.modulo1.completado === true;
             const modulo2Completado = datosEncuesta.modulo2 && datosEncuesta.modulo2.completado === true;
             const modulo3Completado = datosEncuesta.modulo3 && datosEncuesta.modulo3.completado === true;
+            
+            // DEPURACIÓN: Mostrar datos específicos del módulo 3
+            console.log('DATOS DEL MÓDULO 3:', datosEncuesta.modulo3 ? JSON.stringify(datosEncuesta.modulo3, null, 2) : 'No existe');
+            
+            if (datosEncuesta.modulo3 && datosEncuesta.modulo3.datos) {
+                console.log('ACTIVIDAD ACTUAL:', datosEncuesta.modulo3.datos.actividad_actual);
+                console.log('TIPO DE DATO DE ACTIVIDAD ACTUAL:', typeof datosEncuesta.modulo3.datos.actividad_actual);
+            }
             
             // Verificar si el usuario trabaja (para determinar si módulos 4 y 5 son obligatorios)
             const usuarioTrabaja = datosEncuesta.modulo3 && 
                 datosEncuesta.modulo3.datos && 
                 (datosEncuesta.modulo3.datos.actividad_actual === 'trabaja' || 
                  datosEncuesta.modulo3.datos.actividad_actual === 'trabaja_estudia');
+            
+            // DEPURACIÓN: Mostrar evaluación detallada
+            console.log('EVALUACIÓN DETALLADA:');
+            console.log('- ¿Existe módulo3?', !!datosEncuesta.modulo3);
+            console.log('- ¿Existe datos en módulo3?', !!(datosEncuesta.modulo3 && datosEncuesta.modulo3.datos));
+            console.log('- Valor de actividad_actual:', datosEncuesta.modulo3 && datosEncuesta.modulo3.datos ? datosEncuesta.modulo3.datos.actividad_actual : 'No disponible');
+            console.log('- ¿Es trabaja?', datosEncuesta.modulo3 && datosEncuesta.modulo3.datos ? datosEncuesta.modulo3.datos.actividad_actual === 'trabaja' : false);
+            console.log('- ¿Es trabaja_estudia?', datosEncuesta.modulo3 && datosEncuesta.modulo3.datos ? datosEncuesta.modulo3.datos.actividad_actual === 'trabaja_estudia' : false);
+            console.log('CONCLUSIÓN - ¿USUARIO TRABAJA?:', usuarioTrabaja);
             
             console.log('Estado de módulos:');
             console.log('Módulo 1 completado:', modulo1Completado);
@@ -268,6 +288,7 @@ async function verificarModulosAnteriores() {
         }
         
         // Si no existe historial, ningún módulo está completo
+        console.log('NO SE ENCONTRÓ HISTORIAL DE ENCUESTA PARA EL USUARIO');
         return {
             modulosCompletados: false,
             usuarioTrabaja: false
