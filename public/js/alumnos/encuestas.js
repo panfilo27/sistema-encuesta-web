@@ -391,8 +391,10 @@ function calcularProgresoEncuesta(encuestaId) {
     // Módulos posibles según la carrera del estudiante
     const modulosRegulares = ['modulo1', 'modulo2', 'modulo3', 'modulo4', 'modulo5', 'modulo6', 'modulo7'];
     const modulosEspecializados = ['modulo1.1', 'modulo2.1', 'modulo3.1', 'modulo4.1', 'modulo5.1'];
+    // Equivalentes con guion bajo para la búsqueda en datos
+    const modulosEspecializadosConGuion = ['modulo1_1', 'modulo2_1', 'modulo3_1', 'modulo4_1', 'modulo5_1'];
     
-    // Seleccionar la secuencia de módulos correcta
+    // Seleccionar la secuencia de módulos correcta para mostrar en la UI
     const modulos = esQuimicaOBioquimica ? modulosEspecializados : modulosRegulares;
     
     // Verificar módulos completados
@@ -404,25 +406,37 @@ function calcularProgresoEncuesta(encuestaId) {
     console.log('Verificando módulos completados en respuesta:', respuesta);
     
     // Recorrer todos los módulos posibles
-    for (const moduloId of modulos) {
-        console.log(`Verificando si ${moduloId} está completado:`, respuesta[moduloId]);
+    for (let i = 0; i < modulos.length; i++) {
+        const moduloId = modulos[i];
+        // También verificar la versión con guion bajo para los módulos especializados
+        const moduloIdAlternativo = esQuimicaOBioquimica ? modulosEspecializadosConGuion[i] : null;
         
-        // Verificar si el módulo existe y está completado
-        if (respuesta[moduloId] && respuesta[moduloId].completado === true) {
-            console.log(`Módulo ${moduloId} COMPLETADO`);
+        console.log(`Verificando si ${moduloId} o ${moduloIdAlternativo} está completado`);
+        console.log('Datos con punto:', respuesta[moduloId]);
+        console.log('Datos con guion:', moduloIdAlternativo ? respuesta[moduloIdAlternativo] : 'N/A');
+        
+        // Verificar si el módulo existe y está completado (con punto o con guion bajo)
+        const moduloConPunto = respuesta[moduloId] && respuesta[moduloId].completado === true;
+        const moduloConGuion = moduloIdAlternativo && respuesta[moduloIdAlternativo] && respuesta[moduloIdAlternativo].completado === true;
+        
+        if (moduloConPunto || moduloConGuion) {
+            console.log(`Módulo ${moduloId} COMPLETADO`);            
             modulosCompletados.push(moduloId);
             
+            // Seleccionar el objeto de módulo correcto (con punto o guion)
+            const moduloObj = moduloConPunto ? respuesta[moduloId] : respuesta[moduloIdAlternativo];
+            
             // Actualizar fecha del último módulo completado
-            if (respuesta[moduloId].fechaCompletado) {
+            if (moduloObj.fechaCompletado) {
                 let nuevaFecha;
-                if (typeof respuesta[moduloId].fechaCompletado.toDate === 'function') {
-                    nuevaFecha = respuesta[moduloId].fechaCompletado.toDate();
-                } else if (respuesta[moduloId].fechaCompletado instanceof Date) {
-                    nuevaFecha = respuesta[moduloId].fechaCompletado;
-                } else if (respuesta[moduloId].fechaCompletado) {
+                if (typeof moduloObj.fechaCompletado.toDate === 'function') {
+                    nuevaFecha = moduloObj.fechaCompletado.toDate();
+                } else if (moduloObj.fechaCompletado instanceof Date) {
+                    nuevaFecha = moduloObj.fechaCompletado;
+                } else if (moduloObj.fechaCompletado) {
                     // Intentar convertir desde timestamp
                     try {
-                        nuevaFecha = new Date(respuesta[moduloId].fechaCompletado);
+                        nuevaFecha = new Date(moduloObj.fechaCompletado);
                     } catch (e) {
                         console.warn('No se pudo convertir la fecha:', e);
                     }
