@@ -42,15 +42,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             
-            // Verificar que el usuario sea de la carrera de Química o Bioquímica
-            const userDoc = await firebase.firestore().collection('usuario').doc(userData.id).get();
-            if (userDoc.exists) {
-                const userData = userDoc.data();
-                if (userData.carrera !== 'Química' && userData.carrera !== 'Bioquímica') {
-                    alert('Esta encuesta es exclusiva para estudiantes de Química y Bioquímica.');
-                    window.location.href = '../../encuestas.html';
-                    return;
-                }
+            // Verificar que el usuario sea de la carrera de Química o Bioquímica directamente desde la sesión
+            if (userData.carrera !== 'Química' && userData.carrera !== 'Bioquímica') {
+                alert('Esta encuesta es exclusiva para estudiantes de Química y Bioquímica.');
+                window.location.href = '../../encuestas.html';
+                return;
             }
             
             currentUser = userData;
