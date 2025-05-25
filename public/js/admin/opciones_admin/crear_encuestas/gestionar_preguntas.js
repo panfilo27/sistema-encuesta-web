@@ -320,11 +320,11 @@ function agregarOpcionRespuestaUI(textoOpcion, preguntaId) {
     
     opcionElement.innerHTML = `
         <input type="text" value="${textoOpcion}" placeholder="Texto de la opción">
-        <button type="button" class="btn-eliminar-opcion">
-            <i class="fas fa-trash"></i>
-        </button>
         <button type="button" class="btn-condicional-opcion" title="Agregar pregunta condicional">
             <i class="fas fa-question-circle"></i> Subpregunta
+        </button>
+        <button type="button" class="btn-eliminar-opcion">
+            <i class="fas fa-trash"></i>
         </button>
     `;
     
