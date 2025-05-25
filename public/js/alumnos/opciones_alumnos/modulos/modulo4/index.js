@@ -65,8 +65,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Si no aplica el módulo de empleo, redirigir al dashboard
                 if (!moduloEmpleoAplicable) {
-                    alert('Este módulo solo aplica para egresados que trabajan. Serás redirigido al dashboard.');
-                    window.location.href = '../../encuestas.html';
+                    alert('Este módulo solo aplica para egresados que trabajan. Serás redirigido al módulo 6.');
+                    window.location.href = '../../modulo6.html';
                     return;
                 }
                 

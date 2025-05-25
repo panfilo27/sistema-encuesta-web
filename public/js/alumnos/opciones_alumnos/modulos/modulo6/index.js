@@ -61,8 +61,47 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const verificacionPrevia = await verificarModulosAnteriores();
                 
                 if (!verificacionPrevia.modulosCompletados) {
-                    alert('Debes completar los módulos anteriores antes de continuar. Serás redirigido.');
-                    window.location.href = '../../encuestas.html';
+                    // Obtener información sobre qué módulos faltan
+                    const historialEncuestaDoc = await firebase.firestore()
+                        .collection('usuario')
+                        .doc(currentUser.id)
+                        .collection('historial_encuestas')
+                        .doc(encuestaActual.id)
+                        .get();
+                    
+                    if (historialEncuestaDoc.exists) {
+                        const datosEncuesta = historialEncuestaDoc.data();
+                        
+                        // Verificar si el usuario completó el módulo 3
+                        if (datosEncuesta.modulo3 && datosEncuesta.modulo3.completado) {
+                            // Si completó el módulo 3 y debe completar 4 y 5 (porque trabaja)
+                            if (datosEncuesta.modulo3.datos && 
+                                (datosEncuesta.modulo3.datos.actividad_actual === 'trabaja' || 
+                                 datosEncuesta.modulo3.datos.actividad_actual === 'trabaja_estudia')) {
+                                
+                                // Redirigir al módulo 4 o 5 dependiendo de cuál falta
+                                if (!datosEncuesta.modulo4 || !datosEncuesta.modulo4.completado) {
+                                    alert('Debes completar el módulo 4 antes de continuar. Serás redirigido.');
+                                    window.location.href = 'modulo4.html';
+                                } else if (!datosEncuesta.modulo5 || !datosEncuesta.modulo5.completado) {
+                                    alert('Debes completar el módulo 5 antes de continuar. Serás redirigido.');
+                                    window.location.href = 'modulo5.html';
+                                }
+                            } else {
+                                // Si no trabaja pero falta completar alguno de los módulos obligatorios
+                                alert('Debes completar los módulos anteriores antes de continuar. Serás redirigido.');
+                                window.location.href = '../../encuestas.html';
+                            }
+                        } else {
+                            // Si no ha completado el módulo 3 o anteriores
+                            alert('Debes completar los módulos anteriores antes de continuar. Serás redirigido.');
+                            window.location.href = '../../encuestas.html';
+                        }
+                    } else {
+                        // No existe el historial de encuesta
+                        alert('No se encontró historial de encuestas. Serás redirigido.');
+                        window.location.href = '../../encuestas.html';
+                    }
                     return;
                 }
                 

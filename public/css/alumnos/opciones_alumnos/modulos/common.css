@@ -1,0 +1,105 @@
+/* Estilos comunes para todos los módulos de la encuesta de Química y Bioquímica */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    min-height: 100vh;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.navbar {
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.content-wrapper {
+    flex: 1;
+    padding-top: 70px; /* Altura del navbar */
+}
+
+/* Overlay de carga */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+}
+
+.spinner-container {
+    text-align: center;
+}
+
+/* Contenedor de errores */
+#error-container {
+    border-left: 5px solid #dc3545;
+}
+
+.error-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.error-list li {
+    padding: 0.3rem 0;
+}
+
+.error-list li:before {
+    content: "•";
+    color: #dc3545;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+/* Aviso de solo visualización */
+.aviso-solo-visualizacion {
+    display: flex;
+    background-color: #e2f0fd;
+    border: 1px solid #90c3f9;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.aviso-icono {
+    font-size: 2rem;
+    color: #0d6efd;
+    margin-right: 1rem;
+}
+
+.aviso-texto h4 {
+    color: #0d6efd;
+    margin-bottom: 0.25rem;
+}
+
+.aviso-texto p {
+    margin-bottom: 0;
+}
+
+/* Estilos para formulario en modo solo visualización */
+.form-readonly input,
+.form-readonly select,
+.form-readonly textarea {
+    background-color: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+    color: #6c757d !important;
+    cursor: not-allowed !important;
+}
+
+.form-readonly .form-check-input {
+    opacity: 0.7;
+}

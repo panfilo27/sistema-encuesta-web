@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     habilitarModoSoloVisualizacion();
                     // Cambiar el texto del botón
                     if (btnGuardar) {
-                        btnGuardar.textContent = 'Continuar al siguiente módulo';
+                        btnGuardar.textContent = 'Continuar al módulo correspondiente';
                     }
                 }
                 
@@ -309,9 +309,18 @@ function configurarEventos() {
     
     // Evento de guardar y continuar
     btnGuardar.addEventListener('click', async () => {
-        // Si el módulo ya está completado, solo navegar al siguiente módulo
+        // Si el módulo ya está completado, determinar a dónde navegar
         if (moduloCompletado) {
-            window.location.href = 'modulo4.html';
+            // Obtener la actividad seleccionada
+            const actividad = formulario.actividad_actual.value;
+            
+            // Si trabaja o trabaja y estudia, ir al módulo 4
+            // Si no, saltar directamente al módulo 6
+            if (actividad === 'trabaja' || actividad === 'trabaja_estudia') {
+                window.location.href = 'modulo4.html';
+            } else {
+                window.location.href = 'modulo6.html';
+            }
             return;
         }
         
@@ -336,8 +345,17 @@ function configurarEventos() {
             // Guardar en Firestore
             await guardarRespuestas(datosModulo3);
             
-            // Redirigir al siguiente módulo
-            window.location.href = 'modulo4.html';
+            // Determinar a qué módulo redirigir según la actividad seleccionada
+            const actividad = formulario.actividad_actual.value;
+            
+            // Si trabaja o trabaja y estudia, ir al módulo 4 (sobre empleo)
+            // Si no, saltar directamente al módulo 6 (expectativas)
+            if (actividad === 'trabaja' || actividad === 'trabaja_estudia') {
+                window.location.href = 'modulo4.html';
+            } else {
+                // Saltar los módulos 4 y 5 (relacionados con empleo) e ir al módulo 6
+                window.location.href = 'modulo6.html';
+            }
         } catch (error) {
             console.error('Error al guardar el formulario:', error);
             mostrarError('Error al guardar la información. Por favor, intenta nuevamente.');

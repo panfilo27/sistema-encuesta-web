@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 1.1: Datos Generales - Química y Bioquímica</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="../../../css/alumnos/opciones_alumnos/modulos/modulo1.1.css">
+    <link rel="stylesheet" href="../../../css/alumnos/opciones_alumnos/modulos/common.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../../../assets/img/favicon.png">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Barra de navegación -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <img src="../../../assets/img/logo-encuesta.png" alt="Logo" height="40">
+                    Encuesta de Química y Bioquímica
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <span class="nav-link">
+                                <i class="fas fa-user-circle me-1"></i>
+                                <span id="nombre-usuario">Usuario</span>
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <button id="btn-cerrar-sesion" class="btn btn-danger">
+                                <i class="fas fa-sign-out-alt me-1"></i>
+                                Cerrar sesión
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Contenido principal -->
+        <div class="content-wrapper">
+            <div class="container py-4">
+                <!-- Encabezado -->
+                <div class="header-container mb-4">
+                    <h1 class="mb-3">Módulo 1.1: Datos Generales</h1>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">1/5</div>
+                    </div>
+                    <p class="lead">Por favor completa los siguientes datos generales. Los campos marcados con <span class="text-danger">*</span> son obligatorios.</p>
+                </div>
+
+                <!-- Indicador de carga -->
+                <div id="loading-module" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2">Cargando formulario, por favor espera...</p>
+                </div>
+
+                <!-- Contenedor de errores -->
+                <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+
+                <!-- Formulario -->
+                <form id="form-modulo1-1" class="needs-validation" style="display: none;">
+                    <fieldset class="mb-4 p-3 border rounded">
+                        <legend>Datos Personales</legend>
+                        
+                        <div class="mb-3">
+                            <label for="nombre_completo" class="form-label">Nombre completo <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nombre_completo" name="nombre_completo" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="telefono_celular" class="form-label">Teléfono celular <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="telefono_celular" name="telefono_celular" pattern="[0-9]{10}" required>
+                            <small class="form-text text-muted">Formato: 10 dígitos sin espacios ni guiones</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="redes_sociales" class="form-label">Redes sociales (opcional)</label>
+                            <textarea class="form-control" id="redes_sociales" name="redes_sociales" rows="3" 
+                                placeholder="Indica tus perfiles en redes sociales (Facebook, Twitter, LinkedIn, etc.)"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-4 p-3 border rounded">
+                        <legend>Información Académica</legend>
+                        
+                        <div class="mb-3">
+                            <label for="fecha_ingreso" class="form-label">Fecha de ingreso (año) <span class="text-danger">*</span></label>
+                            <select class="form-select" id="fecha_ingreso" name="fecha_ingreso" required>
+                                <option value="">Selecciona un año</option>
+                                <!-- Opciones generadas dinámicamente por JavaScript -->
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fecha_egreso" class="form-label">Fecha de egreso (año) <span class="text-danger">*</span></label>
+                            <select class="form-select" id="fecha_egreso" name="fecha_egreso" required>
+                                <option value="">Selecciona un año</option>
+                                <!-- Opciones generadas dinámicamente por JavaScript -->
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">¿Estás titulado? <span class="text-danger">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="titulado" id="titulado_si" value="si" required>
+                                <label class="form-check-label" for="titulado_si">Sí</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="titulado" id="titulado_no" value="no">
+                                <label class="form-check-label" for="titulado_no">No</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="razon_no_titulado_container" style="display: none;">
+                            <label for="razon_no_titulado" class="form-label">Razón por la que no te has titulado <span class="text-danger">*</span></label>
+                            <select class="form-select" id="razon_no_titulado" name="razon_no_titulado">
+                                <option value="">Selecciona una razón</option>
+                                <option value="tramites">Trámites en proceso</option>
+                                <option value="tiempo">Falta de tiempo</option>
+                                <option value="recursos">Falta de recursos económicos</option>
+                                <option value="trabajo">Compromisos laborales</option>
+                                <option value="tesis">No he terminado tesis/proyecto</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">¿Tu trabajo actual está relacionado con tu carrera? <span class="text-danger">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="trabajo_relacionado" id="trabajo_relacionado_si" value="si" required>
+                                <label class="form-check-label" for="trabajo_relacionado_si">Sí</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="trabajo_relacionado" id="trabajo_relacionado_no" value="no">
+                                <label class="form-check-label" for="trabajo_relacionado_no">No</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="trabajo_relacionado" id="trabajo_relacionado_na" value="no_aplica">
+                                <label class="form-check-label" for="trabajo_relacionado_na">No aplica (no trabajo actualmente)</label>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Botones de navegación -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="../../encuestas.html" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver
+                        </a>
+                        <button type="button" id="btn-guardar-modulo1-1" class="btn btn-primary">
+                            Guardar y continuar<i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Overlay de carga para operaciones -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="spinner-container">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="text-light mt-2">Guardando información...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle con Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <!-- Configuración Firebase -->
+    <script src="../../../js/firebase-config.js"></script>
+    <!-- Scripts del módulo -->
+    <script src="../../../js/alumnos/opciones_alumnos/modulos/modulo1.1/index.js"></script>
+</body>
+</html>

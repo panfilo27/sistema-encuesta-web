@@ -27,6 +27,28 @@ let respuestasAnteriores = null;
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Inicializando Módulo 1: Datos Personales');
     
+    // Añadir estilos para campos bloqueados
+    const style = document.createElement('style');
+    style.textContent = `
+        .campo-bloqueado small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-style: italic;
+        }
+        .campo-bloqueado i {
+            color: #888;
+            margin-right: 5px;
+        }
+        select:disabled {
+            background-color: #f8f8f8;
+            border-color: #ddd;
+            color: #555;
+            cursor: not-allowed;
+        }
+    `;
+    document.head.appendChild(style);
+    
     // Verificar autenticación mediante localStorage
     const userSession = localStorage.getItem('userSession');
     
@@ -233,7 +255,24 @@ function preLlenarFormulario() {
         
         // Académico
         if (datosUsuario.carrera) {
-            formulario.carrera.value = datosUsuario.carrera;
+            // Buscar el ID de la carrera basado en el nombre
+            const carreraEncontrada = carreras.find(c => c.nombre === datosUsuario.carrera);
+            if (carreraEncontrada) {
+                // Establecer el valor usando el ID de la carrera
+                formulario.carrera.value = carreraEncontrada.id;
+                // Bloquear el campo para que no pueda ser modificado
+                formulario.carrera.disabled = true;
+                // Añadir un mensaje visual para indicar que está bloqueado
+                const carreraContainer = formulario.carrera.parentElement;
+                if (!carreraContainer.querySelector('.campo-bloqueado')) {
+                    const infoElement = document.createElement('div');
+                    infoElement.className = 'campo-bloqueado';
+                    infoElement.innerHTML = '<small><i class="fas fa-lock"></i> Campo bloqueado: información del perfil</small>';
+                    carreraContainer.appendChild(infoElement);
+                }
+            } else {
+                console.log('No se pudo encontrar la carrera:', datosUsuario.carrera);
+            }
         }
         
         if (datosUsuario.titulado !== undefined) {
@@ -316,7 +355,8 @@ function preLlenarFormulario() {
         if (respuestasAnteriores.email) formulario.email.value = respuestasAnteriores.email;
         
         // Académico
-        if (respuestasAnteriores.carrera) {
+        // Solo actualizar la carrera si el campo no está ya bloqueado
+        if (respuestasAnteriores.carrera && !formulario.carrera.disabled) {
             formulario.carrera.value = respuestasAnteriores.carrera;
         }
         
