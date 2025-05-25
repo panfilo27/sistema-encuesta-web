@@ -103,115 +103,37 @@ async function cargarEncuestas() {
                 return fechaInicioValida && fechaFinValida;
             });
 
-        // 2. Cargar respuestas del usuario para estas encuestas desde la nueva estructura
+        // 2. Cargar respuestas del usuario para estas encuestas
         if (encuestasActivas.length > 0) {
+            const db = firebase.firestore();
+            const usuarioRef = db.collection('usuario').doc(currentUser.id);
+            
+            // Cargar respuestas de historial_encuestas del usuario
             try {
-                // Obtenemos todas las encuestas en el historial del usuario
-                const historialEncuestasSnapshot = await firebase.firestore()
-                    .collection('usuario')
-                    .doc(currentUser.id)
-                    .collection('historial_encuestas')
-                    .get();
+                const historialEncuestasSnapshot = await usuarioRef.collection('historial_encuestas').get();
                 
-                // Procesamos las respuestas del usuario
-                respuestasUsuario = [];
-                
-                historialEncuestasSnapshot.forEach(doc => {
-                    const datosEncuesta = doc.data();
+                respuestasUsuario = historialEncuestasSnapshot.docs.map(doc => {
+                    const respuesta = { id: doc.id, ...doc.data() };
                     
-                    // Para cada módulo en la encuesta, agregamos una entrada en respuestasUsuario
-                    if (datosEncuesta.modulo1) {
-                        respuestasUsuario.push({
-                            id: `${doc.id}_modulo1`,
-                            encuestaId: doc.id,
-                            moduloId: 'modulo1',
-                            completado: datosEncuesta.modulo1.completado || false,
-                            fechaCompletado: datosEncuesta.modulo1.fechaCompletado || null,
-                            datos: datosEncuesta.modulo1.datos || {}
-                        });
+                    // Convertir fechas de Firestore a objetos Date si existen
+                    if (respuesta.fechaCreacion && typeof respuesta.fechaCreacion.toDate === 'function') {
+                        respuesta.fechaCreacion = respuesta.fechaCreacion.toDate();
                     }
                     
-                    if (datosEncuesta.modulo2) {
-                        respuestasUsuario.push({
-                            id: `${doc.id}_modulo2`,
-                            encuestaId: doc.id,
-                            moduloId: 'modulo2',
-                            completado: datosEncuesta.modulo2.completado || false,
-                            fechaCompletado: datosEncuesta.modulo2.fechaCompletado || null,
-                            datos: datosEncuesta.modulo2.datos || {}
-                        });
-                    }
-                    
-                    // Añadir más módulos cuando se implementen
-                    if (datosEncuesta.modulo3) {
-                        respuestasUsuario.push({
-                            id: `${doc.id}_modulo3`,
-                            encuestaId: doc.id,
-                            moduloId: 'modulo3',
-                            completado: datosEncuesta.modulo3.completado || false,
-                            fechaCompletado: datosEncuesta.modulo3.fechaCompletado || null,
-                            datos: datosEncuesta.modulo3.datos || {}
-                        });
-                    }
-                    
-                    if (datosEncuesta.modulo4) {
-                        respuestasUsuario.push({
-                            id: `${doc.id}_modulo4`,
-                            encuestaId: doc.id,
-                            moduloId: 'modulo4',
-                            completado: datosEncuesta.modulo4.completado || false,
-                            fechaCompletado: datosEncuesta.modulo4.fechaCompletado || null,
-                            datos: datosEncuesta.modulo4.datos || {}
-                        });
-                    }
-                    
-                    if (datosEncuesta.modulo5) {
-                        respuestasUsuario.push({
-                            id: `${doc.id}_modulo5`,
-                            encuestaId: doc.id,
-                            moduloId: 'modulo5',
-                            completado: datosEncuesta.modulo5.completado || false,
-                            fechaCompletado: datosEncuesta.modulo5.fechaCompletado || null,
-                            datos: datosEncuesta.modulo5.datos || {}
-                        });
-                    }
-                    
-                    // Módulo 6 - Expectativas
-                    if (datosEncuesta.modulo6) {
-                        respuestasUsuario.push({
-                            id: `${doc.id}_modulo6`,
-                            encuestaId: doc.id,
-                            moduloId: 'modulo6',
-                            completado: datosEncuesta.modulo6.completado || false,
-                            fechaCompletado: datosEncuesta.modulo6.fechaCompletado || null,
-                            datos: datosEncuesta.modulo6.datos || {}
-                        });
-                    }
-                    
-                    // Módulo 7 - Comentarios y sugerencias
-                    if (datosEncuesta.modulo7) {
-                        respuestasUsuario.push({
-                            id: `${doc.id}_modulo7`,
-                            encuestaId: doc.id,
-                            moduloId: 'modulo7',
-                            completado: datosEncuesta.modulo7.completado || false,
-                            fechaCompletado: datosEncuesta.modulo7.fechaCompletado || null,
-                            datos: datosEncuesta.modulo7.datos || {}
-                        });
-                    }
+                    return respuesta;
                 });
                 
-                console.log('Respuestas del usuario cargadas desde historial:', respuestasUsuario);
+                console.log('Respuestas de usuario cargadas:', respuestasUsuario);
             } catch (error) {
-                console.error('Error al cargar respuestas desde historial:', error);
+                console.error('Error al cargar respuestas del usuario:', error);
             }
         }
 
-        // 3. Mostrar encuestas
+        // 3. Mostrar encuestas en la interfaz
         mostrarEncuestas();
     } catch (error) {
         console.error('Error al cargar encuestas:', error);
-        mostrarErrorEncuestas(error.message);
+        mostrarErrorEncuestas(`Error al cargar encuestas: ${error.message}`);
     }
 }
 
@@ -281,21 +203,41 @@ function mostrarEncuestas() {
                             moduloNombre = 'Datos Personales';
                             moduloNumero = '1';
                             break;
+                        case 'modulo1.1':
+                            moduloNombre = 'Datos Generales (Química/Bioquímica)';
+                            moduloNumero = '1.1';
+                            break;
                         case 'modulo2':
                             moduloNombre = 'Formación Académica';
                             moduloNumero = '2';
+                            break;
+                        case 'modulo2.1':
+                            moduloNombre = 'Situación Laboral (Química/Bioquímica)';
+                            moduloNumero = '2.1';
                             break;
                         case 'modulo3':
                             moduloNombre = 'Datos de Ubicación';
                             moduloNumero = '3';
                             break;
+                        case 'modulo3.1':
+                            moduloNombre = 'Plan de Estudios (Química/Bioquímica)';
+                            moduloNumero = '3.1';
+                            break;
                         case 'modulo4':
                             moduloNombre = 'Datos de Empleo';
                             moduloNumero = '4';
                             break;
+                        case 'modulo4.1':
+                            moduloNombre = 'Institución (Química/Bioquímica)';
+                            moduloNumero = '4.1';
+                            break;
                         case 'modulo5':
                             moduloNombre = 'Desempeño Profesional';
                             moduloNumero = '5';
+                            break;
+                        case 'modulo5.1':
+                            moduloNombre = 'Desempeño Laboral (Química/Bioquímica)';
+                            moduloNumero = '5.1';
                             break;
                         case 'modulo6':
                             moduloNombre = 'Expectativas';
@@ -362,7 +304,15 @@ function mostrarEncuestas() {
                 btnContinuar.style.display = 'none';
                 
                 btnComenzar.addEventListener('click', () => {
-                    continuarEncuesta(encuesta.id, 'modulo1');
+                    // Verificar si es estudiante de Química/Bioquímica
+                    const esQuimicaOBioquimicaStr = localStorage.getItem('esQuimicaOBioquimica');
+                    const esQuimicaOBioquimica = esQuimicaOBioquimicaStr === 'true';
+                    
+                    // Seleccionar el primer módulo según la carrera
+                    const primerModulo = esQuimicaOBioquimica ? 'modulo1.1' : 'modulo1';
+                    console.log(`Comenzando encuesta con: ${primerModulo} (Química/Bioquímica: ${esQuimicaOBioquimica})`);
+                    
+                    continuarEncuesta(encuesta.id, primerModulo);
                 });
             } else {
                 // Se ha comenzado pero no completado
@@ -385,67 +335,110 @@ function mostrarEncuestas() {
  * @returns {Object} Objeto con el porcentaje y siguiente módulo
  */
 function calcularProgresoEncuesta(encuestaId) {
-    // Filtrar respuestas para esta encuesta
-    const respuestasEncuesta = respuestasUsuario.filter(
-        respuesta => respuesta.encuestaId === encuestaId
-    );
+    // Obtener la información de carrera especializada desde localStorage
+    // Esta información se establece en alumnos.js cuando el usuario entra al dashboard
+    const esQuimicaOBioquimicaStr = localStorage.getItem('esQuimicaOBioquimica');
+    let esQuimicaOBioquimica = esQuimicaOBioquimicaStr === 'true';
     
-    // Total de módulos esperados (actualmente 7)
-    const totalModulos = 7;
+    console.log('Calculando progreso para encuesta:', encuestaId);
+    console.log('¿Es carrera especializada? (desde localStorage):', esQuimicaOBioquimica);
     
-    // Verificar módulos completados
-    const modulosCompletados = new Set();
-    let fechaCompletado = null;
-    
-    respuestasEncuesta.forEach(respuesta => {
-        if (respuesta.completado) {
-            modulosCompletados.add(respuesta.moduloId);
-            
-            // Actualizar fecha de último módulo completado
-            if (!fechaCompletado || (respuesta.fechaCompletado && respuesta.fechaCompletado > fechaCompletado)) {
-                fechaCompletado = respuesta.fechaCompletado;
-            }
-        }
-    });
-    
-    // Calcular porcentaje
-    const porcentaje = Math.round((modulosCompletados.size / totalModulos) * 100);
-    
-    // Determinar siguiente módulo
-    let siguienteModulo = 'modulo1';
-    
-    if (modulosCompletados.has('modulo1')) {
-        siguienteModulo = 'modulo2';
-        
-        if (modulosCompletados.has('modulo2')) {
-            siguienteModulo = 'modulo3';
-            
-            if (modulosCompletados.has('modulo3')) {
-                siguienteModulo = 'modulo4';
-                
-                if (modulosCompletados.has('modulo4')) {
-                    siguienteModulo = 'modulo5';
-                    
-                    if (modulosCompletados.has('modulo5')) {
-                        siguienteModulo = 'modulo6';
-                        
-                        if (modulosCompletados.has('modulo6')) {
-                            siguienteModulo = 'modulo7';
-                            
-                            if (modulosCompletados.has('modulo7')) {
-                                siguienteModulo = null; // Todos los módulos completados
-                            }
-                        }
-                    }
+    // Si no hay información en localStorage, verificar directamente
+    if (esQuimicaOBioquimicaStr === null) {
+        const userSession = localStorage.getItem('userSession');
+        if (userSession) {
+            try {
+                const userData = JSON.parse(userSession);
+                if (userData.carrera) {
+                    const carrera = userData.carrera.toLowerCase();
+                    esQuimicaOBioquimica = carrera.includes('ingeniería química') || 
+                                    carrera.includes('ingenieria quimica') || 
+                                    carrera.includes('ingeniería bioquímica') || 
+                                    carrera.includes('ingenieria bioquimica') ||
+                                    carrera.includes('química') || 
+                                    carrera.includes('quimica') || 
+                                    carrera.includes('bioquímica') || 
+                                    carrera.includes('bioquimica');
                 }
+                console.log('Verificación alternativa de carrera:', userData.carrera);
+                console.log('¿Es carrera especializada?', esQuimicaOBioquimica);
+            } catch (error) {
+                console.error('Error al verificar carrera del usuario:', error);
             }
         }
     }
     
+    // Filtrar respuestas para esta encuesta
+    const respuestasEncuesta = respuestasUsuario.filter(
+        respuesta => respuesta.id === encuestaId
+    );
+    
+    if (respuestasEncuesta.length === 0) {
+        // No hay respuestas, determinar el primer módulo según la carrera
+        const primerModulo = esQuimicaOBioquimica ? 'modulo1.1' : 'modulo1';
+        return {
+            porcentaje: 0,
+            siguienteModulo: primerModulo,
+            modulosCompletados: []
+        };
+    }
+    
+    const respuesta = respuestasEncuesta[0];
+    
+    // Módulos posibles según la carrera del estudiante
+    const modulosRegulares = ['modulo1', 'modulo2', 'modulo3', 'modulo4', 'modulo5', 'modulo6', 'modulo7'];
+    const modulosEspecializados = ['modulo1.1', 'modulo2.1', 'modulo3.1', 'modulo4.1', 'modulo5.1'];
+    
+    // Seleccionar la secuencia de módulos correcta
+    const modulos = esQuimicaOBioquimica ? modulosEspecializados : modulosRegulares;
+    
+    // Verificar módulos completados
+    const modulosCompletados = [];
+    let siguienteModulo = modulos[0]; // Por defecto, el primer módulo
+    let fechaCompletado = null;
+    
+    // Recorrer todos los módulos posibles
+    for (const moduloId of modulos) {
+        if (respuesta[moduloId] && respuesta[moduloId].completado) {
+            modulosCompletados.push(moduloId);
+            
+            // Actualizar fecha del último módulo completado
+            if (respuesta[moduloId].fechaCompletado) {
+                let nuevaFecha;
+                if (typeof respuesta[moduloId].fechaCompletado.toDate === 'function') {
+                    nuevaFecha = respuesta[moduloId].fechaCompletado.toDate();
+                } else if (respuesta[moduloId].fechaCompletado instanceof Date) {
+                    nuevaFecha = respuesta[moduloId].fechaCompletado;
+                }
+                
+                if (nuevaFecha && (!fechaCompletado || nuevaFecha > fechaCompletado)) {
+                    fechaCompletado = nuevaFecha;
+                }
+            }
+        } else {
+            // Encontramos el primer módulo no completado
+            siguienteModulo = moduloId;
+            break;
+        }
+    }
+    
+    // Si todos los módulos están completados
+    if (modulosCompletados.length === modulos.length) {
+        return {
+            porcentaje: 100,
+            siguienteModulo: null,
+            modulosCompletados,
+            fechaCompletado
+        };
+    }
+    
+    // Calcular porcentaje de progreso
+    const porcentaje = Math.round((modulosCompletados.length / modulos.length) * 100);
+    
     return {
         porcentaje,
         siguienteModulo,
-        modulosCompletados: Array.from(modulosCompletados),
+        modulosCompletados,
         fechaCompletado
     };
 }
@@ -465,8 +458,24 @@ function continuarEncuesta(encuestaId, moduloId) {
     // Almacenar en localStorage para referencia
     localStorage.setItem('encuestaActiva', encuestaId);
     
-    // Redirigir al módulo correspondiente
-    window.location.href = `modulos/${moduloId}.html`;
+    // Obtener la información de carrera especializada desde localStorage
+    // Esta información se establece en alumnos.js cuando el usuario entra al dashboard
+    const esQuimicaOBioquimicaStr = localStorage.getItem('esQuimicaOBioquimica');
+    let esQuimicaOBioquimica = esQuimicaOBioquimicaStr === 'true';
+    
+    console.log('Continuando encuesta, ID:', encuestaId, 'Módulo:', moduloId);
+    console.log('¿Es carrera especializada? (desde localStorage):', esQuimicaOBioquimica);
+    
+    // Si es de Química o Bioquímica, redirigir a los módulos especializados
+    if (esQuimicaOBioquimica && moduloId.match(/^modulo[1-5]$/)) {
+        // Convertir modulo1 a modulo1.1, modulo2 a modulo2.1, etc.
+        const moduloEspecializado = `${moduloId}.1`;
+        console.log(`Redirigiendo a estudiante de Química/Bioquímica al módulo especializado: ${moduloEspecializado}`);
+        window.location.href = `modulos/${moduloEspecializado}.html`;
+    } else {
+        // Redirigir al módulo regular correspondiente
+        window.location.href = `modulos/${moduloId}.html`;
+    }
 }
 
 /**
@@ -487,9 +496,6 @@ function formatearFecha(fecha) {
     
     return fecha.toLocaleDateString('es-MX', opciones);
 }
-
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', inicializarGestorEncuestas);
 
 /**
  * Muestra un mensaje de error en el contenedor de encuestas
@@ -537,8 +543,32 @@ function verRespuestasModulo(encuestaId, moduloId) {
     localStorage.setItem('verEncuestaId', encuestaId);
     localStorage.setItem('verModuloId', moduloId);
     
-    // Redirigir a la página de respuestas (usaremos el mismo módulo pero en modo vista)
-    window.location.href = `modulos/${moduloId}.html?modo=vista`;
+    // Si el módulo ya es un módulo especializado (contiene ".1"),
+    // redirigimos directamente a ese módulo
+    if (moduloId.includes('.1')) {
+        console.log(`Redirigiendo a ver respuestas del módulo especializado: ${moduloId}`);
+        window.location.href = `modulos/${moduloId}.html?modo=vista`;
+        return;
+    }
+    
+    // Obtener la información de carrera especializada desde localStorage
+    // Esta información se establece en alumnos.js cuando el usuario entra al dashboard
+    const esQuimicaOBioquimicaStr = localStorage.getItem('esQuimicaOBioquimica');
+    let esQuimicaOBioquimica = esQuimicaOBioquimicaStr === 'true';
+    
+    console.log('Viendo respuestas, ID:', encuestaId, 'Módulo:', moduloId);
+    console.log('¿Es carrera especializada? (desde localStorage):', esQuimicaOBioquimica);
+    
+    // Si es de Química o Bioquímica y el módulo es de 1 a 5, usar módulo especializado
+    if (esQuimicaOBioquimica && moduloId.match(/^modulo[1-5]$/)) {
+        const moduloEspecializado = `${moduloId}.1`;
+        console.log(`Redirigiendo a ver respuestas del módulo especializado: ${moduloEspecializado}`);
+        window.location.href = `modulos/${moduloEspecializado}.html?modo=vista`;
+    } else {
+        // Redirigir a la página de respuestas del módulo regular
+        console.log(`Redirigiendo a ver respuestas del módulo regular: ${moduloId}`);
+        window.location.href = `modulos/${moduloId}.html?modo=vista`;
+    }
 }
 
 // Exportar funciones para uso global

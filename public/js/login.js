@@ -300,6 +300,15 @@ async function handleLogin(userType) {
             timestamp: new Date().getTime()
         };
         
+        // Si es un alumno, incluir la información de la carrera
+        if (userData.rolUser === 'alumno') {
+            // Solo usar el campo carrera que existe en la base de datos
+            sessionData.carrera = userData.carrera || '';
+            console.log('Información de carrera incluida:', {
+                carrera: sessionData.carrera
+            });
+        }
+        
         localStorage.setItem('userSession', JSON.stringify(sessionData));
         console.log('Sesión guardada:', sessionData);
         

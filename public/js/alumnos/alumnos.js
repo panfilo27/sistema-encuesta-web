@@ -106,6 +106,47 @@ function mostrarDatosUsuario(userData) {
     if (nombreBienvenidaElement && userData.nombre) {
         nombreBienvenidaElement.textContent = userData.nombre;
     }
+    
+    // Detectar si el usuario es de Química o Bioquímica
+    const esQuimicaOBioquimica = detectarCarreraEspecializada(userData);
+    
+    // Actualizar el texto de bienvenida y almacenar la información
+    const welcomeMessageElement = document.querySelector('.welcome-section p');
+    if (welcomeMessageElement) {
+        if (esQuimicaOBioquimica) {
+            welcomeMessageElement.innerHTML = `<strong>Estudiante de Química/Bioquímica:</strong> Se te mostrará una encuesta especializada para tu carrera. Consulta los avisos importantes y tus encuestas pendientes.`;
+        }
+    }
+    
+    // Guardar la información en localStorage para que otros scripts la utilicen
+    localStorage.setItem('esQuimicaOBioquimica', esQuimicaOBioquimica);
+}
+
+/**
+ * Detecta si el usuario es de Ingeniería Química o Bioquímica
+ * @param {Object} userData - Datos del usuario
+ * @returns {boolean} true si es de Química o Bioquímica, false si no
+ */
+function detectarCarreraEspecializada(userData) {
+    if (!userData || !userData.carrera) return false;
+    
+    // Normalizar texto de carrera (quitar acentos y convertir a minúsculas)
+    const carrera = userData.carrera.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    
+    // Verificar si contiene palabras clave de Química o Bioquímica
+    const esQuimicaOBioquimica = [
+        'ingenieria quimica',
+        'quimica', 
+        'ingenieria bioquimica',
+        'bioquimica'
+    ].some(keyword => carrera.includes(keyword));
+    
+    console.log(`Detectando carrera especializada: ${userData.carrera}`);
+    console.log(`¿Es Química o Bioquímica? ${esQuimicaOBioquimica}`);
+    
+    return esQuimicaOBioquimica;
 }
 
 /**
