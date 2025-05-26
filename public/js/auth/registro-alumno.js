@@ -224,7 +224,7 @@ async function handleRegistrationAlumno() {
                 email: email,
                 rolUser: 'alumno',
                 carreraId: carreraId,
-                carreraNombre: carreraNombre, // Guardar el nombre de la carrera obtenido de Firestore
+                carrera: carreraNombre, // Guardar el nombre de la carrera obtenido de Firestore
                 // NOTA: Solo para pruebas - Guardar la contraseña en texto plano
                 // ADVERTENCIA: Esto no debe hacerse en un entorno de producción por razones de seguridad
                 // Se almacena aquí solo para facilitar pruebas y demostraciones
