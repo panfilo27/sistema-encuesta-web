@@ -216,12 +216,37 @@ async function exportarDatosAExcel() {
             throw new Error('La biblioteca XLSX no está cargada. Intente nuevamente en unos segundos.');
         }
         
-        // Obtener los alumnos filtrados actualmente
-        const alumnosFiltrados = obtenerAlumnosFiltrados();
-        if (!alumnosFiltrados || alumnosFiltrados.length === 0) {
-            alert('No hay alumnos para exportar. Aplique filtros diferentes.');
+        // Obtener los alumnos mostrados actualmente en la tabla
+        const tabla = document.getElementById('tabla-alumnos');
+        if (!tabla) {
+            alert('No se puede acceder a la tabla de alumnos.');
             return;
         }
+        
+        // Obtener todos los alumnos visibles en la tabla (filas que no están ocultas)
+        const filasAlumnos = Array.from(tabla.querySelectorAll('tbody tr:not([style*="display: none"])')); 
+        
+        if (!filasAlumnos || filasAlumnos.length === 0) {
+            alert('No hay alumnos visibles para exportar. Aplique filtros diferentes.');
+            return;
+        }
+        
+        // Convertir filas a datos de alumnos
+        const alumnosFiltrados = filasAlumnos.map(fila => {
+            const idAlumno = fila.getAttribute('data-alumno-id');
+            if (!idAlumno) {
+                console.warn('Fila sin ID de alumno detectada');
+                return null;
+            }
+            return { id: idAlumno };
+        }).filter(alumno => alumno !== null); // Eliminar los nulos
+        
+        if (alumnosFiltrados.length === 0) {
+            alert('No se pudieron obtener los IDs de los alumnos. Verifique la tabla.');
+            return;
+        }
+        
+        console.log(`Se obtuvieron ${alumnosFiltrados.length} alumnos filtrados para exportar`);
         
         // Obtener el periodo de encuesta seleccionado
         const filtroPeriodoEncuesta = document.getElementById('filtro-periodo-encuesta');
@@ -392,49 +417,69 @@ async function exportarEncuestasEspecializadas(datosEncuestas) {
 
 /**
  * Obtiene los datos de encuestas para cada alumno
- * @param {Array} alumnos - Lista de alumnos para los que se quiere obtener datos
+ * @param {Array} alumnos - Lista de alumnos (objetos con id) para los que se quiere obtener datos
  * @returns {Promise<Array>} - Lista de objetos con datos de alumnos y sus encuestas
  */
 async function obtenerDatosEncuestasAlumnos(alumnos) {
     try {
         const resultado = [];
         
-        // Para cada alumno, obtener su historial de encuestas
+        // Para cada alumno, obtener primero sus datos completos y luego su historial de encuestas
         for (const alumno of alumnos) {
-            mostrarMensajeCargando(`Procesando datos de ${alumno.getNombreCompleto()}...`);
-            
-            // Determinar qué encuesta buscar
-            let encuestaId = '';
-            
-            // Si hay un periodo seleccionado, usar ese
-            const filtroPeriodo = document.getElementById('filtro-periodo-encuesta');
-            if (filtroPeriodo && filtroPeriodo.value) {
-                encuestaId = filtroPeriodo.value;
-            } else if (alumno.historialEncuestas && alumno.historialEncuestas.length > 0) {
-                // Si no hay periodo seleccionado, usar la última encuesta del alumno
-                alumno.historialEncuestas.sort((a, b) => {
-                    if (!a.fechaCompletado) return 1;
-                    if (!b.fechaCompletado) return -1;
-                    return b.fechaCompletado - a.fechaCompletado;
-                });
-                encuestaId = alumno.historialEncuestas[0].encuestaId;
-            }
-            
-            if (!encuestaId) {
-                console.log(`No se encontró encuesta para ${alumno.getNombreCompleto()}`);
-                // Añadir datos básicos sin respuestas
-                resultado.push({
-                    alumno: alumno,
-                    respuestasModulo1: {},
-                    respuestasModulo2: {},
-                    fechaCompletado: null
-                });
-                continue;
-            }
-            
-            // Obtener datos de la encuesta
             try {
-                // Buscar en la ruta correcta: usuario/[id_usuario]/historial_encuestas
+                // Obtener datos completos del alumno
+                const alumnoDoc = await firebase.firestore()
+                    .collection('usuario')
+                    .doc(alumno.id)
+                    .get();
+                
+                if (!alumnoDoc.exists) {
+                    console.error(`No se encontraron datos para el alumno con ID: ${alumno.id}`);
+                    continue;
+                }
+                
+                // Datos del alumno
+                const alumnoData = alumnoDoc.data();
+                const nombreCompleto = `${alumnoData.nombre || ''} ${alumnoData.apellidoPaterno || ''} ${alumnoData.apellidoMaterno || ''}`.trim();
+                mostrarMensajeCargando(`Procesando datos de ${nombreCompleto || 'Alumno ID: ' + alumno.id}...`);
+                
+                // Determinar qué encuesta buscar
+                let encuestaId = '';
+                
+                // Si hay un periodo seleccionado, usar ese
+                const filtroPeriodo = document.getElementById('filtro-periodo-encuesta');
+                if (filtroPeriodo && filtroPeriodo.value) {
+                    encuestaId = filtroPeriodo.value;
+                }
+                
+                // Si no hay encuestaId definida, intentar buscar la última encuesta del alumno
+                if (!encuestaId) {
+                    const historialRef = firebase.firestore()
+                        .collection('usuario')
+                        .doc(alumno.id)
+                        .collection('historial_encuestas');
+                    
+                    // Obtener todas las encuestas y ordenarlas por fecha
+                    const todasEncuestas = await historialRef.orderBy('fechaCreacion', 'desc').limit(1).get();
+                    
+                    if (!todasEncuestas.empty) {
+                        encuestaId = todasEncuestas.docs[0].data().encuestaId;
+                    }
+                }
+                
+                if (!encuestaId) {
+                    console.log(`No se encontró encuesta para el alumno: ${nombreCompleto}`);
+                    // Añadir datos básicos sin respuestas
+                    resultado.push({
+                        alumnoId: alumno.id,
+                        alumnoData: alumnoData,
+                        encuestaData: {},
+                        fechaCompletado: null
+                    });
+                    continue;
+                }
+                
+                // Obtener datos de la encuesta
                 const historialSnapshot = await firebase.firestore()
                     .collection('usuario')
                     .doc(alumno.id)
@@ -443,11 +488,11 @@ async function obtenerDatosEncuestasAlumnos(alumnos) {
                     .get();
                 
                 if (historialSnapshot.empty) {
-                    console.log(`No se encontró historial para ${alumno.getNombreCompleto()} en la encuesta ${encuestaId}`);
+                    console.log(`No se encontró historial para ${nombreCompleto} en la encuesta ${encuestaId}`);
                     resultado.push({
-                        alumno: alumno,
-                        respuestasModulo1: {},
-                        respuestasModulo2: {},
+                        alumnoId: alumno.id,
+                        alumnoData: alumnoData,
+                        encuestaData: {},
                         fechaCompletado: null
                     });
                     continue;
@@ -457,46 +502,32 @@ async function obtenerDatosEncuestasAlumnos(alumnos) {
                 const historialDoc = historialSnapshot.docs[0];
                 const historialData = historialDoc.data();
                 
-                // Obtener las respuestas para todos los módulos (1-7)
-                const respuestasModulos = {};
-                
-                // Obtener datos de cada módulo si está disponible
-                for (let i = 1; i <= 7; i++) {
-                    const moduloKey = `modulo${i}`;
-                    respuestasModulos[moduloKey] = {};
-                    
-                    if (historialData[moduloKey] && historialData[moduloKey].datos) {
-                        respuestasModulos[moduloKey] = historialData[moduloKey].datos;
-                        console.log(`Respuestas módulo ${i} encontradas:`, respuestasModulos[moduloKey]);
-                    }
-                }
-                
-                // Para módulo 7, añadir campos adicionales a nivel de encuesta
-                if (respuestasModulos.modulo7) {
-                    respuestasModulos.modulo7.encuestaCompletada = historialData.encuestaCompletada || false;
-                    respuestasModulos.modulo7.fechaCompletado = historialData.fechaCompletado || null;
-                }
-                
                 // Añadir datos al resultado
-                const resultadoAlumno = {
-                    alumno: alumno,
-                    fechaCompletado: historialData.fechaCompletado?.toDate()
+                const datoAlumno = {
+                    alumnoId: alumno.id,
+                    alumnoData: alumnoData,
+                    encuestaData: historialData,
+                    fechaCompletado: historialData.fechaCompletado ? historialData.fechaCompletado.toDate() : null
                 };
                 
-                // Añadir todas las respuestas de módulos
-                for (let i = 1; i <= 7; i++) {
-                    resultadoAlumno[`respuestasModulo${i}`] = respuestasModulos[`modulo${i}`] || {};
-                }
+                // Comprobar si es una encuesta especializada (tiene módulos con nombre modulo1_1, etc.)
+                const tieneModulosEspecializados = (
+                    historialData.modulo1_1 || 
+                    historialData.modulo2_1 || 
+                    historialData.modulo3_1 || 
+                    historialData.modulo4_1 || 
+                    historialData.modulo5_1
+                );
                 
-                resultado.push(resultadoAlumno);
+                // Determinar el tipo de encuesta y añadirlo al objeto
+                datoAlumno.encuestaData.tipo = tieneModulosEspecializados ? 'especializada' : 'regular';
+                
+                resultado.push(datoAlumno);
                 
             } catch (error) {
-                console.error(`Error al obtener datos de encuesta para ${alumno.getNombreCompleto()}:`, error);
+                console.error(`Error al procesar alumno con ID ${alumno.id}:`, error);
                 resultado.push({
-                    alumno: alumno,
-                    respuestasModulo1: {},
-                    respuestasModulo2: {},
-                    fechaCompletado: null,
+                    alumnoId: alumno.id,
                     error: error.message
                 });
             }
@@ -534,15 +565,24 @@ function prepararDatosExcel(datosCompletos, modulo) {
     
     // Para cada alumno, crear una fila con sus datos y respuestas
     for (const datos of datosCompletos) {
-        const alumno = datos.alumno;
-        const respuestas = datos[`respuestasModulo${modulo}`] || {};
+        // Verificar que existan los datos necesarios
+        if (!datos.alumnoData || !datos.encuestaData) {
+            console.log('Datos incompletos para alumno:', datos.alumnoId);
+            continue;
+        }
+        
+        const alumnoData = datos.alumnoData;
+        const encuestaData = datos.encuestaData;
+        const moduloData = encuestaData[`modulo${modulo}`] || {};
+        const respuestas = moduloData.datos || {};
         const fechaCompletado = datos.fechaCompletado;
         
         // Crear objeto base con datos básicos del alumno
         const fila = {
-            "No. Control": alumno.usuario || '',
-            "Nombre": alumno.getNombreCompleto(),
-            "Carrera": alumno.nombreCarrera || ''
+            "ID": datos.alumnoId || '',
+            "No. Control": alumnoData.usuario || '',
+            "Nombre": `${alumnoData.nombre || ''} ${alumnoData.apellidoPaterno || ''} ${alumnoData.apellidoMaterno || ''}`.trim(),
+            "Carrera": alumnoData.carreraNombre || ''
         };
         
         // Añadir fecha de completado si existe
@@ -562,6 +602,9 @@ function prepararDatosExcel(datosCompletos, modulo) {
                 fila[pregunta] = respuestas[clave] || '';
             }
         }
+        
+        // Añadir estado de completitud del módulo
+        fila['Módulo Completado'] = moduloData.completado ? 'Sí' : 'No';
         
         resultado.push(fila);
     }
@@ -591,15 +634,26 @@ function prepararDatosExcelEspecializados(datosCompletos, modulo) {
     
     // Para cada alumno, crear una fila con sus datos y respuestas
     for (const datos of datosCompletos) {
-        const alumno = datos.alumno;
-        const respuestas = datos[`respuestasModulo${modulo}_1`] || {};
-        const fechaCompletado = datos.fechaCompletadoEspecializada;
+        // Verificar que existan los datos necesarios
+        if (!datos.alumnoData || !datos.encuestaData) {
+            console.log('Datos incompletos para alumno:', datos.alumnoId);
+            continue;
+        }
+        
+        const alumnoData = datos.alumnoData;
+        const encuestaData = datos.encuestaData;
+        // Los módulos especializados tienen nombre con formato modulo1_1, modulo2_1, etc.
+        const moduloKey = `modulo${modulo}_1`;
+        const moduloData = encuestaData[moduloKey] || {};
+        const respuestas = moduloData.datos || {};
+        const fechaCompletado = datos.fechaCompletado;
         
         // Crear objeto base con datos básicos del alumno
         const fila = {
-            "No. Control": alumno.usuario || '',
-            "Nombre": alumno.getNombreCompleto(),
-            "Carrera": alumno.nombreCarrera || ''
+            "ID": datos.alumnoId || '',
+            "No. Control": alumnoData.usuario || '',
+            "Nombre": `${alumnoData.nombre || ''} ${alumnoData.apellidoPaterno || ''} ${alumnoData.apellidoMaterno || ''}`.trim(),
+            "Carrera": alumnoData.carreraNombre || ''
         };
         
         // Añadir fecha de completado si existe
@@ -619,6 +673,9 @@ function prepararDatosExcelEspecializados(datosCompletos, modulo) {
                 fila[pregunta] = respuestas[clave] || '';
             }
         }
+        
+        // Añadir estado de completitud del módulo
+        fila['Módulo Completado'] = moduloData.completado ? 'Sí' : 'No';
         
         resultado.push(fila);
     }
