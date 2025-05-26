@@ -680,8 +680,17 @@ function prepararDatosExcel(datosCompletos, modulo) {
         const alumnoData = datos.alumnoData;
         const encuestaData = datos.encuestaData;
         const moduloData = encuestaData[`modulo${modulo}`] || {};
-        const respuestas = moduloData.datos || {};
-        const fechaCompletado = datos.fechaCompletado;
+        
+        // FILTRO: Solo incluir alumnos que han completado este módulo
+        if (!moduloData.completado || !moduloData.datos) {
+            console.log(`Alumno ${alumnoData.nombre} no ha completado el módulo ${modulo}`);
+            continue;
+        }
+        
+        const respuestas = moduloData.datos;
+        const fechaCompletado = moduloData.fechaCompletado ? 
+                                (moduloData.fechaCompletado.toDate ? moduloData.fechaCompletado.toDate() : moduloData.fechaCompletado) : 
+                                datos.fechaCompletado;
         
         // Crear objeto base con datos básicos del alumno
         const fila = {
@@ -691,11 +700,15 @@ function prepararDatosExcel(datosCompletos, modulo) {
             "Carrera": alumnoData.carreraNombre || ''
         };
         
-        // Añadir fecha de completado si existe
+        // Añadir fecha de completado
         if (fechaCompletado) {
-            fila["Fecha Completado"] = fechaCompletado.toLocaleDateString('es-MX');
-        } else {
-            fila["Fecha Completado"] = 'No completado';
+            try {
+                fila["Fecha Completado"] = fechaCompletado instanceof Date ? 
+                                          fechaCompletado.toLocaleDateString('es-MX') : 
+                                          new Date(fechaCompletado).toLocaleDateString('es-MX');
+            } catch (e) {
+                fila["Fecha Completado"] = 'Fecha inválida';
+            }
         }
         
         // Añadir respuestas a las preguntas
@@ -709,9 +722,7 @@ function prepararDatosExcel(datosCompletos, modulo) {
             }
         }
         
-        // Añadir estado de completitud del módulo
-        fila['Módulo Completado'] = moduloData.completado ? 'Sí' : 'No';
-        
+        // Añadir a resultados
         resultado.push(fila);
     }
     
@@ -751,8 +762,17 @@ function prepararDatosExcelEspecializados(datosCompletos, modulo) {
         // Los módulos especializados tienen nombre con formato modulo1_1, modulo2_1, etc.
         const moduloKey = `modulo${modulo}_1`;
         const moduloData = encuestaData[moduloKey] || {};
-        const respuestas = moduloData.datos || {};
-        const fechaCompletado = datos.fechaCompletado;
+        
+        // FILTRO: Solo incluir alumnos que han completado este módulo especializado
+        if (!moduloData.completado || !moduloData.datos) {
+            console.log(`Alumno ${alumnoData.nombre} no ha completado el módulo especializado ${modulo}_1`);
+            continue;
+        }
+        
+        const respuestas = moduloData.datos;
+        const fechaCompletado = moduloData.fechaCompletado ? 
+                                (moduloData.fechaCompletado.toDate ? moduloData.fechaCompletado.toDate() : moduloData.fechaCompletado) : 
+                                datos.fechaCompletado;
         
         // Crear objeto base con datos básicos del alumno
         const fila = {
@@ -762,11 +782,15 @@ function prepararDatosExcelEspecializados(datosCompletos, modulo) {
             "Carrera": alumnoData.carreraNombre || ''
         };
         
-        // Añadir fecha de completado si existe
+        // Añadir fecha de completado
         if (fechaCompletado) {
-            fila["Fecha Completado"] = fechaCompletado.toLocaleDateString('es-MX');
-        } else {
-            fila["Fecha Completado"] = 'No completado';
+            try {
+                fila["Fecha Completado"] = fechaCompletado instanceof Date ? 
+                                          fechaCompletado.toLocaleDateString('es-MX') : 
+                                          new Date(fechaCompletado).toLocaleDateString('es-MX');
+            } catch (e) {
+                fila["Fecha Completado"] = 'Fecha inválida';
+            }
         }
         
         // Añadir respuestas a las preguntas
@@ -780,9 +804,7 @@ function prepararDatosExcelEspecializados(datosCompletos, modulo) {
             }
         }
         
-        // Añadir estado de completitud del módulo
-        fila['Módulo Completado'] = moduloData.completado ? 'Sí' : 'No';
-        
+        // Añadir a resultados
         resultado.push(fila);
     }
     
