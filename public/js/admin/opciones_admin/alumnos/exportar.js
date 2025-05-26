@@ -2,6 +2,9 @@
  * Módulo para exportación de datos de alumnos y encuestas
  * Este archivo maneja la funcionalidad para exportar a Excel la información
  * de los alumnos filtrados y sus respuestas a las encuestas.
+ * 
+ * Se incluye soporte para exportar tanto encuestas generales como encuestas
+ * especializadas para alumnos de Química y Bioquímica.
  */
 
 // Definición de preguntas por módulo para la exportación
@@ -116,6 +119,55 @@ const PREGUNTAS_MODULO7 = {
     "fechaCompletado": "Fecha de finalización"
 };
 
+// Definición de preguntas para módulos especializados (Química y Bioquímica)
+const PREGUNTAS_MODULO1_1 = {
+    "nombre_completo": "Nombre Completo",
+    "telefono_celular": "Teléfono Celular",
+    "redes_sociales": "Redes Sociales",
+    "email": "Correo Electrónico",
+    "fecha_ingreso": "Año de Ingreso",
+    "fecha_egreso": "Año de Egreso",
+    "titulado": "¿Estás titulado?",
+    "razon_no_titulado": "Razón por la que no te has titulado",
+    "trabajo_relacionado": "¿Tu trabajo actual está relacionado con tu carrera?"
+};
+
+const PREGUNTAS_MODULO2_1 = {
+    "trabaja": "¿Trabajas actualmente?",
+    "antiguedad": "Antigüedad en el trabajo actual",
+    "razon_no_trabajo": "Razón por la que no trabajas",
+    "tiempo_primer_empleo": "Tiempo para conseguir primer empleo",
+    "razon_no_conseguir": "¿Por qué no has conseguido empleo?",
+    "tipo_sector": "¿En qué sector te desempeñas?",
+    "rol_trabajo": "¿Cuál es tu rol principal?",
+    "medio_conseguir_empleo": "¿Cómo conseguiste empleo?", 
+    "satisfaccion_trabajo": "Nivel de satisfacción laboral"
+};
+
+const PREGUNTAS_MODULO3_1 = {
+    "utilidad_competencias": "Utilidad de competencias adquiridas",
+    "satisfaccion_carrera": "Grado de satisfacción con la carrera",
+    "aspectos_reforzar": "Aspectos a reforzar en el plan de estudios",
+    "otro_aspecto": "Otros aspectos a reforzar"
+};
+
+const PREGUNTAS_MODULO4_1 = {
+    "contactado_institucion": "¿La institución te ha contactado?",
+    "participar_institucion": "¿Te gustaría participar con la institución?",
+    "formas_participacion": "Formas de participación que te interesan"
+};
+
+const PREGUNTAS_MODULO5_1 = {
+    "herramientas": "Herramientas utilizadas en desempeño profesional",
+    "colabora_investigacion": "¿Colaboras en investigación y desarrollo?",
+    "tipo_investigacion": "Tipo de investigación",
+    "area_especializacion": "Área de especialización",
+    "certificaciones": "Certificaciones profesionales",
+    "asociacion_profesional": "¿Perteneces a una asociación profesional?",
+    "nombre_asociacion": "Nombre de la asociación",
+    "aporte_etica": "¿Cómo aporta la ética a tu trabajo?"
+};
+
 /**
  * Inicializa el módulo de exportación
  */
@@ -165,6 +217,7 @@ async function exportarDatosAExcel() {
         }
         
         // Obtener los alumnos filtrados actualmente
+        const alumnosFiltrados = obtenerAlumnosFiltrados();
         if (!alumnosFiltrados || alumnosFiltrados.length === 0) {
             alert('No hay alumnos para exportar. Aplique filtros diferentes.');
             return;
@@ -178,68 +231,51 @@ async function exportarDatosAExcel() {
         mostrarMensajeCargando('Obteniendo datos de encuestas...');
         const datosEncuestas = await obtenerDatosEncuestasAlumnos(alumnosFiltrados, periodoEncuestaId);
         
-        // Crear libro de Excel
-        mostrarMensajeCargando('Creando archivo Excel...');
-        const wb = XLSX.utils.book_new();
-        
-        // Definir nombres cortos de los módulos (menos de 31 caracteres en total)
-        const nombresModulos = [
-            "Datos Personales",
-            "Evaluacion Academica",
-            "Ubicacion Laboral",
-            "Datos de Empleo",
-            "Desempeno Profesional",
-            "Expectativas",
-            "Comentarios"
-        ];
-        
-        // Preparar y añadir cada módulo como una hoja separada
-        let hayDatos = false;
-        
-        for (let modulo = 1; modulo <= 7; modulo++) {
-            mostrarMensajeCargando(`Formateando datos del Módulo ${modulo}...`);
-            const datosModulo = prepararDatosExcel(datosEncuestas, modulo);
-            
-            if (datosModulo.length > 0) {
-                hayDatos = true;
-                const ws = XLSX.utils.json_to_sheet(datosModulo);
-                XLSX.utils.book_append_sheet(wb, ws, `Mod${modulo}-${nombresModulos[modulo-1]}`.substring(0, 31));
-            }
-        }
-        
-        if (!hayDatos) {
-            alert('No hay datos para exportar con los filtros actuales.');
+        if (!datosEncuestas || datosEncuestas.length === 0) {
             ocultarMensajeDeCarga();
+            alert('No se encontraron datos de encuestas para los alumnos seleccionados.');
             return;
         }
         
-        // Obtener nombre del archivo
-        const fechaActual = new Date().toISOString().slice(0, 10);
+        // Separar datos por tipo de encuesta
+        const datosRegulares = [];
+        const datosEspecializados = [];
         
-        // Construir nombre del archivo
-        let nombreBase = `Encuestas_Completas_${fechaActual}`;
-        
-        // Si hay un periodo seleccionado, añadirlo al nombre
-        if (filtroPeriodoEncuesta && filtroPeriodoEncuesta.selectedIndex > 0) {
-            const textoPeriodo = filtroPeriodoEncuesta.options[filtroPeriodoEncuesta.selectedIndex].text;
-            const periodoFormateado = textoPeriodo.replace(/\s+/g, '_').replace(/[()]/g, '');
-            nombreBase += `_${periodoFormateado}`;
+        // Identificar encuestas regulares y especializadas
+        for (const dato of datosEncuestas) {
+            if (dato.encuestaData && dato.encuestaData.tipo === 'especializada') {
+                datosEspecializados.push(dato);
+            } else {
+                datosRegulares.push(dato);
+            }
         }
         
-        const nombreArchivo = `${nombreBase}.xlsx`;
+        // Mostrar información sobre lo que se va a exportar
+        let mensajeInfo = '';
+        if (datosRegulares.length > 0) {
+            mensajeInfo += `Se exportarán ${datosRegulares.length} encuestas regulares. `;
+        }
+        if (datosEspecializados.length > 0) {
+            mensajeInfo += `Se exportarán ${datosEspecializados.length} encuestas especializadas para Química/Bioquímica.`;
+        }
+        mostrarMensaje(mensajeInfo, 'info');
         
-        // Exportar a Excel
-        XLSX.writeFile(wb, nombreArchivo);
+        // Exportar encuestas regulares si existen
+        if (datosRegulares.length > 0) {
+            await exportarEncuestasRegulares(datosRegulares);
+        }
         
-        // Ocultar mensaje de carga
-        ocultarMensajeDeCarga();
-        
-        // Notificar éxito
-        alert(`Datos exportados correctamente a ${nombreArchivo}`);
+        // Exportar encuestas especializadas si existen
+        if (datosEspecializados.length > 0) {
+            await exportarEncuestasEspecializadas(datosEspecializados);
+        }
         
         // Restaurar el estado original del botón
         btnExportar.innerHTML = textoOriginal;
         btnExportar.classList.remove('procesando');
+        
+        // Ocultar mensaje de carga
+        ocultarMensajeDeCarga();
         
     } catch (error) {
         console.error('Error al exportar datos a Excel:', error);
@@ -250,6 +286,108 @@ async function exportarDatosAExcel() {
         btnExportar.innerHTML = textoOriginal;
         btnExportar.classList.remove('procesando');
     }
+}
+
+/**
+ * Exporta a Excel las encuestas regulares
+ * @param {Array} datosEncuestas - Datos de encuestas regulares
+ */
+async function exportarEncuestasRegulares(datosEncuestas) {
+    // Crear libro de Excel
+    mostrarMensajeCargando('Creando archivo Excel para encuestas regulares...');
+    const wb = XLSX.utils.book_new();
+    
+    // Definir nombres cortos de los módulos (menos de 31 caracteres en total)
+    const nombresModulos = [
+        "Datos Personales",
+        "Evaluacion Academica",
+        "Ubicacion Laboral",
+        "Datos de Empleo",
+        "Desempeno Profesional",
+        "Expectativas",
+        "Comentarios"
+    ];
+    
+    // Preparar y añadir cada módulo como una hoja separada
+    let hayDatos = false;
+    
+    for (let modulo = 1; modulo <= 7; modulo++) {
+        mostrarMensajeCargando(`Formateando datos del Módulo ${modulo}...`);
+        const datosModulo = prepararDatosExcel(datosEncuestas, modulo);
+        
+        if (datosModulo.length > 0) {
+            hayDatos = true;
+            const ws = XLSX.utils.json_to_sheet(datosModulo);
+            XLSX.utils.book_append_sheet(wb, ws, `Mod${modulo}-${nombresModulos[modulo-1]}`.substring(0, 31));
+        }
+    }
+    
+    if (!hayDatos) {
+        mostrarMensaje('No hay datos para exportar en las encuestas regulares', 'info');
+        return;
+    }
+    
+    // Obtener nombre del archivo
+    const fechaActual = new Date();
+    const fechaStr = fechaActual.toISOString().slice(0, 10);
+    const horaStr = `${fechaActual.getHours()}-${fechaActual.getMinutes()}`;
+    
+    // Construir nombre del archivo
+    const nombreArchivo = `Encuestas_Regulares_${fechaStr}_${horaStr}.xlsx`;
+    
+    // Exportar a Excel
+    XLSX.writeFile(wb, nombreArchivo);
+    mostrarMensaje(`Encuestas regulares exportadas correctamente a ${nombreArchivo}`, 'success');
+}
+
+/**
+ * Exporta a Excel las encuestas especializadas
+ * @param {Array} datosEncuestas - Datos de encuestas especializadas
+ */
+async function exportarEncuestasEspecializadas(datosEncuestas) {
+    // Crear libro de Excel
+    mostrarMensajeCargando('Creando archivo Excel para encuestas especializadas...');
+    const wb = XLSX.utils.book_new();
+    
+    // Definir nombres de los módulos especializados
+    const nombresModulos = [
+        "Datos Generales",
+        "Situacion Laboral",
+        "Plan de Estudios",
+        "Institucion",
+        "Desempeno Laboral"
+    ];
+    
+    // Preparar y añadir cada módulo especializado como una hoja separada
+    let hayDatos = false;
+    
+    for (let modulo = 1; modulo <= 5; modulo++) {
+        mostrarMensajeCargando(`Formateando datos del Módulo ${modulo}.1...`);
+        const datosModulo = prepararDatosExcelEspecializados(datosEncuestas, modulo);
+        
+        if (datosModulo.length > 0) {
+            hayDatos = true;
+            const ws = XLSX.utils.json_to_sheet(datosModulo);
+            XLSX.utils.book_append_sheet(wb, ws, `Mod${modulo}.1-${nombresModulos[modulo-1]}`.substring(0, 31));
+        }
+    }
+    
+    if (!hayDatos) {
+        mostrarMensaje('No hay datos para exportar en las encuestas especializadas', 'info');
+        return;
+    }
+    
+    // Obtener nombre del archivo
+    const fechaActual = new Date();
+    const fechaStr = fechaActual.toISOString().slice(0, 10);
+    const horaStr = `${fechaActual.getHours()}-${fechaActual.getMinutes()}`;
+    
+    // Construir nombre del archivo
+    const nombreArchivo = `Encuestas_Especializadas_Quimica_${fechaStr}_${horaStr}.xlsx`;
+    
+    // Exportar a Excel
+    XLSX.writeFile(wb, nombreArchivo);
+    mostrarMensaje(`Encuestas especializadas exportadas correctamente a ${nombreArchivo}`, 'success');
 }
 
 /**
@@ -399,6 +537,63 @@ function prepararDatosExcel(datosCompletos, modulo) {
         const alumno = datos.alumno;
         const respuestas = datos[`respuestasModulo${modulo}`] || {};
         const fechaCompletado = datos.fechaCompletado;
+        
+        // Crear objeto base con datos básicos del alumno
+        const fila = {
+            "No. Control": alumno.usuario || '',
+            "Nombre": alumno.getNombreCompleto(),
+            "Carrera": alumno.nombreCarrera || ''
+        };
+        
+        // Añadir fecha de completado si existe
+        if (fechaCompletado) {
+            fila["Fecha Completado"] = fechaCompletado.toLocaleDateString('es-MX');
+        } else {
+            fila["Fecha Completado"] = 'No completado';
+        }
+        
+        // Añadir respuestas a las preguntas
+        for (const [clave, pregunta] of Object.entries(preguntas)) {
+            // Para campos anidados como aspectos.areaEstudio, acceder correctamente
+            if (clave.includes('.')) {
+                const [objetoPadre, campoHijo] = clave.split('.');
+                fila[pregunta] = respuestas[objetoPadre]?.[campoHijo] || '';
+            } else {
+                fila[pregunta] = respuestas[clave] || '';
+            }
+        }
+        
+        resultado.push(fila);
+    }
+    
+    return resultado;
+}
+
+/**
+ * Prepara los datos para exportar a Excel de las encuestas especializadas
+ * @param {Array} datosCompletos - Datos de alumnos con sus respuestas especializadas
+ * @param {number} modulo - Número de módulo (1 a 5)
+ * @returns {Array} - Datos formateados para Excel
+ */
+function prepararDatosExcelEspecializados(datosCompletos, modulo) {
+    const resultado = [];
+    
+    // Seleccionar las preguntas según el módulo especializado
+    let preguntas;
+    switch(modulo) {
+        case 1: preguntas = PREGUNTAS_MODULO1_1; break;
+        case 2: preguntas = PREGUNTAS_MODULO2_1; break;
+        case 3: preguntas = PREGUNTAS_MODULO3_1; break;
+        case 4: preguntas = PREGUNTAS_MODULO4_1; break;
+        case 5: preguntas = PREGUNTAS_MODULO5_1; break;
+        default: preguntas = PREGUNTAS_MODULO1_1;
+    }
+    
+    // Para cada alumno, crear una fila con sus datos y respuestas
+    for (const datos of datosCompletos) {
+        const alumno = datos.alumno;
+        const respuestas = datos[`respuestasModulo${modulo}_1`] || {};
+        const fechaCompletado = datos.fechaCompletadoEspecializada;
         
         // Crear objeto base con datos básicos del alumno
         const fila = {
