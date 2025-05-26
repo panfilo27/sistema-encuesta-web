@@ -380,6 +380,16 @@ async function exportarEncuestasRegulares(datosEncuestas) {
         "Comentarios"
     ];
     
+    // Colores para el formato
+    const colores = {
+        encabezado: { fgColor: { rgb: "4F81BD" } },  // Azul institucional
+        filasAlternas: { fgColor: { rgb: "F2F2F2" } }, // Gris claro para filas alternas
+        bordeEncabezado: { top: { style: 'thin', color: { rgb: '000000' } },
+                          bottom: { style: 'thin', color: { rgb: '000000' } },
+                          left: { style: 'thin', color: { rgb: '000000' } },
+                          right: { style: 'thin', color: { rgb: '000000' } } }
+    };
+    
     // Preparar y añadir cada módulo como una hoja separada
     let hayDatos = false;
     
@@ -389,7 +399,12 @@ async function exportarEncuestasRegulares(datosEncuestas) {
         
         if (datosModulo.length > 0) {
             hayDatos = true;
+            
+            // Crear hoja y aplicar formato
             const ws = XLSX.utils.json_to_sheet(datosModulo);
+            aplicarFormatoExcel(ws, datosModulo);
+            
+            // Añadir la hoja al libro
             XLSX.utils.book_append_sheet(wb, ws, `Mod${modulo}-${nombresModulos[modulo-1]}`.substring(0, 31));
         }
     }
@@ -430,6 +445,16 @@ async function exportarEncuestasEspecializadas(datosEncuestas) {
         "Desempeno Laboral"
     ];
     
+    // Colores para el formato (usando colores distintivos para diferenciar de las encuestas regulares)
+    const colores = {
+        encabezado: { fgColor: { rgb: "8064A2" } },  // Morado para encuestas especializadas
+        filasAlternas: { fgColor: { rgb: "F2F2F2" } }, // Gris claro para filas alternas
+        bordeEncabezado: { top: { style: 'thin', color: { rgb: '000000' } },
+                          bottom: { style: 'thin', color: { rgb: '000000' } },
+                          left: { style: 'thin', color: { rgb: '000000' } },
+                          right: { style: 'thin', color: { rgb: '000000' } } }
+    };
+    
     // Preparar y añadir cada módulo especializado como una hoja separada
     let hayDatos = false;
     
@@ -440,6 +465,7 @@ async function exportarEncuestasEspecializadas(datosEncuestas) {
         if (datosModulo.length > 0) {
             hayDatos = true;
             const ws = XLSX.utils.json_to_sheet(datosModulo);
+            aplicarFormatoExcel(ws, datosModulo, colores);
             XLSX.utils.book_append_sheet(wb, ws, `Mod${modulo}.1-${nombresModulos[modulo-1]}`.substring(0, 31));
         }
     }
@@ -905,4 +931,96 @@ function mostrarMensaje(mensaje, tipo = 'info') {
             mensajeElement.remove();
         }
     }, 5000);
+}
+
+/**
+ * Aplica formato y estilos a una hoja de Excel para mejorar su apariencia
+ * @param {Worksheet} ws - Hoja de Excel a formatear
+ * @param {Array} datos - Datos contenidos en la hoja
+ * @param {Object} colores - Colores para aplicar al formato (opcional)
+ */
+function aplicarFormatoExcel(ws, datos, colores = null) {
+    if (!ws || !datos || datos.length === 0) return;
+    
+    // Si no se proporcionan colores, usar colores por defecto
+    if (!colores) {
+        colores = {
+            encabezado: { fgColor: { rgb: "4F81BD" } },  // Azul institucional
+            filasAlternas: { fgColor: { rgb: "F2F2F2" } }, // Gris claro para filas alternas
+            bordeEncabezado: { top: { style: 'thin', color: { rgb: '000000' } },
+                          bottom: { style: 'thin', color: { rgb: '000000' } },
+                          left: { style: 'thin', color: { rgb: '000000' } },
+                          right: { style: 'thin', color: { rgb: '000000' } } }
+        };
+    }
+    
+    try {
+        // Obtener todas las claves (encabezados) del primer objeto
+        const encabezados = Object.keys(datos[0]);
+        
+        // Configurar anchos de columna basados en el contenido
+        const wscols = [];
+        for (let i = 0; i < encabezados.length; i++) {
+            // Calcular el ancho basado en la longitud del encabezado y los datos
+            let maxLength = encabezados[i].length;
+            
+            // Revisar los primeros 100 registros para determinar el ancho
+            const maxRows = Math.min(datos.length, 100);
+            for (let j = 0; j < maxRows; j++) {
+                const cellValue = datos[j][encabezados[i]];
+                if (cellValue) {
+                    const cellLength = String(cellValue).length;
+                    if (cellLength > maxLength) {
+                        maxLength = cellLength;
+                    }
+                }
+            }
+            
+            // Limitar el ancho máximo y mínimo de columna
+            maxLength = Math.max(10, Math.min(maxLength, 50));
+            
+            wscols.push({ wch: maxLength + 2 }); // +2 para espacio adicional
+        }
+        
+        // Aplicar anchos de columna
+        ws['!cols'] = wscols;
+        
+        // Conseguir el rango de celdas (A1:Z99 por ejemplo)
+        if (ws['!ref']) {
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            
+            // Aplicar estilos a los encabezados (si es posible)
+            try {
+                const primeraFila = range.s.r; // Primera fila (encabezados)
+                
+                for (let col = range.s.c; col <= range.e.c; col++) {
+                    const cellRef = XLSX.utils.encode_cell({ r: primeraFila, c: col });
+                    
+                    // Si la celda existe y la biblioteca admite estilos
+                    if (ws[cellRef] && typeof ws[cellRef] === 'object') {
+                        // Crear propiedad de estilo si no existe
+                        if (!ws[cellRef].s) ws[cellRef].s = {};
+                        
+                        // Aplicar estilo de encabezado (si es compatible)
+                        ws[cellRef].s = {
+                            fill: colores.encabezado,
+                            font: { bold: true, color: { rgb: "FFFFFF" } },
+                            alignment: { horizontal: "center" }
+                        };
+                    }
+                }
+            } catch (e) {
+                console.log('No se pudieron aplicar estilos a los encabezados:', e);
+            }
+            
+            // Intentar congelar la primera fila (encabezados) si es compatible
+            try {
+                ws['!freeze'] = { xSplit: 0, ySplit: 1, activePane: 'bottomRight' };
+            } catch (e) {
+                console.log('No se pudo congelar la primera fila:', e);
+            }
+        }
+    } catch (error) {
+        console.error('Error al aplicar formato a Excel:', error);
+    }
 }
