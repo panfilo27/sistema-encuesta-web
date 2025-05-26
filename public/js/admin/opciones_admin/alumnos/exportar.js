@@ -942,23 +942,11 @@ function mostrarMensaje(mensaje, tipo = 'info') {
 function aplicarFormatoExcel(ws, datos, colores = null) {
     if (!ws || !datos || datos.length === 0) return;
     
-    // Si no se proporcionan colores, usar colores por defecto
-    if (!colores) {
-        colores = {
-            encabezado: { fgColor: { rgb: "4F81BD" } },  // Azul institucional
-            filasAlternas: { fgColor: { rgb: "F2F2F2" } }, // Gris claro para filas alternas
-            bordeEncabezado: { top: { style: 'thin', color: { rgb: '000000' } },
-                          bottom: { style: 'thin', color: { rgb: '000000' } },
-                          left: { style: 'thin', color: { rgb: '000000' } },
-                          right: { style: 'thin', color: { rgb: '000000' } } }
-        };
-    }
-    
     try {
         // Obtener todas las claves (encabezados) del primer objeto
         const encabezados = Object.keys(datos[0]);
         
-        // Configurar anchos de columna basados en el contenido
+        // Configurar anchos de columna óptimos basados en el contenido
         const wscols = [];
         for (let i = 0; i < encabezados.length; i++) {
             // Calcular el ancho basado en la longitud del encabezado y los datos
@@ -985,39 +973,28 @@ function aplicarFormatoExcel(ws, datos, colores = null) {
         // Aplicar anchos de columna
         ws['!cols'] = wscols;
         
-        // Conseguir el rango de celdas (A1:Z99 por ejemplo)
+        // Aplicar congelado de la primera fila (encabezados)
+        ws['!freeze'] = { xSplit: 0, ySplit: 1, activePane: 'bottomRight' };
+        
+        // Crear una hoja con estilo alternativo que hace más visible el diseño
+        // Esto funcionará aunque la versión estándar de XLSX no soporte estilos completos
+        
+        // Añadir una fila superior para instrucciones y título
+        const titulo = datos[0].Carrera ? `Encuesta para alumnos de ${datos[0].Carrera}` : 'Encuesta de Seguimiento a Egresados';
+        XLSX.utils.sheet_add_aoa(ws, [[titulo]], { origin: "A1" });
+        
+        // Aplicar negrita a los encabezados - no podemos aplicar colores con la versión básica de XLSX
+        // pero podemos hacer que los encabezados resalten con mayúsculas
         if (ws['!ref']) {
             const range = XLSX.utils.decode_range(ws['!ref']);
+            const primeraFila = range.s.r + 1; // La fila real de encabezados ahora es +1 por el título
             
-            // Aplicar estilos a los encabezados (si es posible)
-            try {
-                const primeraFila = range.s.r; // Primera fila (encabezados)
-                
-                for (let col = range.s.c; col <= range.e.c; col++) {
-                    const cellRef = XLSX.utils.encode_cell({ r: primeraFila, c: col });
-                    
-                    // Si la celda existe y la biblioteca admite estilos
-                    if (ws[cellRef] && typeof ws[cellRef] === 'object') {
-                        // Crear propiedad de estilo si no existe
-                        if (!ws[cellRef].s) ws[cellRef].s = {};
-                        
-                        // Aplicar estilo de encabezado (si es compatible)
-                        ws[cellRef].s = {
-                            fill: colores.encabezado,
-                            font: { bold: true, color: { rgb: "FFFFFF" } },
-                            alignment: { horizontal: "center" }
-                        };
-                    }
+            for (let col = range.s.c; col <= range.e.c; col++) {
+                const cellRef = XLSX.utils.encode_cell({ r: primeraFila, c: col });
+                if (ws[cellRef] && ws[cellRef].v) {
+                    // Convertir encabezados a mayúsculas para que resalten
+                    ws[cellRef].v = String(ws[cellRef].v).toUpperCase();
                 }
-            } catch (e) {
-                console.log('No se pudieron aplicar estilos a los encabezados:', e);
-            }
-            
-            // Intentar congelar la primera fila (encabezados) si es compatible
-            try {
-                ws['!freeze'] = { xSplit: 0, ySplit: 1, activePane: 'bottomRight' };
-            } catch (e) {
-                console.log('No se pudo congelar la primera fila:', e);
             }
         }
     } catch (error) {
