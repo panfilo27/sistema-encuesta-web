@@ -216,37 +216,84 @@ async function exportarDatosAExcel() {
             throw new Error('La biblioteca XLSX no está cargada. Intente nuevamente en unos segundos.');
         }
         
-        // Obtener los alumnos mostrados actualmente en la tabla
-        const tabla = document.getElementById('tabla-alumnos');
-        if (!tabla) {
-            alert('No se puede acceder a la tabla de alumnos.');
-            return;
+        // Usaremos los datos de alumnos que ya están cargados en la página
+        // Normalmente esto se obtiene de una variable global que gestiona la tabla
+        
+        // Buscar el lugar donde se almacenan los datos de alumnos filtrados
+        // Buscar en diferentes ubicaciones posibles
+        let alumnosFiltrados = [];
+        
+        // Opción 1: Variable global directa
+        if (typeof window.alumnosFiltrados !== 'undefined' && window.alumnosFiltrados.length > 0) {
+            alumnosFiltrados = window.alumnosFiltrados;
+            console.log('Usando alumnos filtrados de variable global window.alumnosFiltrados');
         }
-        
-        // Obtener todos los alumnos visibles en la tabla (filas que no están ocultas)
-        const filasAlumnos = Array.from(tabla.querySelectorAll('tbody tr:not([style*="display: none"])')); 
-        
-        if (!filasAlumnos || filasAlumnos.length === 0) {
-            alert('No hay alumnos visibles para exportar. Aplique filtros diferentes.');
-            return;
+        // Opción 2: Variable en el objeto window.gestorAlumnos
+        else if (typeof window.gestorAlumnos !== 'undefined' && 
+                 window.gestorAlumnos.alumnosFiltrados && 
+                 window.gestorAlumnos.alumnosFiltrados.length > 0) {
+            alumnosFiltrados = window.gestorAlumnos.alumnosFiltrados;
+            console.log('Usando alumnos filtrados de gestorAlumnos.alumnosFiltrados');
         }
-        
-        // Convertir filas a datos de alumnos
-        const alumnosFiltrados = filasAlumnos.map(fila => {
-            const idAlumno = fila.getAttribute('data-alumno-id');
-            if (!idAlumno) {
-                console.warn('Fila sin ID de alumno detectada');
-                return null;
+        // Opción 3: Buscar datos de fila directamente en la tabla
+        else {
+            // Obtener todos los alumnos visibles en la tabla (filas que no están ocultas)
+            const tabla = document.getElementById('tabla-alumnos');
+            if (!tabla) {
+                alert('No se puede acceder a la tabla de alumnos.');
+                return;
             }
-            return { id: idAlumno };
-        }).filter(alumno => alumno !== null); // Eliminar los nulos
+            
+            const filasAlumnos = Array.from(tabla.querySelectorAll('tbody tr:not([style*="display: none"])')); 
+            
+            if (!filasAlumnos || filasAlumnos.length === 0) {
+                alert('No hay alumnos visibles para exportar. Aplique filtros diferentes.');
+                return;
+            }
+            
+            console.log(`Encontradas ${filasAlumnos.length} filas de alumnos en la tabla`);
+            
+            // Intentar obtener los IDs de los alumnos de varias formas
+            alumnosFiltrados = filasAlumnos
+                .map(fila => {
+                    // Intentar diferentes atributos donde podría estar el ID
+                    const idPorDataAttribute = fila.getAttribute('data-alumno-id') || 
+                                             fila.getAttribute('data-id') || 
+                                             fila.getAttribute('data-usuario-id');
+                    
+                    // Si hay un data-attribute, usarlo
+                    if (idPorDataAttribute) {
+                        return { id: idPorDataAttribute };
+                    }
+                    
+                    // Si hay una celda con el ID del alumno, extraerlo
+                    const celdaID = fila.querySelector('td[data-id]') || fila.querySelector('td.id-alumno');
+                    if (celdaID) {
+                        return { id: celdaID.getAttribute('data-id') || celdaID.textContent.trim() };
+                    }
+                    
+                    // Intentar con la primera celda, que podría contener el ID o número de control
+                    const primeraCelda = fila.querySelector('td:first-child');
+                    if (primeraCelda) {
+                        // Asumir que la primera celda tiene el ID o número de control
+                        const posibleId = primeraCelda.textContent.trim();
+                        if (posibleId) {
+                            return { id: posibleId, esNumeroControl: true };
+                        }
+                    }
+                    
+                    console.warn('No se pudo determinar el ID para una fila de alumno');
+                    return null;
+                })
+                .filter(alumno => alumno !== null); // Eliminar los nulos
+        }
         
         if (alumnosFiltrados.length === 0) {
-            alert('No se pudieron obtener los IDs de los alumnos. Verifique la tabla.');
+            alert('No se pudieron obtener los IDs de los alumnos. Intente nuevamente o contacte al administrador.');
             return;
         }
         
-        console.log(`Se obtuvieron ${alumnosFiltrados.length} alumnos filtrados para exportar`);
+        console.log(`Se obtuvieron ${alumnosFiltrados.length} alumnos para exportar:`, alumnosFiltrados);
         
         // Obtener el periodo de encuesta seleccionado
         const filtroPeriodoEncuesta = document.getElementById('filtro-periodo-encuesta');
@@ -428,14 +475,40 @@ async function obtenerDatosEncuestasAlumnos(alumnos) {
         for (const alumno of alumnos) {
             try {
                 // Obtener datos completos del alumno
-                const alumnoDoc = await firebase.firestore()
-                    .collection('usuario')
-                    .doc(alumno.id)
-                    .get();
+                let alumnoDoc;
                 
-                if (!alumnoDoc.exists) {
-                    console.error(`No se encontraron datos para el alumno con ID: ${alumno.id}`);
-                    continue;
+                // Si el alumno tiene marcado que es número de control, buscar por ese campo
+                if (alumno.esNumeroControl) {
+                    console.log(`Buscando alumno por número de control: ${alumno.id}`);
+                    
+                    // Buscar al alumno por número de control (campo usuario)
+                    const alumnosQuery = await firebase.firestore()
+                        .collection('usuario')
+                        .where('usuario', '==', alumno.id)
+                        .where('rolUser', '==', 'alumno')
+                        .limit(1)
+                        .get();
+                    
+                    if (alumnosQuery.empty) {
+                        console.error(`No se encontró alumno con número de control: ${alumno.id}`);
+                        continue;
+                    }
+                    
+                    // Usar el primer resultado
+                    alumnoDoc = alumnosQuery.docs[0];
+                    // Guardar el ID real para futuras referencias
+                    alumno.idReal = alumnoDoc.id;
+                } else {
+                    // Buscar por ID directamente
+                    alumnoDoc = await firebase.firestore()
+                        .collection('usuario')
+                        .doc(alumno.id)
+                        .get();
+                    
+                    if (!alumnoDoc.exists) {
+                        console.error(`No se encontraron datos para el alumno con ID: ${alumno.id}`);
+                        continue;
+                    }
                 }
                 
                 // Datos del alumno
@@ -454,9 +527,12 @@ async function obtenerDatosEncuestasAlumnos(alumnos) {
                 
                 // Si no hay encuestaId definida, intentar buscar la última encuesta del alumno
                 if (!encuestaId) {
+                    // Usar el ID real si vino de número de control
+                    const alumnoId = alumno.idReal || alumno.id;
+                    
                     const historialRef = firebase.firestore()
                         .collection('usuario')
-                        .doc(alumno.id)
+                        .doc(alumnoId)
                         .collection('historial_encuestas');
                     
                     // Obtener todas las encuestas y ordenarlas por fecha
@@ -464,6 +540,7 @@ async function obtenerDatosEncuestasAlumnos(alumnos) {
                     
                     if (!todasEncuestas.empty) {
                         encuestaId = todasEncuestas.docs[0].data().encuestaId;
+                        console.log(`Encontrada encuesta ${encuestaId} para alumno ${alumnoData.nombre}`);
                     }
                 }
                 
@@ -480,9 +557,12 @@ async function obtenerDatosEncuestasAlumnos(alumnos) {
                 }
                 
                 // Obtener datos de la encuesta
+                // Usar el ID real si vino de número de control
+                const alumnoId = alumno.idReal || alumno.id;
+                
                 const historialSnapshot = await firebase.firestore()
                     .collection('usuario')
-                    .doc(alumno.id)
+                    .doc(alumnoId)
                     .collection('historial_encuestas')
                     .where('encuestaId', '==', encuestaId)
                     .get();
